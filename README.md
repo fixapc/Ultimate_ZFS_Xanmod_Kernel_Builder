@@ -1,4 +1,10 @@
-# Ultimate_kernel_v2
+# Ultimate_Kernel_Builder
+# For Devuan / Debian - Sid / Ceres - Custom kernel.config is for Intel only. 
 # This is a high performance kernel builder script based on Xanmod Kernel and ZFS built in.
-# Right now it is made for Debian And Devuan Rolling Release Repos. 
-# SystemD support will be added soon.
+# The kernel configuration was based soley on performance and latency.
+# Power management axed, resource management axed, baked in performance based kernel parameters.
+# RCU boosting enabled, kernel debugging gutted besides basic dmesg functions. 
+# Will add other distros later
+# Future release plans
+# Built in nvidia drivers
+# Initram free kernel with EFI stub based booting

@@ -1,13 +1,14 @@
 #!/bin/bash
-#Xanmod Ultra Performance Edition By Fixapc.net
-#This script automatically downloads the latest ZFS and Xanmod kernel. A customized configuration is than run and the kernel is built with compiler optimzations for your hardware.
-#1. ZFS is compiled and installed as a built in module.
-#2. All I/O Scheduling has been removed for lower latency driver performance
-#3. All filesystems are baked in for compadibility, speed and to help guard against page faults.
-#4. Debugging has been disabled
-#5. Cgroups control has been mostly axes.
-#6. Built in sleep and power management functions have been disabled.
-#7. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
+#Ultimate ZFS Kernel Builder - Based On Xanmod Fixapc.net
+#This script automatically downloads the latest ZFS and Xanmod kernel.
+#1. A customized configuration kernel configuration has been added that has based on a pure latency based build.
+#2. ZFS is compiled and installed as a built in module.
+#3. All I/O Scheduling has been removed for better I/O performance. Aka none / noop
+#4. All filesystems are baked in for compatibility, speed and to help guard against page faults.
+#5. Debugging has been disabled
+#6. Cgroups and other resource managment has been Axed.
+#7. Built in sleep and power management functions have been disabled.
+#8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
 
 #Variables
 	xandeps="\ngrub2 \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \npahole \nbison \nflex \nbinutils"
@@ -19,23 +20,6 @@
 	nocolor='\e[1;m'
 	yellow='\e[1;33m'
 	green='\e[1;32m'
-
-
-#Remove Old Directories
-#        echo -e  "$yellow Removing Previous Xanmod Kernel Source To Prevent Bad Builds $nocolor"
-#        rm -R -f linux-5.18.1-xanmod1/
-#        echo -e " $green Done $nocolor "
-#        rm -R -f 5.18.1-xanmod1.tar.gz*
-
-#Remove Old Directories
-#        echo -e  "$yellow Removing Previous ZFS Source Folder To Prevent Bad Builds $nocolor"
-#        rm -r -f  zfs
-#        echo -e " $green Done $nocolor "
-
-#Remove Old Directories
-#        echo -e  "$yellow Removing Previous Firmware Source Folder To Prevent Bad Builds $nocolor"
-#        rm -r -f linux-firmware
-#        echo -e " $green Done $nocolor "
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
@@ -51,7 +35,6 @@
 		else
 		echo "Contiuning Without Dependencies"
 	fi
-
 
 #Do you want to install the latest firmware?
 	read -p " $red Do You Want To Install The Latest Linux Firmware From Kernel.org $nocolor (y/n)  " FIRM
@@ -75,7 +58,6 @@
 	else
 	echo -e " $yellow Skipping Firmware $nocolor "
 	fi
-
 
 #See If LZ4 Is Prevent For Kernel Files
 	if [ -d linux ]
@@ -158,14 +140,17 @@
 #Build New Kernel
 	echo -e " $yellow Moving To Kernel Source Directory $nocolor "
 	cd ../linux
-	#echo -e " $yellow Running Make $nocolor "
+	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e " $yellow Preparing Modules $nocolor "
 	$make modules_prepare
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Building Modules $nocolor "
 	$make modules
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Modules $nocolor "
         $make modules_install
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Running Make Install $nocolor "
 	$make install
 	echo -n -e "$green DONE! $nocolor "
