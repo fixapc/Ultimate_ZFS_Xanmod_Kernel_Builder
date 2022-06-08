@@ -59,7 +59,19 @@
 	echo -e " $yellow Skipping Firmware $nocolor "
 	fi
 
-#See If LZ4 Is Prevent For Kernel Files
+
+#Install Arch Linux ZFS Grub Patch?
+	read -p " Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n) " GRUB
+        if [ "$GRUB" = "y" ]
+                then
+                cd -a 10_linux /etc/grub.d/10_linux
+                echo -e " $green DONE! $nocolor "
+                cd ..
+                else
+                echo -e " $yellow Contiuning Without Grub Patch $nocolor "
+        fi
+
+#Check to see if Xanmon Source Clone Is Available
 	if [ -d linux ]
 		then
 		echo -e "$red Kernel Folder Present!, Checkout Instead! $nocolor "
@@ -144,11 +156,12 @@
 	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
 	./copy-builtin ../linux/
+	cd ..
 	echo -e "$green DONE! $nocolor "
 
 #Build New Kernel
 	echo -e " $yellow Moving To Kernel Source Directory $nocolor "
-	cd ../linux
+	cd linux/
 	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
@@ -170,19 +183,21 @@
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
-        cd ../zfs
+        cd ..
+	cd zfs/
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
 	$make deb-utils deb-dkms
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
-	echo -e " $yellow Installing ZFS .Deb Packages"
+	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
+	cd ..
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
-	dkms autoinstall -k  5.18.1-xanmod1-Rolling4  --kernelsourcedir=/usr/src/linux
+	dkms autoinstall -k  5.18.2-xanmod1-Rolling4  --kernelsourcedir=linux/
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
