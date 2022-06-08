@@ -97,6 +97,9 @@
         cd linux/
 
 #Run Make Config W
+	echo  -e "$yellow Make Clean $nocolor "
+	$make clean
+	echo  -e "$green DONE! $nocolor "
 	echo  -e "$yellow Running Make Menuconfig $nocolor "
 	$make menuconfig
 	echo  -e "$green DONE! $nocolor "
@@ -117,8 +120,13 @@
 #Moving To ZFS Directory
 	echo -e " $yellow Moving To ZFS Directory $nocolor "
 	cd ..
-	cd zfs..
+	cd zfs/
 	echo -e "$green DONE! $nocolor "
+
+#Make clean for ZFS
+	echo -e " $yellow Running Make Clean For ZFS Directory $nocolor "
+	$make clean
+	echo  -e "$green DONE! $nocolor "
 
 #Running Auto Config For ZFS
 	echo -e " $yellow Running Autogen $nocolor "
