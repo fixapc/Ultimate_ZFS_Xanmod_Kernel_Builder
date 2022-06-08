@@ -1,4 +1,4 @@
-# Ultimate_Kernel_Builder
+# Ultimate_ZFS_Kernel_Builder
 # For Devuan / Debian - Sid / Ceres - Custom kernel.config is for Intel only. 
 # This is a high performance kernel builder script based on Xanmod Kernel and ZFS built in.
 # The kernel configuration was based soley on performance and latency.
