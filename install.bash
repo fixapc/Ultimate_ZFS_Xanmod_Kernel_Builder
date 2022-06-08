@@ -116,7 +116,8 @@
 
 #Moving To ZFS Directory
 	echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd ../zfs/
+	cd ..
+	cd zfs..
 	echo -e "$green DONE! $nocolor "
 
 #Running Auto Config For ZFS
@@ -126,7 +127,7 @@
 
 #Running Configure
 	echo -e " $yellow Running ZFS Configuration $nocolor "
-	./configure --with-linux=linux/ --with-linux-obj=linux/ --enable-sysvinit --enable-linux-builtin
+	./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-sysvinit --enable-linux-builtin
 	echo -e " $yellow Running ZFS Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
@@ -142,6 +143,7 @@
 	cd ../linux
 	echo -e " $yellow Running Make $nocolor "
 	$make
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Preparing Modules $nocolor "
 	$make modules_prepare
 	echo -e "$green DONE! $nocolor "
@@ -150,6 +152,9 @@
 	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Modules $nocolor "
         $make modules_install
+	echo -e "$green DONE! $nocolor "
+	echo -e " $yellow Installing Headers $nocolor "
+	$make headers_install
 	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Running Make Install $nocolor "
 	$make install
