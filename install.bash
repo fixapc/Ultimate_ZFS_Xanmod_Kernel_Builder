@@ -209,7 +209,8 @@
 	#$make install
 	#echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Make Kernel Image $nocolor "
-	$make
+	$make bzImage
+	cp -a bzImage /boot/5.18.2-xanmod1-Rolling5 
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
@@ -227,7 +228,7 @@
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
-	dkms autoinstall -k  5.18.2-xanmod1-Rolling4  --kernelsourcedir=linux/
+	dkms autoinstall -k  5.18.2-xanmod1-Rolling5  --kernelsourcedir=linux/
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
