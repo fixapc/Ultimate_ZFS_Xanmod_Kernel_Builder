@@ -54,6 +54,14 @@
 			echo -e " $green DONE! $nocolor "
 		fi
 
+#Install The Firmware
+	echo -e " $yellow Moving To Firmware Directory $nocolor "
+	cd linux-firmware/
+	echo -e " $yellow Installing The Latest Firmware $nocolor "
+	$make install
+	echo -e " $green DONE! $nocolor "
+
+
 #Skip Firmware
 	else
 	echo -e " $yellow Skipping Firmware $nocolor "
