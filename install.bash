@@ -40,6 +40,7 @@
 	read -p " $red Do You Want To Install The Latest Linux Firmware From Kernel.org $nocolor (y/n)  " FIRM
 	if [ "$FIRM" = "y" ]
 	then
+
 #See If LZ4 File Already Exsists
 		if [ -d linux-firmware ]
 			then
@@ -153,9 +154,25 @@
 	./autogen.sh
 	echo -e "$green DONE! $nocolor "
 
+
+#Sysvinit Or SystemD?
+	read -p " Are you using SystemD for your init? (y/n)  " SYSD
+	if [ "$SYSD" = "y" ]
+        	then
+        	echo -e " $yellew Configuring ZFS for SystemD $nocolor "
+		echo -e " $yellow Running ZFS Configuration $nocolor "
+		./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-systemd --enable-linux-builtin
+		echo -e "$green DONE! $nocolor "
+
+		else
+        	echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
+		echo -e " $yellow Running ZFS Configuration $nocolor "
+		./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-sysvinit --enable-linux-builtin
+		echo -e "$green DONE! $nocolor "
+	fi
+
+
 #Running Configure
-	echo -e " $yellow Running ZFS Configuration $nocolor "
-	./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-sysvinit --enable-linux-builtin
 	echo -e " $yellow Running ZFS Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
