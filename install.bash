@@ -199,12 +199,17 @@
 	echo -e " $yellow Installing Modules $nocolor "
         $make modules_install
 	echo -e "$green DONE! $nocolor "
+	echo -e " $yellow Make Headers $nocolor "
+	$make headers
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Running Make Install $nocolor "
-	$make install
-	echo -n -e "$green DONE! $nocolor "
+	#echo -e " $yellow Running Make Install $nocolor "
+	#$make install
+	#echo -n -e "$green DONE! $nocolor "
+	echo -e " $yellow Make Kernel Image $nocolor "
+	$make
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
@@ -212,7 +217,7 @@
 	cd zfs/
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
-	$make deb-utils deb-dkms
+	$make deb-utils
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
