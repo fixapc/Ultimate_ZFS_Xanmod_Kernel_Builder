@@ -210,10 +210,12 @@
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
+	rm -f -v zfs-dracut*
 	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
 	cd ..
 	echo -n -e "$green DONE! $nocolor "
+
 
 #Rebuild DKMS Modules
 	#dkms autoinstall -k  5.18.2-xanmod1-Rolling5  --kernelsourcedir=linux/
