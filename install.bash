@@ -11,10 +11,10 @@
 #8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
 
 #Variables
-	xandeps="\ngrub2 \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \npahole \nbison \nflex \nbinutils"
+	xandeps="\ngrub-efi \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \npahole \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \ndkms \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \ndkms \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make LLVM=1 -j$(nproc)"
-	make="make -j$(nproc)"
+	make="make -s -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
 	nocolor='\e[1;m'
@@ -37,7 +37,7 @@
 	fi
 
 #Do you want to install the latest firmware?
-	read -p " $red Do You Want To Install The Latest Linux Firmware From Kernel.org $nocolor (y/n)  " FIRM
+	read -p " Do You Want To Install The Latest Linux Firmware From Kernel.org (y/n)  " FIRM
 	if [ "$FIRM" = "y" ]
 	then
 
@@ -61,21 +61,19 @@
 	echo -e " $yellow Installing The Latest Firmware $nocolor "
 	$make install
 	echo -e " $green DONE! $nocolor "
-
+	cd ..
 
 #Skip Firmware
 	else
 	echo -e " $yellow Skipping Firmware $nocolor "
 	fi
 
-
 #Install Arch Linux ZFS Grub Patch?
 	read -p " Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n) " GRUB
         if [ "$GRUB" = "y" ]
                 then
-                cd -a 10_linux /etc/grub.d/10_linux
+                cp -a 10_linux /etc/grub.d/10_linux
                 echo -e " $green DONE! $nocolor "
-                cd ..
                 else
                 echo -e " $yellow Contiuning Without Grub Patch $nocolor "
         fi
@@ -140,8 +138,7 @@
 
 #Moving To ZFS Directory
 	echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd ..
-	cd zfs/
+	cd ../zfs/
 	echo -e "$green DONE! $nocolor "
 
 #Make clean for ZFS
@@ -173,12 +170,6 @@
 
 
 #Running Configure
-	echo -e " $yellow Running ZFS Make $nocolor "
-	$make
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Running ZFS Make Install $nocolor "
-	$make install
-	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
 	./copy-builtin ../linux/
 	cd ..
@@ -205,20 +196,17 @@
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
-	#echo -e " $yellow Running Make Install $nocolor "
-	#$make install
-	#echo -n -e "$green DONE! $nocolor "
+	echo -e " $yellow Running Make Install $nocolor "
+	$make install
+	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Make Kernel Image $nocolor "
-	$make bzImage
-	cp -a bzImage /boot/5.18.2-xanmod1-Rolling5 
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
-        cd ..
-	cd zfs/
+	cd ../zfs/
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
-	$make deb-utils
+	$make deb-utils deb-dkms
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
@@ -228,7 +216,7 @@
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
-	dkms autoinstall -k  5.18.2-xanmod1-Rolling5  --kernelsourcedir=linux/
+	#dkms autoinstall -k  5.18.2-xanmod1-Rolling5  --kernelsourcedir=linux/
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
