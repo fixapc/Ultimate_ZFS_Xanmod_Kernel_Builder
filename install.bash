@@ -45,9 +45,9 @@
 #See If LZ4 File Already Exsists
 		if [ -d linux-firmware ]
 			then
-			echo -e "$red Firmware Folder Present, We Will Checkout Instead! $nocolor "
+			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor "
 			cd linux-firmware/
-			git checkout main
+			git fetch --prune
 			cd ..
 			echo -e " $green DONE! $nocolor "
 			else
@@ -82,9 +82,9 @@
 #Check to see if Xanmon Source Clone Is Available
 	if [ -d linux ]
 		then
-		echo -e "$red Kernel Folder Present!, Checkout Instead! $nocolor "
+		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor "
 		cd linux/
-		git checkout origin
+		git fetch --prune
 		echo -e " $green DONE! $nocolor "
 		cd ..
 		else
@@ -96,9 +96,9 @@
 #See If LZ4 Is Prevent For Kernel Files
         if [ -d zfs ]
                 then
-                echo -e "$red Lz4 Has Already Been Created For ZFS Files, Checkout Instead $nocolor "
+                echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor "
 		cd zfs/
-		git checkout master
+		git fetch --prune
 		echo -e " $green DONE! $nocolor "
 		cd ..
                 else
