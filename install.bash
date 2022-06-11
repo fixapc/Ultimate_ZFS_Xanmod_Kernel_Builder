@@ -196,9 +196,10 @@
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Running Make Install $nocolor "
-	$make install
-	echo -n -e "$green DONE! $nocolor "
+	#echo -e " $yellow Running Make Install $nocolor "
+	#$make install
+	#echo -n -e "$green DONE! $nocolor "
+	#echo -e " $yellow Make Kernel Image $nocolor "
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
@@ -212,11 +213,16 @@
 	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
 	cd ..
+	echo "$green Moving To Kernel Directory $nocolor "
+	cd linux/
+	echo "$green Running A Final Kernel Make Install $nocolor "
+	$make install
+	cd ..
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
 	echo "$green Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k  5.18.3-xanmod1-ROOT2  --kernelsourcedir=linux/
+	dkms autoinstall -k  5.18.3-xanmod1-ROOT3  --kernelsourcedir=linux/
 	echo "$green DONE! $nocolor "
 
 #Installation Completed
