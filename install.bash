@@ -22,6 +22,7 @@
 	green='\e[1;32m'
 	kver='cat linux/include/config/kernel.release'
 
+
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
 	echo -e -n $xandeps
@@ -204,6 +205,8 @@
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
 	cd ../zfs/
+	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
+	rm *.deb *.rpm
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
 	$make deb-utils deb-dkms
@@ -216,9 +219,18 @@
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
-	echo "$green Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k $kver --kernelsourcedir=linux/
+	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
+	dkms add -m zfs -v 2.1.99
 	echo "$green DONE! $nocolor "
+	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
+	dkms autoinstall -k $kver --kernelsourcedir=$PWD/linux/
+	echo "$green DONE! $nocolor "
+
+
+#Rebuild Initramfs for confirmation
+	echo "$yellow Final Rebuild Of Initramfs $nocolor "
+	update-initramfs -u -k $kver
+
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
