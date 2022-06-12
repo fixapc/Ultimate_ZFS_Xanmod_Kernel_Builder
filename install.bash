@@ -10,6 +10,7 @@
 #7. Built in sleep and power management functions have been disabled.
 #8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
 
+
 #Variables
 	xandeps="\ngrub-efi-amd64 \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \ndkms \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \ndkms \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
@@ -20,7 +21,12 @@
 	nocolor='\e[1;m'
 	yellow='\e[1;33m'
 	green='\e[1;32m'
-	kver='cat linux/include/config/kernel.release'
+	kver=$(cat $(dirname "$0")/linux/include/config/kernel.release)
+	SCRIPT=$(readlink -f "$0")
+	basedir=$(dirname "$SCRIPT")
+
+
+	cd $basedir
 
 
 #List Required Dependencies
@@ -47,9 +53,8 @@
 		if [ -d linux-firmware ]
 			then
 			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor "
-			cd linux-firmware/
+			cd $basedir/linux-firmware
 			git fetch --prune
-			cd ..
 			echo -e " $green DONE! $nocolor "
 			else
 			echo -e " $yellow Downloading The Latest Firmware From Kernel.org $nocolor "
@@ -59,11 +64,10 @@
 
 #Install The Firmware
 	echo -e " $yellow Moving To Firmware Directory $nocolor "
-	cd linux-firmware/
+	cd $basedir/linux-firmware
 	echo -e " $yellow Installing The Latest Firmware $nocolor "
 	$make install
 	echo -e " $green DONE! $nocolor "
-	cd ..
 
 #Skip Firmware
 	else
@@ -74,7 +78,7 @@
 	read -p " Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n) " GRUB
         if [ "$GRUB" = "y" ]
                 then
-                cp -a 10_linux /etc/grub.d/10_linux
+                cp -a $basedir/10_linux /etc/grub.d/10_linux
                 echo -e " $green DONE! $nocolor "
                 else
                 echo -e " $yellow Contiuning Without Grub Patch $nocolor "
@@ -84,10 +88,9 @@
 	if [ -d linux ]
 		then
 		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor "
-		cd linux/
+		cd $basedir/linux
 		git fetch --prune
 		echo -e " $green DONE! $nocolor "
-		cd ..
 		else
 		echo -e " $yellow Cloning Xanmod Repo! $nocolor "
 		git clone https://github.com/xanmod/linux.git
@@ -98,10 +101,9 @@
         if [ -d zfs ]
                 then
                 echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor "
-		cd zfs/
+		cd $basedir/zfs
 		git fetch --prune
 		echo -e " $green DONE! $nocolor "
-		cd ..
                 else
                 echo -e " $yellow Downloading ZFS Repo $nocolor "
                 git clone https://github.com/openzfs/zfs.git
@@ -110,12 +112,12 @@
 
 #USE LAST MADE CONFIG
 	echo -e " $yellow Using Last Modified Kernel $nocolor $nocolor "
-	cp -a kernel.config linux/.config
+	cp -a $basedir/kernel.config $basedir/linux/.config
 	echo -e "$green DONE! $nocolor "
 
 #Moving To Kernel Build Directory
         echo -e "$yellow Moving To Kernel Directory $nocolor "
-        cd linux/
+        cd $basedir/linux
 
 #Run Make Config W
 	echo  -e "$yellow Make Clean $nocolor "
@@ -127,10 +129,10 @@
 
 #Backup Changes From Menuconfig
 	 echo -e "$yellow Backing Up Configuration $nocolor "
-         cp -a .config ../$dateconfig
+         cp -a $basedir/linux/.config $basedir/$dateconfig
 	 echo -e "$green DONE! $nocolor "
 	 echo -e "$yellow Saving Kernel Configuration To Be Used During Next Makemenu Config $nocolor "
-         cp -a .config ../kernel.config
+         cp -a $basedir/linux/.config $basedir/kernel.config
 	 echo -e "$green DONE! $nocolor "
 
 #Run Make Prepare
@@ -140,7 +142,7 @@
 
 #Moving To ZFS Directory
 	echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd ../zfs/
+	cd $basedir/zfs
 	echo -e "$green DONE! $nocolor "
 
 #Make clean for ZFS
@@ -160,26 +162,25 @@
         	then
         	echo -e " $yellew Configuring ZFS for SystemD $nocolor "
 		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-systemd --enable-linux-builtin
+		./configure --with-linux=$basedir/linux --with-linux-obj=$basedir/linux --enable-systemd --enable-linux-builtin
 		echo -e "$green DONE! $nocolor "
 
 		else
         	echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
 		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux=../linux/ --with-linux-obj=../linux/ --enable-sysvinit --enable-linux-builtin
+		./configure --with-linux=$basedir/linux --with-linux-obj=$basedir/linux --enable-sysvinit --enable-linux-builtin
 		echo -e "$green DONE! $nocolor "
 	fi
 
 
 #Running Configure
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
-	./copy-builtin ../linux/
-	cd ..
+	./copy-builtin $basedir/linux
 	echo -e "$green DONE! $nocolor "
 
 #Build New Kernel
 	echo -e " $yellow Moving To Kernel Source Directory $nocolor "
-	cd linux/
+	cd $basedir/linux
 	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
@@ -204,7 +205,7 @@
 
 #Moving To ZFS Directory
         echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd ../zfs/
+	cd $basedir/zfs
 	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
 	rm *.deb *.rpm
 	echo -n -e "$green DONE! $nocolor "
@@ -215,7 +216,7 @@
 #Now Install Compiled ZFS Packages
 	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
-	cd ..
+	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
 
 #Rebuild DKMS Modules
@@ -223,7 +224,7 @@
 	dkms add -m zfs -v 2.1.99
 	echo "$green DONE! $nocolor "
 	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k $kver --kernelsourcedir=$PWD/linux/
+	dkms autoinstall -k $kver --kernelsourcedir=$basedir/linux/
 	echo "$green DONE! $nocolor "
 
 
