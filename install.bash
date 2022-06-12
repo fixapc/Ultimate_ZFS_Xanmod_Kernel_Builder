@@ -25,7 +25,7 @@
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
 
-
+#Confirm In Working Directory Before Moving
 	cd $basedir
 
 
