@@ -21,12 +21,14 @@
 	nocolor='\e[1;m'
 	yellow='\e[1;33m'
 	green='\e[1;32m'
-	kver=$(cat $(dirname "$0")/linux/include/config/kernel.release)
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
+	kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
 #Confirm In Working Directory Before Moving
 	cd $basedir
+
+
 
 
 #List Required Dependencies
@@ -50,15 +52,14 @@
 	then
 
 #See If LZ4 File Already Exsists
-		if [ -d linux-firmware ]
+		if [ -d $basedir/linux-firmware ]
 			then
 			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor "
-			cd $basedir/linux-firmware
-			git fetch --prune
+			cd $basedir/linux-firmware && git fetch --prune
 			echo -e " $green DONE! $nocolor "
 			else
 			echo -e " $yellow Downloading The Latest Firmware From Kernel.org $nocolor "
-			git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
+			cd $basedir && git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
 			echo -e " $green DONE! $nocolor "
 		fi
 
@@ -85,28 +86,26 @@
         fi
 
 #Check to see if Xanmon Source Clone Is Available
-	if [ -d linux ]
+	if [ -d $basedir/linux ]
 		then
 		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor "
-		cd $basedir/linux
-		git fetch --prune
+		cd $basedir/linux && git fetch --prune
 		echo -e " $green DONE! $nocolor "
 		else
 		echo -e " $yellow Cloning Xanmod Repo! $nocolor "
-		git clone https://github.com/xanmod/linux.git
+		cd $basedir && git clone https://github.com/xanmod/linux.git
 		echo -e " $green DONE! $nocolor "
 	fi
 
 #See If LZ4 Is Prevent For Kernel Files
-        if [ -d zfs ]
+        if [ -d $basedir/zfs ]
                 then
                 echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor "
-		cd $basedir/zfs
-		git fetch --prune
+		cd $basedir/zfs && git fetch --prune
 		echo -e " $green DONE! $nocolor "
                 else
                 echo -e " $yellow Downloading ZFS Repo $nocolor "
-                git clone https://github.com/openzfs/zfs.git
+                cd $basedir && git clone https://github.com/openzfs/zfs.git
                 echo -e " $green DONE! $nocolor "
         fi
 
@@ -162,13 +161,13 @@
         	then
         	echo -e " $yellew Configuring ZFS for SystemD $nocolor "
 		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux=$basedir/linux --with-linux-obj=$basedir/linux --enable-systemd --enable-linux-builtin
+		./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-systemd --enable-linux-builtin
 		echo -e "$green DONE! $nocolor "
 
 		else
         	echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
 		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux=$basedir/linux --with-linux-obj=$basedir/linux --enable-sysvinit --enable-linux-builtin
+		./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-sysvinit --enable-linux-builtin
 		echo -e "$green DONE! $nocolor "
 	fi
 
@@ -207,10 +206,10 @@
         echo -e " $yellow Moving To ZFS Directory $nocolor "
 	cd $basedir/zfs
 	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
-	rm *.deb *.rpm
+	rm $basedir *.deb *.rpm
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
-	$make deb-utils deb-dkms
+	cd $basedir && $make deb-utils deb-dkms
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
@@ -218,6 +217,7 @@
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
 	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
+
 
 #Rebuild DKMS Modules
 	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
