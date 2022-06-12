@@ -183,18 +183,18 @@
 	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Preparing Modules $nocolor "
-	$make modules_prepare
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Building Modules $nocolor "
-	$make modules
-	echo -e "$green DONE! $nocolor "
+	#echo -e " $yellow Preparing Modules $nocolor "
+	#$make modules_prepare
+	#echo -e "$green DONE! $nocolor "
+	#echo -e " $yellow Building Modules $nocolor "
+	#$make modules
+	#echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Modules $nocolor "
         $make modules_install
 	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Make Headers $nocolor "
-	$make headers
-	echo -e "$green DONE! $nocolor "
+	#echo -e " $yellow Make Headers $nocolor "
+	#$make headers
+	#echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
@@ -203,13 +203,11 @@
 	echo -n -e "$green DONE! $nocolor "
 
 #Moving To ZFS Directory
-        echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd $basedir/zfs
 	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
-	rm $basedir *.deb *.rpm
+	cd $basedir/zfs && rm  *.deb *.rpm
 	echo -n -e "$green DONE! $nocolor "
 	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
-	cd $basedir && $make deb-utils deb-dkms
+	$make deb-utils deb-dkms
 	echo -n -e "$green DONE! $nocolor "
 
 #Now Install Compiled ZFS Packages
