@@ -121,23 +121,20 @@ This project is used by the following companies:
 
 ## Installation
 
-Install my-project with npm
+Install 
 
 ```bash
-  npm install my-project
-  cd my-project
+  Comming Soon
 ```
-    
+
 ## Acknowledgements
 
- - [Awesome Readme Templates](https://awesomeopensource.com/project/elangosundar/awesome-README-templates)
- - [Awesome README](https://github.com/matiassingers/awesome-readme)
- - [How to write a Good readme](https://bulldogjob.com/news/449-how-to-write-a-good-readme-for-your-github-project)
+ - [Dont Just Install Without Reading](https://github.com/fixapc)
 
 
 ## API Reference
 
-#### Get all items
+#### Pros
 
 ```http
   GET /api/items
@@ -169,5 +166,5 @@ Any additional information goes here
 
 ## Authors
 
-- [@katherinepeterson](https://www.github.com/octokatherine)
+- [@fixapc](https://www.github.com/fixapc)
 
