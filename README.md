@@ -1,7 +1,6 @@
 
 # Ultimate ZFS Xanmod Kernel Builder
 
-A brief description of what this project does and who it's for
 - This script is for those of you who love ZFS and the Xanmod kernel
         and want to squeeze every drop of peformance out of your 
         system you can with the perfectly thoughout Performanced based configuration
@@ -117,6 +116,23 @@ This project is used by the following companies:
             and prevent FIFO threads from merging to eliminate the need for thread and CPU isolation at
             the cost of losing all but 1 of your Cgroups controllers. Your normal task move to cores without FIFO)
 
+## The Gist Of It
+
+#### Pros
+```
+1. Scheduler CPU management can be used in place of isolcpus and cpusets. (Hard to believe but its totally true)
+2. Ultra low latency configuration
+3. Rock solid while at 100% guest and host stress
+4. Fewer page faults due to built in modules and the kernel not moving memory around as much from memory management features (big win for KVMs)
+5. Built in IOMMU Passthrough mode by default
+5. Destroy benchmarks.
+```
+
+#### Cons
+```
+1. Cgroups mostly gutted all but 1 item, aka no docker unless you want to take the time to do a rootless install that does not require cgroups
+2. Increased memory consumption due to resource managment being gutted from kernel in favor of a low latency realtime based build. 
+```
 
 
 ## Installation
@@ -132,13 +148,7 @@ Install
  - [Dont Just Install Without Reading](https://github.com/fixapc)
 
 
-## API Reference
 
-#### Pros
-
-```http
-  GET /api/items
-```
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
