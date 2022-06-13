@@ -3,9 +3,10 @@
 
 - This script is for those of you who love ZFS and the Xanmod kernel
         and want to squeeze every drop of peformance out of your 
-        system you can with the perfectly thoughout Performanced based configuration
+        system you can with the perfectly thoughout performanced based configuration
         NOTE: I spent 6 months on that blue kernel screen while you where sleeping 
-        with your girlfriend so trust me this is a really good kernel configuration from a script kiddy and can be easily proven by benchmarks
+        with your girlfriend so trust me this is a really good kernel configuration 
+        from a script kiddy and can be easily proven by benchmarks
 - Help Teach Linux Enthusiast The Benefits Of A Highly Customized Kernel
 - Specifically Tuned For ZFS And Low Latency Based KVM Computing
 - Keeping The RIGHT Modules Out Of User Space Interferance And Away From Page Faults By Building The Most Important Ones Into Kernel
@@ -153,39 +154,10 @@ Install
 
 
 
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `api_key` | `string` | **Required**. Your API key |
-
-#### Get item
-
-```http
-  GET /api/items/${id}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `id`      | `string` | **Required**. Id of item to fetch |
-
-
-
-
-#### add(num1, num2)
-
-Takes two numbers and returns the sum.
-
-
-## Appendix
-
-Any additional information goes here
-
-
 ## Authors
-
 - [@fixapc](https://www.github.com/fixapc)
 
-
-## Used By
+## Looking For Code Advice, Please Contact Me If You Are A Skilled Developer And Like Where Iam Going With This. 
 - [Looking Devs](https://www.github.com/fixapc)
 
 ## Credit To The Obvious Projects For Giving Us Some Of The Best Software Tech Available.
