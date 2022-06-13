@@ -14,7 +14,7 @@
 - The idea is to keep the kernel from interfering with any resouces by workings of its resource management.  
    
         
-        
+  
         
      NO PAIN NO GAIN:   While This Kernel Configuration Gives A Very Noticable Kick In Performance Along With Much Lower CPU Usage. 
                         It does come at a cost. Because of the amount of built in modules and the disablement of page merging, compression and compaction. 
@@ -150,6 +150,26 @@ Install
 ## Acknowledgements
 
  - [Dont Just Install Without Reading](https://github.com/fixapc)
+ 
+ 
+## Screenies
+![image](https://user-images.githubusercontent.com/34402379/173275413-214a57b5-303f-40ca-b2a3-9cb6a1d650e5.png)
+![image](https://user-images.githubusercontent.com/34402379/173275517-8df3038e-0d55-493f-ab13-18bbce0b5b8f.png)
+![image](https://user-images.githubusercontent.com/34402379/173275562-63c79737-0e0e-4373-b2df-e65deb171d5b.png)
+![image](https://user-images.githubusercontent.com/34402379/173275726-a1453e3a-41c4-468b-8d52-d183184f16fd.png)
+![image](https://user-images.githubusercontent.com/34402379/173275749-d2c2330e-cca1-40e7-93b5-f244a0ac0b73.png)
+![image](https://user-images.githubusercontent.com/34402379/173275773-ec8bd3cc-bdc2-4876-853e-e86018b31aba.png)
+![image](https://user-images.githubusercontent.com/34402379/173275798-ba4d15c1-34b5-495b-9148-9cda01974889.png)
+![image](https://user-images.githubusercontent.com/34402379/173275811-96c91bea-a47f-4979-8b19-e5cc281eac05.png)
+![image](https://user-images.githubusercontent.com/34402379/173275868-bc07d590-4d6f-4a9d-9434-a4ef6b38fde7.png)
+![image](https://user-images.githubusercontent.com/34402379/173275943-ea5d3c49-d52a-465c-bb85-c9624571b3a1.png)
+![image](https://user-images.githubusercontent.com/34402379/173275995-9990e29c-af3c-4bf8-88f6-43785ed8264a.png)
+![image](https://user-images.githubusercontent.com/34402379/173276021-7500b37d-34bc-45a6-b2e1-e923719d6067.png)
+![image](https://user-images.githubusercontent.com/34402379/173276085-1b0f81b1-8629-466b-9155-858ce06d3e91.png)
+![image](https://user-images.githubusercontent.com/34402379/173276128-da917648-8749-4936-9e2d-1d4f913f7aca.png)
+![image](https://user-images.githubusercontent.com/34402379/173276174-c9a99197-f248-474f-8041-3c9d37b3eae0.png)
+
+
 
 
 
