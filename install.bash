@@ -25,10 +25,7 @@
 	basedir=$(dirname "$SCRIPT")
 	kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
-#Confirm In Working Directory Before Moving
-	cd $basedir
-
-
+echo $basedir
 
 
 #List Required Dependencies
@@ -222,7 +219,7 @@
 	dkms add -m zfs -v 2.1.99
 	echo "$green DONE! $nocolor "
 	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k $kver --kernelsourcedir=$basedir/linux/
+	dkms autoinstall -k "$kver" --kernelsourcedir="$basedir"/linux/
 	echo "$green DONE! $nocolor "
 
 
@@ -233,3 +230,6 @@
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
+	echo -e " $green Would You Like To Install The Maintenance Initramfs, This Is Protected Kernel With An Initramfs Built Into It To Be Compadible With All Systhem As A Fail Safe Incase Of A Miss Boot.  $nocolor"
+
+
