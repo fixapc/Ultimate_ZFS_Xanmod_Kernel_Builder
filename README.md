@@ -1,5 +1,6 @@
-
 # Ultimate ZFS Xanmod Kernel Builder README.MD - PRE-RELEASE DRAFT
+
+![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
 
 - This script is for those of you who love ZFS and the Xanmod kernel
         and want to squeeze every drop of peformance out of your 
@@ -11,16 +12,16 @@
 - Specifically Tuned For ZFS And Low Latency Based KVM Computing
 - Keeping The RIGHT Modules Out Of User Space Interferance And Away From Page Faults By Building The Most Important Ones Into Kernel
 - Automatically Downloads The Latest Developer Release Of Xanmod And ZFS, Than Configures It With A Tuned Configuration.
-- The idea is to keep the kernel from interfering with any resouces by workings of its resource management.  
-   
-        
-  
-        
+- The idea is to keep the kernel from interfering with any resouces by workings of its resource management.
+
+
+
+
      NO PAIN NO GAIN:   While This Kernel Configuration Gives A Very Noticable Kick In Performance Along With Much Lower CPU Usage. 
                         It does come at a cost. Because of the amount of built in modules and the disablement of page merging, compression and compaction. 
                         memory usage will be higher. This was an easy trade off for the the lower latency and CPU usage.
 
-     
+ 
 ## Used By
 
 This kernel is used by some of my friends, family and clients on their servers and personal rigs:
@@ -32,8 +33,8 @@ This kernel is used by some of my friends, family and clients on their servers a
 - [ART SPLASH EXPRESSIONS](https://www.artsplashexpressions.com)
 - [BARRY REIDS ROOFING](https://www.barryreidsroofing.com)
 - [MDVINSON](https://www.mdvinson.com)
+- [ITELEMENTS](https://www.itelements.store)
 
-![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
 
 
 ## Roadmap
@@ -66,8 +67,8 @@ This kernel is used by some of my friends, family and clients on their servers a
 
 - Multi Choice Prompt For Configuring RCU Threads, KVM Based FIFO Threads And Standard Scheduler Threads Based On CPU Core Count.
         Note: This will get rid of the need to use ISOLATE CPUs for an ultra low latency based KVM experiance. 
-        
-        
+ 
+
 ## Optimizations
 
     Default Kernel Configuration - Intel
@@ -177,8 +178,8 @@ Install
 ## Authors
 - [@fixapc](https://www.github.com/fixapc)
 
-## Looking For Code Advice, Please Contact Me If You Are A Skilled Developer And Like Where Iam Going With This. 
-- [Looking Devs](https://www.github.com/fixapc)
+## Looking For Contributors 
+- [Submit Your Code Enhancements](https://www.github.com/fixapc)
 
 ## Credit To The Obvious Projects For Giving Us Some Of The Best Software Tech Available.
 - [XANMOD](https://www.github.com/xanmod)

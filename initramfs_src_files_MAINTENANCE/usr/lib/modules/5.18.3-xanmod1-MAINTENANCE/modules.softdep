@@ -1,0 +1,10 @@
+# Soft dependencies extracted from modules themselves.
+softdep gpio_madera pre: pinctrl-madera
+softdep arizona_i2c pre: arizona_ldo1
+softdep arizona_spi pre: arizona_ldo1
+softdep wm8994 pre: wm8994_regulator
+softdep intel_lpss pre: platform:idma64
+softdep csiostor pre: cxgb4
+softdep spi_pxa2xx_platform pre: dw_dmac
+softdep genet pre: mdio-bcm-unimac
+softdep r8169 pre: realtek

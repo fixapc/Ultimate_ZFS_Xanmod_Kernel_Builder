@@ -23,10 +23,10 @@
 	green='\e[1;32m'
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
-	kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
-echo $basedir
-
+#Confirm base directory before execution
+	cd $basedir
+	echo Current Directory $basedir
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
@@ -180,18 +180,18 @@ echo $basedir
 	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
-	#echo -e " $yellow Preparing Modules $nocolor "
-	#$make modules_prepare
-	#echo -e "$green DONE! $nocolor "
-	#echo -e " $yellow Building Modules $nocolor "
-	#$make modules
-	#echo -e "$green DONE! $nocolor "
+	echo -e " $yellow Preparing Modules $nocolor "
+	$make modules_prepare
+	echo -e "$green DONE! $nocolor "
+	echo -e " $yellow Building Modules $nocolor "
+	$make modules
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Modules $nocolor "
         $make modules_install
 	echo -e "$green DONE! $nocolor "
-	#echo -e " $yellow Make Headers $nocolor "
-	#$make headers
-	#echo -e "$green DONE! $nocolor "
+	echo -e " $yellow Make Headers $nocolor "
+	$make headers
+	echo -e "$green DONE! $nocolor "
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
@@ -213,23 +213,40 @@ echo $basedir
 	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
 
+#Declare kver variable
+	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
 #Rebuild DKMS Modules
 	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
 	dkms add -m zfs -v 2.1.99
 	echo "$green DONE! $nocolor "
 	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k "$kver" --kernelsourcedir="$basedir"/linux/
+	dkms autoinstall -k $kver
 	echo "$green DONE! $nocolor "
 
 
 #Rebuild Initramfs for confirmation
-	echo "$yellow Final Rebuild Of Initramfs $nocolor "
+	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
 	update-initramfs -u -k $kver
+	echo "$green DONE! $nocolor "
 
+#Update Grub
+	echo "$yellow Updating Grub $nocolor "
+	update-grub
+	echo "$green DONE! $nocolor "
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
-	echo -e " $green Would You Like To Install The Maintenance Initramfs, This Is Protected Kernel With An Initramfs Built Into It To Be Compadible With All Systhem As A Fail Safe Incase Of A Miss Boot.  $nocolor"
 
+
+#Building Initramfs Into Kernel - In Progress
+#	echo -e " $green Building Another Initramfs To Working Directory, To Build Into Kernel  $nocolor"
+#	update-initramfs -c -k $kver -b "$basedir/initramfs_src_files" -v | grep -i zfs.ko
+
+#	echo -e " $yellow Unpacking Built Initramfs Into Initramfs Source Directory $nocolor"
+#	cd $basedir/initramfs_src_files
+#	lsinitramfs --unpack $kver
+#	echo -e " $green DONE! $nocolor"
+
+#Running Make Install
 
