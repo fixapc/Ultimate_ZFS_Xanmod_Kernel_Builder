@@ -52,7 +52,7 @@
 		if [ -d $basedir/linux-firmware ]
 			then
 			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor "
-			cd $basedir/linux-firmware && git fetch --prune
+			cd $basedir/linux-firmware && git fetch --prune && git pull --all
 			echo -e " $green DONE! $nocolor "
 			else
 			echo -e " $yellow Downloading The Latest Firmware From Kernel.org $nocolor "
@@ -86,7 +86,7 @@
 	if [ -d $basedir/linux ]
 		then
 		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor "
-		cd $basedir/linux && git fetch --prune
+		cd $basedir/linux && git fetch --prune && git pull --all
 		echo -e " $green DONE! $nocolor "
 		else
 		echo -e " $yellow Cloning Xanmod Repo! $nocolor "
@@ -98,7 +98,7 @@
         if [ -d $basedir/zfs ]
                 then
                 echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor "
-		cd $basedir/zfs && git fetch --prune
+		cd $basedir/zfs && git fetch --prune && git pull --all
 		echo -e " $green DONE! $nocolor "
                 else
                 echo -e " $yellow Downloading ZFS Repo $nocolor "
@@ -234,8 +234,8 @@
 	update-grub
 	echo "$green DONE! $nocolor "
 
-#Installation Completed
-	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
+#Confirm ZFS Module Is In Initramfs
+	lsinitramfs /boot/$kver | grep zfs.ko && update-grub && echo "$FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
 
 #Building Initramfs Into Kernel - In Progress
 #	echo -e " $green Building Another Initramfs To Working Directory, To Build Into Kernel  $nocolor"
