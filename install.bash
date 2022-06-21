@@ -224,7 +224,6 @@
 	dkms autoinstall -k $kver
 	echo "$green DONE! $nocolor "
 
-
 #Rebuild Initramfs for confirmation
 	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
 	update-initramfs -u -k $kver
@@ -237,7 +236,6 @@
 
 #Installation Completed
 	echo -e " $green Finished Installing $nocolor $red Bleeding Edge $nocolor $green Xanmod Kernel With $nocolor $red Bleeding Edge $nocolor $green Built In ZFS $nocolor"
-
 
 #Building Initramfs Into Kernel - In Progress
 #	echo -e " $green Building Another Initramfs To Working Directory, To Build Into Kernel  $nocolor"
