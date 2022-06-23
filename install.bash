@@ -195,9 +195,9 @@
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Running Make Install $nocolor "
-	$make install
-	echo -n -e "$green DONE! $nocolor "
+#	echo -e " $yellow Running Make Install $nocolor "
+#	$make install
+#	echo -n -e "$green DONE! $nocolor "
 
 #Moving To ZFS Directory
 	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
@@ -213,29 +213,31 @@
 	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
 
+	echo -e " $yellow Running Make Install $nocolor "
+	cd $basedir/linux
+	$make install
+	echo -n -e "$green DONE! $nocolor "
+
+
+
 #Declare kver variable
 	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
 #Rebuild DKMS Modules
-	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
-	dkms add -m zfs -v 2.1.99
-	echo "$green DONE! $nocolor "
-	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k $kver
-	echo "$green DONE! $nocolor "
+#	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
+#	dkms add -m zfs -v 2.1.99
+#	echo "$green DONE! $nocolor "
+#	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
+#	dkms autoinstall -k $kver
+#	echo "$green DONE! $nocolor "
 
 #Rebuild Initramfs for confirmation
-	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
-	update-initramfs -u -k $kver
-	echo "$green DONE! $nocolor "
-
-#Update Grub
-	echo "$yellow Updating Grub $nocolor "
-	update-grub
-	echo "$green DONE! $nocolor "
+#	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
+#	update-initramfs -u -k $kver
+#	echo "$green DONE! $nocolor "
 
 #Confirm ZFS Module Is In Initramfs
-	lsinitramfs /boot/$kver | grep zfs.ko && update-grub && echo "$FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
+	lsinitramfs /boot/initrd.img-"$kver" | grep zfs.ko && update-grub && echo "$green FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
 
 #Building Initramfs Into Kernel - In Progress
 #	echo -e " $green Building Another Initramfs To Working Directory, To Build Into Kernel  $nocolor"
