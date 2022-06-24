@@ -176,7 +176,7 @@
 	#fi
 
 
-	echo -eg" $yellow Running ZFS Configuration $nocolor "
+	echo -e " $yellow Running ZFS Configuration $nocolor "
 	./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux  --without-udevdir --disable-sysvinit --disable-systemd  \
 	echo -e " $yellow Running ZFS Configuration $nocolor "echo -e "$green DONE! $nocolor "
 
