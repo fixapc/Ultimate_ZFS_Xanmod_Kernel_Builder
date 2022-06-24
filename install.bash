@@ -153,20 +153,25 @@
 
 
 #Sysvinit Or SystemD?
-	read -p " Are you using SystemD for your init? (y/n)  " SYSD
-	if [ "$SYSD" = "y" ]
-        	then
-        	echo -e " $yellew Configuring ZFS for SystemD $nocolor "
-		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-systemd --enable-linux-builtin
-		echo -e "$green DONE! $nocolor "
+	#read -p " Are you using SystemD for your init? (y/n)  " SYSD
+	#if [ "$SYSD" = "y" ]
+        	#then
+        	#echo -e " $yellew Configuring ZFS for SystemD $nocolor "
+		#echo -e " $yellow Running ZFS Configuration $nocolor "
+		#./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-systemd --enable-linux-builtin --config-cache=none
+		#echo -e "$green DONE! $nocolor "
+		#
+		#else
+        	#echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
+		#echo -e " $yellow Running ZFS Configuration $nocolor "
+		#./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-sysvinit --enable-linux-builtin --config-cache=none --with-mounthelperdir
+		#echo -e " $yellow Running ZFS Configuration $nocolor "echo -e "$green DONE! $nocolor "
+	#fi
 
-		else
-        	echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
-		echo -e " $yellow Running ZFS Configuration $nocolor "
-		./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-sysvinit --enable-linux-builtin
-		echo -e "$green DONE! $nocolor "
-	fi
+
+	echo -eg" $yellow Running ZFS Configuration $nocolor "
+	./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux  --without-udevdir --disable-sysvinit --disable-systemd  \
+	echo -e " $yellow Running ZFS Configuration $nocolor "echo -e "$green DONE! $nocolor "
 
 
 #Running Configure
@@ -213,6 +218,18 @@
 	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
 
+
+#Testing make install for ZFS
+#	echo -e " $yellow Running Make For ZFS $nocolor "
+#	cd $basedir/zfs
+#	$make -j36
+#	echo -n -e "$green DONE! $nocolor "
+#       echo -e " $yellow Running Make Install For ZFS $nocolor "
+#       $make install -j36
+#       echo -n -e "$green DONE! $nocolor "
+
+
+#Running Make Install Kernel
 	echo -e " $yellow Running Make Install $nocolor "
 	cd $basedir/linux
 	$make install
