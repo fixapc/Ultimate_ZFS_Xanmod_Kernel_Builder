@@ -106,6 +106,13 @@
                 echo -e " $green DONE! $nocolor "
         fi
 
+
+#	select kernelconfig in Intelgutted amdgutted stockxanmod performancexanmod
+#	do
+#	echo "You have chosen $brand"
+#	done
+
+
 #USE LAST MADE CONFIG
 	echo -e " $yellow Using Last Modified Kernel $nocolor $nocolor "
 	cp -a $basedir/kernel.config $basedir/linux/.config
@@ -200,9 +207,6 @@
 	echo -e " $yellow Installing Headers $nocolor "
 	$make headers_install
 	echo -e "$green DONE! $nocolor "
-#	echo -e " $yellow Running Make Install $nocolor "
-#	$make install
-#	echo -n -e "$green DONE! $nocolor "
 
 #Moving To ZFS Directory
 	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
@@ -235,23 +239,21 @@
 	$make install
 	echo -n -e "$green DONE! $nocolor "
 
-
-
 #Declare kver variable
 	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
 #Rebuild DKMS Modules
-#	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
-#	dkms add -m zfs -v 2.1.99
-#	echo "$green DONE! $nocolor "
-#	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-#	dkms autoinstall -k $kver
-#	echo "$green DONE! $nocolor "
+	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
+	dkms add -m zfs -v 2.1.99
+	echo "$green DONE! $nocolor "
+	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
+	dkms autoinstall -k $kver
+	echo "$green DONE! $nocolor "
 
 #Rebuild Initramfs for confirmation
-#	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
-#	update-initramfs -u -k $kver
-#	echo "$green DONE! $nocolor "
+	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
+	update-initramfs -u -k /boot/initrd.img-$kver
+	echo "$green DONE! $nocolor "
 
 #Confirm ZFS Module Is In Initramfs
 	lsinitramfs /boot/initrd.img-"$kver" | grep zfs.ko && update-grub && echo "$green FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
@@ -265,5 +267,4 @@
 #	lsinitramfs --unpack $kver
 #	echo -e " $green DONE! $nocolor"
 
-#Running Make Install
 
