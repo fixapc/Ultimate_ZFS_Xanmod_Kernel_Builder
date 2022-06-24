@@ -252,7 +252,7 @@
 
 #Rebuild Initramfs for confirmation
 	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
-	update-initramfs -u -k /boot/initrd.img-$kver
+	update-initramfs -u -k $kver
 	echo "$green DONE! $nocolor "
 
 #Confirm ZFS Module Is In Initramfs
