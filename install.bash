@@ -23,7 +23,6 @@
 	green='\e[1;32m'
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
-	zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
 
 #Confirm base directory before execution
@@ -251,6 +250,7 @@
 
 #Declare kver variable
 	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
+	declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
 #Rebuild DKMS Modules
 	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
