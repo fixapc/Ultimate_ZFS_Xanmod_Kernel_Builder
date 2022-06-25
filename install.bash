@@ -29,6 +29,7 @@
 #Confirm base directory before execution
 	cd $basedir
 	echo Current Directory $basedir
+	mkdir /configs/auto_backup_configs
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
