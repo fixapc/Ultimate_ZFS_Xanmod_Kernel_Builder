@@ -254,15 +254,15 @@
 
 #Rebuild DKMS Modules
 	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
-	dkms add -m zfs -v $zfsv
+	dkms add -m zfs -v "$zfsv"
 	echo "$green DONE! $nocolor "
 	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k $kver
+	dkms autoinstall -k "$kver"
 	echo "$green DONE! $nocolor "
 
 #Rebuild Initramfs for confirmation
 	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
-	update-initramfs -u -k $kver
+	update-initramfs -u -k "$kver"
 	echo "$green DONE! $nocolor "
 
 #Confirm ZFS Module Is In Initramfs
