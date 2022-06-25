@@ -115,7 +115,7 @@
 
 #USE LAST MADE CONFIG
 	echo -e " $yellow Using Last Modified Kernel $nocolor $nocolor "
-	cp -a $basedir/kernel.config $basedir/linux/.config
+	cp -a $basedir/configs/kernel.config $basedir/linux/.config
 	echo -e "$green DONE! $nocolor "
 
 #Moving To Kernel Build Directory
@@ -132,10 +132,10 @@
 
 #Backup Changes From Menuconfig
 	 echo -e "$yellow Backing Up Configuration $nocolor "
-         cp -a $basedir/linux/.config $basedir/$dateconfig
+         cp -a $basedir/linux/.config $basedir/configs/auto_backup_configs/$dateconfig
 	 echo -e "$green DONE! $nocolor "
 	 echo -e "$yellow Saving Kernel Configuration To Be Used During Next Makemenu Config $nocolor "
-         cp -a $basedir/linux/.config $basedir/kernel.config
+         cp -a $basedir/linux/.config $basedir/configs/kernel.config
 	 echo -e "$green DONE! $nocolor "
 
 #Run Make Prepare
