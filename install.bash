@@ -28,8 +28,15 @@
 
 #Confirm base directory before execution
 	cd $basedir
-	echo Current Directory $basedir
-	mkdir /configs/auto_backup_configs
+	echo Script Working Directory $basedir
+
+#Check to see if directory is present, if so do not make
+        if [ -d $basedir/configs/auto_backup_configs ]
+                then
+		echo -e " $yellow config backup directory present, not making $nocolor "
+                else
+		mkdir configs/auto_backup_configs
+        fi
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
