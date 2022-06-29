@@ -23,18 +23,49 @@
 	green='\e[1;32m'
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
+	kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
+	showcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | column )
+
 
 
 #Confirm base directory before execution
 	cd $basedir
 	echo Script Working Directory $basedir
 
+
+
+echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Install  $nocolor "
+	strings $basedir/configs/cmdline.conf | grep -v "#" | sort -u | column
+
+
+        read -p "Would You Like To Edit The Kernel Parameters Before Installation? (y/n)" Kerncmds
+        if [ "$Kerncmds" = "y" ]
+                then
+		nano $basedir/configs/cmdline.conf
+                else
+                echo -e "$red Contiuning Without Changing Kernel Parameters $nocolor"
+        fi
+
+
+#Applying Kernel Parameters Config
+	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
+
+
+
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
 		echo -e " $yellow config backup directory present, not making $nocolor "
                 else
-		mkdir configs/auto_backup_configs
+		mkdir $basedir/configs/auto_backup_configs
+        fi
+
+#Check to see if hostid0 is present for hassle free mounting.
+        if [ -f /etc/zfs/hostid ]
+                then
+                echo -e " $yellow hostid0 already present not making $nocolor "
+                else
+                echo 0 > /etc/zfs/hostid0
         fi
 
 #List Required Dependencies
@@ -168,26 +199,21 @@
 	echo -e "$green DONE! $nocolor "
 
 
-#Sysvinit Or SystemD?
-	#read -p " Are you using SystemD for your init? (y/n)  " SYSD
-	#if [ "$SYSD" = "y" ]
-        	#then
-        	#echo -e " $yellew Configuring ZFS for SystemD $nocolor "
-		#echo -e " $yellow Running ZFS Configuration $nocolor "
-		#./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-systemd --enable-linux-builtin --config-cache=none
-		#echo -e "$green DONE! $nocolor "
-		#
-		#else
-        	#echo "$yellow Configuring for Sysvinit, OpenRC, Runit and or other......"
-		#echo -e " $yellow Running ZFS Configuration $nocolor "
-		#./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux --enable-sysvinit --enable-linux-builtin --config-cache=none --with-mounthelperdir
-		#echo -e " $yellow Running ZFS Configuration $nocolor "echo -e "$green DONE! $nocolor "
-	#fi
-
-
+#ZFS Configuration
 	echo -e " $yellow Running ZFS Configuration $nocolor "
-	./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux  --without-udevdir --disable-sysvinit --disable-systemd  \
-	echo -e " $yellow Running ZFS Configuration $nocolor "echo -e "$green DONE! $nocolor "
+	./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux \
+	--enable-linux-builtin
+#	--enable-dependency-tracking \
+#	--with-gnu-ld \
+#	--disable-systemd \
+#	--disable-sysvinit \
+#	--with-spec=generic \
+#	--with-gcov=GCOV
+#	--bindir=bin \
+#	--includedir= \
+#	--sysconfdir=DIR \
+#	--sbindir=sbin \
+	echo -e "$green DONE! $nocolor "
 
 
 #Running Configure
@@ -196,8 +222,8 @@
 	echo -e "$green DONE! $nocolor "
 
 #Build New Kernel
-	echo -e " $yellow Moving To Kernel Source Directory $nocolor "
-	cd $basedir/linux
+ 	echo -e " $yellow Preparing Kernel With ZFS Built In $nocolor "
+	cd $basedir/linux && $make prepare
 	echo -e " $yellow Running Make $nocolor "
 	$make
 	echo -e "$green DONE! $nocolor "
@@ -228,7 +254,6 @@
 #Now Install Compiled ZFS Packages
 	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
 	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
-	cd $basedir
 	echo -n -e "$green DONE! $nocolor "
 
 
@@ -253,17 +278,17 @@
 	declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
 #Rebuild DKMS Modules
-	echo "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
+	echo -e "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
 	dkms add -m zfs -v "$zfsv"
-	echo "$green DONE! $nocolor "
-	echo "$yellow Rebuild DKMS modules for new kernel $nocolor "
+	echo -e "$green DONE! $nocolor "
+	echo -e "$yellow Rebuild DKMS modules for new kernel $nocolor "
 	dkms autoinstall -k "$kver"
-	echo "$green DONE! $nocolor "
+	echo -e "$green DONE! $nocolor "
 
 #Rebuild Initramfs for confirmation
-	echo "$yellow Confirming Update Of Initramfs Files $nocolor "
+	echo -e "$yellow Confirming Update Of Initramfs Files $nocolor "
 	update-initramfs -u -k "$kver"
-	echo "$green DONE! $nocolor "
+	echo -e "$green DONE! $nocolor "
 
 #Confirm ZFS Module Is In Initramfs
 	lsinitramfs /boot/initrd.img-"$kver" | grep zfs.ko && update-grub && echo "$green FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
