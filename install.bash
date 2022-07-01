@@ -180,11 +180,12 @@
 	 --with-linux-obj="$basedir"/linux 	\
 	 --with-gnu-ld 				\
 	 --enable-pyzfs				\
-	 --enable-linux-builtin
+	 --enable-linux-builtin			\
 	#--enable-systemd 			\
 	#--enable-sysvinit 			\
-	#--disable-systemd 			\
-	#--disable-sysvinit			\
+	--with-udevdir				\
+	--disable-systemd 			\
+	--disable-sysvinit
 	#--enable-dependency-tracking 		\
 	#--with-spec=generic 			\
 	#--with-gcov=GCOV 			\
