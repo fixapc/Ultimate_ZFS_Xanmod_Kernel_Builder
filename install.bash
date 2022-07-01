@@ -1,7 +1,7 @@
 #!/bin/bash
 #Ultimate ZFS Kernel Builder - Based On Xanmod Fixapc.net
 #This script automatically downloads the latest ZFS and Xanmod kernel.
-#1. A customized configuration kernel configuration has been added that has based on a pure latency based build.
+#1. A customized kernel configuration has been added that has based on a pure latency based build.
 #2. ZFS is compiled and installed as a built in module.
 #3. All I/O Scheduling has been removed for better I/O performance. Aka none / noop
 #4. All filesystems are baked in for compatibility, speed and to help guard against page faults.
@@ -9,13 +9,13 @@
 #6. Cgroups and other resource managment has been Axed.
 #7. Built in sleep and power management functions have been disabled.
 #8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
+#9. USE AT YOUR OWM RISK UNTIL OFFICAL RELEASE
 
-
-#Variables
+#=======================VARIABLES=====================
 	xandeps="\ngrub-efi-amd64 \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \ndkms \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \ndkms \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make LLVM=1 -j$(nproc)"
-	make="make -s -j$(nproc)"
+	make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
 	nocolor='\e[1;m'
@@ -24,19 +24,21 @@
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
 	kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
-	showcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | column )
+	menuconfig="menuconfig MENUCONFIG_COLOR=blackbg"
+	bootdrive=$(df)
 
-
+#=======================BEGIN SCRIPT==================
 
 #Confirm base directory before execution
+	echo
 	cd $basedir
-	echo Script Working Directory $basedir
+	echo -e "$green Script Working Directory: $nocolor" $basedir
+	echo
+	echo
+	echo
 
-
-
-echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Install  $nocolor "
+	echo -e "$yellow Current List Of Kernel Parameters To Be Used For Kernel Install  $nocolor"
 	strings $basedir/configs/cmdline.conf | grep -v "#" | sort -u | column
-
 
         read -p "Would You Like To Edit The Kernel Parameters Before Installation? (y/n)" Kerncmds
         if [ "$Kerncmds" = "y" ]
@@ -46,16 +48,16 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
                 echo -e "$red Contiuning Without Changing Kernel Parameters $nocolor"
         fi
 
-
 #Applying Kernel Parameters Config
-	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
-
+		sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
+		sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
+		echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
 
 
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
-		echo -e " $yellow config backup directory present, not making $nocolor "
+		echo -e "$yellow config backup directory present, not making $nocolor"
                 else
 		mkdir $basedir/configs/auto_backup_configs
         fi
@@ -63,15 +65,14 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
 #Check to see if hostid0 is present for hassle free mounting.
         if [ -f /etc/zfs/hostid ]
                 then
-                echo -e " $yellow hostid0 already present not making $nocolor "
+                echo -e "$yellow hostid0 already present not making $nocolor"
                 else
                 echo 0 > /etc/zfs/hostid0
         fi
 
 #List Required Dependencies
-	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor" 
-	echo -e -n $xandeps
-	echo -e $zfs_debian_deps
+	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor"
+	echo -e  "$xandeps $zfs_debian_deps" | column
 
 #Ask User If They Wish To Continue
 	read -p " Do you want to Install The Dependencies? (y/n)  " CONT
@@ -84,48 +85,48 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
 	fi
 
 #Do you want to install the latest firmware?
-	read -p " Do You Want To Install The Latest Linux Firmware From Kernel.org (y/n)  " FIRM
+	read -p "Do You Want To Install The Latest Linux Firmware From Kernel.org (y/n)" FIRM
 	if [ "$FIRM" = "y" ]
 	then
 
 #See If LZ4 File Already Exsists
 		if [ -d $basedir/linux-firmware ]
 			then
-			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor "
+			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor"
 			cd $basedir/linux-firmware && git fetch --prune && git pull --all
-			echo -e " $green DONE! $nocolor "
+			echo -e "$green DONE! $nocolor "
 			else
-			echo -e " $yellow Downloading The Latest Firmware From Kernel.org $nocolor "
+			echo -e "$yellow Downloading The Latest Firmware From Kernel.org $nocolor"
 			cd $basedir && git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
-			echo -e " $green DONE! $nocolor "
+			echo -e "$green DONE! $nocolor"
 		fi
 
 #Install The Firmware
-	echo -e " $yellow Moving To Firmware Directory $nocolor "
+	echo -e "$yellow Moving To Firmware Directory $nocolor"
 	cd $basedir/linux-firmware
-	echo -e " $yellow Installing The Latest Firmware $nocolor "
+	echo -e "$yellow Installing The Latest Firmware $nocolor"
 	$make install
-	echo -e " $green DONE! $nocolor "
+	echo -e "$green DONE! $nocolor"
 
 #Skip Firmware
 	else
-	echo -e " $yellow Skipping Firmware $nocolor "
+	echo -e "$yellow Skipping Firmware $nocolor"
 	fi
 
 #Install Arch Linux ZFS Grub Patch?
-	read -p " Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n) " GRUB
+	read -p "Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n)" GRUB
         if [ "$GRUB" = "y" ]
                 then
                 cp -a $basedir/10_linux /etc/grub.d/10_linux
                 echo -e " $green DONE! $nocolor "
                 else
-                echo -e " $yellow Contiuning Without Grub Patch $nocolor "
+                echo -e "$yellow Contiuning Without Grub Patch $nocolor"
         fi
 
-#Check to see if Xanmon Source Clone Is Available
+#Check To See If Xanmon Source Code Is Already On This System
 	if [ -d $basedir/linux ]
 		then
-		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor "
+		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor"
 		cd $basedir/linux && git fetch --prune && git pull --all
 		echo -e " $green DONE! $nocolor "
 		else
@@ -134,12 +135,12 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
 		echo -e " $green DONE! $nocolor "
 	fi
 
-#See If LZ4 Is Prevent For Kernel Files
+#Check for presence of ZFS Folder
         if [ -d $basedir/zfs ]
                 then
-                echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor "
+                echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor"
 		cd $basedir/zfs && git fetch --prune && git pull --all
-		echo -e " $green DONE! $nocolor "
+		echo -e "$green DONE! $nocolor"
                 else
                 echo -e " $yellow Downloading ZFS Repo $nocolor "
                 cd $basedir && git clone https://github.com/openzfs/zfs.git
@@ -147,27 +148,15 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
         fi
 
 
-#	select kernelconfig in Intelgutted amdgutted stockxanmod performancexanmod
-#	do
-#	echo "You have chosen $brand"
-#	done
-
-
 #USE LAST MADE CONFIG
-	echo -e " $yellow Using Last Modified Kernel $nocolor $nocolor "
+	echo -e "$yellow Using Last Modified Kernel Configuration $nocolor"
 	cp -a $basedir/configs/kernel.config $basedir/linux/.config
 	echo -e "$green DONE! $nocolor "
 
-#Moving To Kernel Build Directory
-        echo -e "$yellow Moving To Kernel Directory $nocolor "
-        cd $basedir/linux
-
 #Run Make Config W
-	echo  -e "$yellow Make Clean $nocolor "
-	$make clean
-	echo  -e "$green DONE! $nocolor "
-	echo  -e "$yellow Running Make Menuconfig $nocolor "
-	$make menuconfig
+	echo  -e "$yellow Running Make Clean, Menuconfig And Make Prepare $nocolor "
+	echo  -e "$yellow Please Add Any Other Items You Wish To Add To Configuration $nocolor "
+	cd $basedir/linux && $make clean $menuconfig prepare
 	echo  -e "$green DONE! $nocolor "
 
 #Backup Changes From Menuconfig
@@ -178,128 +167,88 @@ echo -e " $yellow Current List Of Kernel Parameters To Be Used For Kernel Instal
          cp -a $basedir/linux/.config $basedir/configs/kernel.config
 	 echo -e "$green DONE! $nocolor "
 
-#Run Make Prepare
-	echo -e "$yellow Running Make Prepare, Prior To Running The ZFS Built In Module Command $nocolor "
-	$make prepare
-	echo -e "$green DONE! $nocolor "
-
-#Moving To ZFS Directory
-	echo -e " $yellow Moving To ZFS Directory $nocolor "
-	cd $basedir/zfs
-	echo -e "$green DONE! $nocolor "
-
 #Make clean for ZFS
-	echo -e " $yellow Running Make Clean For ZFS Directory $nocolor "
-	$make clean
-	echo  -e "$green DONE! $nocolor "
+        echo -e "$yellow Running Make Clean And Prepare For ZFS Directory $nocolor "
+        cd $basedir/zfs && $make clean
+        echo  -e "$green DONE! $nocolor "
 
-#Running Auto Config For ZFS
-	echo -e " $yellow Running Autogen $nocolor "
-	./autogen.sh
-	echo -e "$green DONE! $nocolor "
-
-
-#ZFS Configuration
+#ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
 	echo -e " $yellow Running ZFS Configuration $nocolor "
-	./configure --with-linux="$basedir"/linux --with-linux-obj="$basedir"/linux \
-	--enable-linux-builtin
-#	--enable-dependency-tracking \
-#	--with-gnu-ld \
-#	--disable-systemd \
-#	--disable-sysvinit \
-#	--with-spec=generic \
-#	--with-gcov=GCOV
-#	--bindir=bin \
-#	--includedir= \
-#	--sysconfdir=DIR \
-#	--sbindir=sbin \
-	echo -e "$green DONE! $nocolor "
+	 ./autogen.sh
+	 ./configure 				\
+	 --with-linux="$basedir"/linux 		\
+	 --with-linux-obj="$basedir"/linux 	\
+	 --with-gnu-ld 				\
+	 --enable-pyzfs				\
+	 --enable-linux-builtin
+	#--enable-systemd 			\
+	#--enable-sysvinit 			\
+	#--disable-systemd 			\
+	#--disable-sysvinit			\
+	#--enable-dependency-tracking 		\
+	#--with-spec=generic 			\
+	#--with-gcov=GCOV 			\
+	#--bindir=bin			 	\
+	#--includedir= 				\
+	#--sysconfdir=DIR 			\
+	#--sbindir=sbin 			\
+	echo -e "$green DONE! $nocolor"
 
+#Make Standard ZFS Install
+       echo -e " $yellow Running Make And Make Install For ZFS $nocolor "
+       $make && $make install
+       echo -n -e "$green DONE! $nocolor"
 
 #Running Configure
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
-	./copy-builtin $basedir/linux
-	echo -e "$green DONE! $nocolor "
+	./copy-builtin "$basedir"/linux
+	echo -e "$green DONE! $nocolor"
 
 #Build New Kernel
- 	echo -e " $yellow Preparing Kernel With ZFS Built In $nocolor "
-	cd $basedir/linux && $make prepare
-	echo -e " $yellow Running Make $nocolor "
-	$make
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Preparing Modules $nocolor "
-	$make modules_prepare
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Building Modules $nocolor "
-	$make modules
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Installing Modules $nocolor "
-        $make modules_install
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Make Headers $nocolor "
-	$make headers
-	echo -e "$green DONE! $nocolor "
-	echo -e " $yellow Installing Headers $nocolor "
-	$make headers_install
-	echo -e "$green DONE! $nocolor "
+ 	echo -e " $yellow Installing Kernel, Modules, Headers And Symbol Layout With ZFS Built In $nocolor "
+	cd "$basedir"/linux && $make && $make headers_install && $make vdso_install && $make modules_install
+	echo -e "$green DONE! $nocolor"
 
-#Moving To ZFS Directory
-	echo -n -e "$yellow Cleaning Deb Package Install Files $nocolor "
-	cd $basedir/zfs && rm  *.deb *.rpm
-	echo -n -e "$green DONE! $nocolor "
-	echo -e " $yellow Making ZFS Deb Packages Based On Sysvinit $nocolor "
-	$make deb-utils deb-dkms
-	echo -n -e "$green DONE! $nocolor "
+#Declare Variables
+  	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
+        declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
-#Now Install Compiled ZFS Packages
-	echo -e " $yellow Installing ZFS .Deb Packages $nocolor "
-	for file in *.deb; do sudo gdebi -q --non-interactive $file; done
-	echo -n -e "$green DONE! $nocolor "
+#Copy Kernel To Boot Directory
+	echo -e "$yellow Moving Kernel And System.map To Boot Directory $nocolor"
+	cp -a "$basedir"/linux/System.map /boot/System.map-"$kver"
+	cp -a "$basedir"/linux/arch/x86/boot/bzImage /boot/vmlinuz-"$kver"
+
+#Update Grub
+	echo -e "$yellow Updating Grub, Note: Grubs kernel parameters are still passed to the kernel $nocolor"
+	update-grub
+
+#Finished
+	echo -e "Kernel $kver has been installed"
+	echo -e "ZFS $zfsv developer version has been installed"
+
+#Install Arch Linux ZFS Grub Patch?
+        read -p "Do you want to add a UEFI boot menu entry directly to the Kernels EFI stub?, this is the fastest possbile way to boot the kernel but is known to be buggy on many motherboards. The the grubs menu entry will still be used if the EFI stub booting does not work (y/n) " efistub
+        if [ "$efistub" = "y" ]
+                then
+                echo -e "$red Delete Any Previously Installed Kernels By This Script $nocolor"
+		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs efibootmgr -B -d
+              	efibootmgr --disk /dev/sda --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
+                else
+                echo -e " $yellow NOT adding an EFI Stub $nocolor "
+        fi
+
+#Install Arch Linux ZFS Grub Patch?
+        read -p "DO YOU WISH TO REBOOT NOW (y/n) " rebootnow
+        if [ "$rebootnow" = "y" ]
+                then
+                echo -e " $red REBOOTING NOW! $nocolor "
+		reboot
+                else
+                echo -e " $yellow NOT REBOOTING $nocolor "
+        fi
+exit
 
 
-#Testing make install for ZFS
-#	echo -e " $yellow Running Make For ZFS $nocolor "
-#	cd $basedir/zfs
-#	$make -j36
-#	echo -n -e "$green DONE! $nocolor "
-#       echo -e " $yellow Running Make Install For ZFS $nocolor "
-#       $make install -j36
-#       echo -n -e "$green DONE! $nocolor "
 
-
-#Running Make Install Kernel
-	echo -e " $yellow Running Make Install $nocolor "
-	cd $basedir/linux
-	$make install
-	echo -n -e "$green DONE! $nocolor "
-
-#Declare kver variable
-	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
-	declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
-
-#Rebuild DKMS Modules
-	echo -e "$yellow Confirming DKMS ZFS Module Has Been Added To Initrd $nocolor "
-	dkms add -m zfs -v "$zfsv"
-	echo -e "$green DONE! $nocolor "
-	echo -e "$yellow Rebuild DKMS modules for new kernel $nocolor "
-	dkms autoinstall -k "$kver"
-	echo -e "$green DONE! $nocolor "
-
-#Rebuild Initramfs for confirmation
-	echo -e "$yellow Confirming Update Of Initramfs Files $nocolor "
-	update-initramfs -u -k "$kver"
-	echo -e "$green DONE! $nocolor "
-
-#Confirm ZFS Module Is In Initramfs
-	lsinitramfs /boot/initrd.img-"$kver" | grep zfs.ko && update-grub && echo "$green FOUND ZFS MODULE IN NEW INITRAMFS AND UPDATED GRUB, INSTALL FINISHED! (SAFE TO REBOOT!) $nocolor "
-
-#Building Initramfs Into Kernel - In Progress
-#	echo -e " $green Building Another Initramfs To Working Directory, To Build Into Kernel  $nocolor"
-#	update-initramfs -c -k $kver -b "$basedir/initramfs_src_files" -v | grep -i zfs.ko
-
-#	echo -e " $yellow Unpacking Built Initramfs Into Initramfs Source Directory $nocolor"
-#	cd $basedir/initramfs_src_files
-#	lsinitramfs --unpack $kver
-#	echo -e " $green DONE! $nocolor"
 
 
