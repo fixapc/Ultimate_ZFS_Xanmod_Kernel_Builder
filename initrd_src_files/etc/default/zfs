@@ -53,7 +53,7 @@ ZPOOL_IMPORT_ALL_VISIBLE='no'
 # It supersedes the old USE_DISK_BY_ID which indicated that it would only
 # try '/dev/disk/by-id'.
 # The old variable will still work in the code, but is deprecated.
-#ZPOOL_IMPORT_PATH="/dev/disk/by-vdev:/dev/disk/by-id"
+ZPOOL_IMPORT_PATH="/dev/disk/by-vdev:/dev/disk/by-id"
 
 # List of pools that should NOT be imported at boot
 # when ZPOOL_IMPORT_ALL_VISIBLE is 'yes'.

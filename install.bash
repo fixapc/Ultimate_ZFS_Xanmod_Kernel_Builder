@@ -17,6 +17,7 @@
 	#make="make LLVM=1 -j$(nproc)"
 	make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
+	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
 	nocolor='\e[1;m'
 	yellow='\e[1;33m'
@@ -37,30 +38,60 @@
 	echo
 	echo
 
-	echo -e "$yellow Current List Of Kernel Parameters To Be Used For Kernel Install  $nocolor"
-	strings $basedir/configs/cmdline.conf | grep -v "#" | sort -u | column
-
-        read -p "Would You Like To Edit The Kernel Parameters Before Installation? (y/n)" Kerncmds
-        if [ "$Kerncmds" = "y" ]
-                then
-		nano $basedir/configs/cmdline.conf
-                else
-                echo -e "$red Contiuning Without Changing Kernel Parameters $nocolor"
-        fi
-
-#Applying Kernel Parameters Config
-		sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
-		sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
-		echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
-
 
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
-		echo -e "$yellow config backup directory present, not making $nocolor"
+                echo -e "$yellow config backup directory present, not making $nocolor"
                 else
-		mkdir $basedir/configs/auto_backup_configs
+                mkdir $basedir/configs/auto_backup_configs
         fi
+
+
+
+#Continue With Last Session (Kernel Parameters) Or Use Defaults
+	 if [ -f $basedir/configs/auto_backup_configs/cmdline.conf.save ]
+		then
+		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor"
+		echo -e "$yellow Would You Like To Use Your Last Saved Kernel Parameters Configuration? $nocolor"
+		echo -e "$yellow You Can Edit This Configuration With Nano Before Continuing $nocolor"
+		read -p "y= Use Last Saved Kernel Parameters n= Use Default Kernel Parameter List (y/n)" Savedcmds
+			if [ "$Savedcmds" = "y" ]
+
+		        	then
+				cp -a $basedir/configs/auto_backup_configs/cmdline.conf.save $basedir/configs/cmdline.conf
+
+				else
+				echo -e "$yellow Using Backup Config $nocolor"
+				cp -a $basedir/configs/cmdline_default.conf $basedir/configs/cmdline.conf
+				fi
+
+		else
+		echo -e "$yellow No Previous Configurations Found From Last Sessions Continuing With Default Config $nocolor"
+		cp -a $basedir/configs/cmdline_default.conf $basedir/configs/cmdline.conf
+		fi
+
+
+		echo -e "$yellow Current Kernel Parameters Based On Your Selection $nocolor"
+		strings $basedir/configs/cmdline.conf | grep -v "#" | sort -u | column
+
+        read -p "Would You Like To Edit The Kernel Parameters Before Installation? (y/n)" Kerncmds
+        if [ "$Kerncmds" = "y" ]
+                then
+		nano  $basedir/configs/cmdline.conf
+		cp -a $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/cmdline.conf.save
+		cp -a $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
+                else
+                echo -e "$red Contiuning Without Changing Kernel Parameters $nocolor"
+        fi
+
+#Save Last Used Configuration By Date
+	cp -a "$basedir"/configs/cmdline.conf "$basedir"/configs/auto_backup_configs/$datecmds
+
+#Applying Mandatory Kernel Parameter Config
+		sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
+		sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
+		echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
 
 #Check to see if hostid0 is present for hassle free mounting.
         if [ -f /etc/zfs/hostid ]
@@ -177,15 +208,16 @@
 	 ./autogen.sh
 	 ./configure 				\
 	 --with-linux="$basedir"/linux 		\
-	 --with-linux-obj="$basedir"/linux 	\
-	 --with-gnu-ld 				\
-	 --enable-pyzfs				\
-	 --enable-linux-builtin			\
+	 --with-linux-obj="$basedir"/linux	\
+	 --enable-linux-builtin 		\
+	# --with-gnu-ld 			\
+	#--enable-pyzfs				\
+	# --enable-linux-builtin		\
 	#--enable-systemd 			\
 	#--enable-sysvinit 			\
-	--with-udevdir				\
-	--disable-systemd 			\
-	--disable-sysvinit
+	#--with-udevdir				\
+	#--disable-systemd 			\
+	#--disable-sysvinit			\
 	#--enable-dependency-tracking 		\
 	#--with-spec=generic 			\
 	#--with-gcov=GCOV 			\
@@ -232,13 +264,13 @@
         if [ "$efistub" = "y" ]
                 then
                 echo -e "$red Delete Any Previously Installed Kernels By This Script $nocolor"
-		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs efibootmgr -B -d
+		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs efibootmgr -B -b
               	efibootmgr --disk "$bootdrive" --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
                 else
                 echo -e " $yellow NOT adding an EFI Stub $nocolor "
         fi
 
-#Install Arch Linux ZFS Grub Patch?
+#Ask To Reboot
         read -p "DO YOU WISH TO REBOOT NOW (y/n) " rebootnow
         if [ "$rebootnow" = "y" ]
                 then
@@ -247,9 +279,4 @@
                 else
                 echo -e " $yellow NOT REBOOTING $nocolor "
         fi
-exit
-
-
-
-
 
