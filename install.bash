@@ -25,7 +25,7 @@
 	basedir=$(dirname "$SCRIPT")
 	kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
 	menuconfig="menuconfig MENUCONFIG_COLOR=blackbg"
-	bootdrive=$(df)
+	bootdrive=$(df | grep -i /boot  | awk '{print $1}' | tr -d [:digit:])
 
 #=======================BEGIN SCRIPT==================
 
@@ -233,7 +233,7 @@
                 then
                 echo -e "$red Delete Any Previously Installed Kernels By This Script $nocolor"
 		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs efibootmgr -B -d
-              	efibootmgr --disk /dev/sda --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
+              	efibootmgr --disk "$bootdrive" --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
                 else
                 echo -e " $yellow NOT adding an EFI Stub $nocolor "
         fi
