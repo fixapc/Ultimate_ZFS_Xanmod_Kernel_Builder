@@ -145,14 +145,14 @@
 	fi
 
 #Install Arch Linux ZFS Grub Patch?
-	read -p "Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n)" GRUB
-        if [ "$GRUB" = "y" ]
-                then
-                cp -a $basedir/10_linux /etc/grub.d/10_linux
-                echo -e " $green DONE! $nocolor "
-                else
-                echo -e "$yellow Contiuning Without Grub Patch $nocolor"
-        fi
+	#read -p "Do you eish To install The Arch Linux Grub patch? This allows using the bootfs property correctly, this will overwrite /etc/grub.d/10_linux (y/n)" GRUB
+        #if [ "$GRUB" = "y" ]
+        #        then
+        #        cp -a $basedir/10_linux /etc/grub.d/10_linux
+        #        echo -e " $green DONE! $nocolor "
+        #        else
+        #        echo -e "$yellow Contiuning Without Grub Patch $nocolor"
+        #fi
 
 #Check To See If Xanmon Source Code Is Already On This System
 	if [ -d $basedir/linux ]
@@ -209,8 +209,8 @@
 	 ./configure 				\
 	 --with-linux="$basedir"/linux 		\
 	 --with-linux-obj="$basedir"/linux	\
-	 --enable-linux-builtin 		\
-	# --with-gnu-ld 			\
+	 --enable-linux-builtin
+	#--with-gnu-ld 			\
 	#--enable-pyzfs				\
 	#--enable-systemd 			\
 	#--enable-sysvinit 			\
@@ -238,8 +238,12 @@
 
 #Build New Kernel
  	echo -e " $yellow Installing Kernel, Modules, Headers And Symbol Layout With ZFS Built In $nocolor "
-	cd "$basedir"/linux && $make && $make headers_install && $make vdso_install && $make modules_install
+	cd "$basedir"/linux && $make && $make headers_install && $make modules_prepare && $make vdso_install && $make modules_install && $make bzImage
 	echo -e "$green DONE! $nocolor"
+
+#Install Basic Debian Based Packages
+	echo -e "$green Installing ZFS Utils, ZFS-Dracut And ZFS-Initramfs $nocolor"
+        cd "$basedir"/zfs && $make deb-utils && dpkg -i --force-all *.deb
 
 #Declare Variables
   	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
