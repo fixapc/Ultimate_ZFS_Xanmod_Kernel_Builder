@@ -39,6 +39,14 @@
 	echo
 
 
+ #Check to see if hostid0 is present for hassle free mounting.
+         if [ -f /etc/zfs/hostid ]
+                 then
+                 echo -e "$yellow hostid0 already present not making $nocolor"
+                 else
+                 echo 0 > /etc/zfs/hostid0
+         fi
+
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
@@ -92,14 +100,6 @@
 		sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
 		sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
 		echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
-
-#Check to see if hostid0 is present for hassle free mounting.
-        if [ -f /etc/zfs/hostid ]
-                then
-                echo -e "$yellow hostid0 already present not making $nocolor"
-                else
-                echo 0 > /etc/zfs/hostid0
-        fi
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor"
@@ -212,7 +212,6 @@
 	 --enable-linux-builtin 		\
 	# --with-gnu-ld 			\
 	#--enable-pyzfs				\
-	# --enable-linux-builtin		\
 	#--enable-systemd 			\
 	#--enable-sysvinit 			\
 	#--with-udevdir				\
