@@ -1,0 +1,18 @@
+#!/bin/sh
+
+DEVNAME=$1
+
+for link in /dev/bcache/by-uuid/*; do
+	if [ -n "$DEVNAME" -a "$DEVNAME" = "$(readlink -f $link)" ]; then
+		echo "BCACHE_CACHED_UUID=$(basename $link)"
+		break
+	fi
+done
+
+for link in /dev/bcache/by-label/*; do
+	if [ -n "$DEVNAME" -a "$DEVNAME" = "$(readlink -f $link)" ]; then
+		echo "BCACHE_CACHED_LABEL=$(basename $link)"
+		break
+	fi
+done
+

@@ -11,119 +11,154 @@
 #8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
 #9. USE AT YOUR OWM RISK UNTIL OFFICAL RELEASE
 
+#Enable Logging
+	#set -x
+
 #=======================VARIABLES=====================
-	xandeps="\ngrub-efi-amd64 \nlz4 \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nkmod \nutil-linux \nbison \nflex \nbinutils"
-	zfs_debian_deps="\ngdebi \ndkms \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \ndkms \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
+	xandeps="\ngrub-efi-amd64 \nlz4 \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
+	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make LLVM=1 -j$(nproc)"
 	make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
-	red='\e[1;31m'
-	nocolor='\e[1;m'
+	red='\e[1;31m'	
 	yellow='\e[1;33m'
+	orange='\e[0;33m'
 	green='\e[1;32m'
+	nocolor='\e[1;m'
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
 	kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
-	menuconfig="menuconfig MENUCONFIG_COLOR=blackbg"
+	menuconfig=""$make" menuconfig MENUCONFIG_COLOR=blackbg"
 	bootdrive=$(df | grep -i /boot  | awk '{print $1}' | tr -d [:digit:])
+	initmodver=$(ls "$basedir"/initrd/lib/modules/ | grep -i xanmod)
+	bootlocation=$(df | grep -i /boot  | awk '{print $1,$6}')
+	runkern=$(uname -r)
+	autobakdir=$(readlink -e  configs/auto_backup_configs)
 
 #=======================BEGIN SCRIPT==================
 
 #Confirm base directory before execution
 	echo
 	cd $basedir
+	figlet -t -c Ultimate ZFS Xanmod Kernel Builder By Fixapc.net
+	echo
+	echo
 	echo -e "$green Script Working Directory: $nocolor" $basedir
-	echo
-	echo
+	echo -e "$green Current Boot: $nocolor" $bootlocation
+	echo -e "$green Current Kernel Version: $nocolor" $runkern
+	echo -e "$green Autobackupdir: $nocolor" $autobakdir
 	echo
 
 
- #Check to see if hostid0 is present for hassle free mounting.
-         if [ -f /etc/zfs/hostid ]
-                 then
-                 echo -e "$yellow hostid0 already present not making $nocolor"
-                 else
-                 echo 0 > /etc/zfs/hostid0
-         fi
+#Create ZFS zpool create files
+	#Default Zpool
+	cp -a -r -f -v $basedir/zfs_command_scripts/* /bin
+	cp -a -r -f -v $basedir/zfs_command_scripts/* /sbin
+
+
+#Check to see if hostid0 is present for hassle free mounting.
+#         if [ -f /etc/zfs/hostid0 ]
+#                 then
+#                 echo -e "$yellow hostid0 already present not making $nocolor"
+#                 else
+#                 touch /etc/zfs/hostid0
+#                 echo 0 > /etc/zfs/hostid0
+#         fi
 
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
-                echo -e "$yellow config backup directory present, not making $nocolor"
+                echo -e "$green Configuration Directory Present, Not Making $nocolor" $(readlink -e configs/auto_backup_configs)
+                echo
+                echo
                 else
                 mkdir $basedir/configs/auto_backup_configs
         fi
 
-
-
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
 	 if [ -f $basedir/configs/auto_backup_configs/cmdline.conf.save ]
 		then
-		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor"
+		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e configs/auto_backup_configs/cmdline.conf.save)
 		echo -e "$yellow Would You Like To Use Your Last Saved Kernel Parameters Configuration? $nocolor"
 		echo -e "$yellow You Can Edit This Configuration With Nano Before Continuing $nocolor"
-		read -p "y= Use Last Saved Kernel Parameters n= Use Default Kernel Parameter List (y/n)" Savedcmds
-			if [ "$Savedcmds" = "y" ]
+		read -p "$(echo -e $green Y= Use Last Saved Kernel Parameters $nocolor $red N= Use Default Kernel Parameter List $nocolor)" Savedcmds
+			if [ "$Savedcmds" = "Y" ]
 
 		        	then
 				cp -a $basedir/configs/auto_backup_configs/cmdline.conf.save $basedir/configs/cmdline.conf
 
 				else
-				echo -e "$yellow Using Backup Config $nocolor"
+				echo -e "$yellow Using Default Config $nocolor"
 				cp -a $basedir/configs/cmdline_default.conf $basedir/configs/cmdline.conf
 				fi
 
+#If not previous config found copy defaults to the cmdline file that will be used.
 		else
 		echo -e "$yellow No Previous Configurations Found From Last Sessions Continuing With Default Config $nocolor"
 		cp -a $basedir/configs/cmdline_default.conf $basedir/configs/cmdline.conf
 		fi
 
 
+#Show kernel parameters
 		echo -e "$yellow Current Kernel Parameters Based On Your Selection $nocolor"
 		strings $basedir/configs/cmdline.conf | grep -v "#" | sort -u | column
 
-        read -p "Would You Like To Edit The Kernel Parameters Before Installation? (y/n)" Kerncmds
-        if [ "$Kerncmds" = "y" ]
+
+#Ask if user would like to edit before installing
+
+        echo -e "$yellow Would You Like To Edit The Kernel Parameters Before Installation? $nocolor " 
+        read -p "$(echo -e $green Y= YES EDIT PARAMETERS $nocolor $red N= NO DO NOT EDIT NOW $nocolor)" Kerncmds
+        if [ "$Kerncmds" = "Y" ]
                 then
 		nano  $basedir/configs/cmdline.conf
-		cp -a $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/cmdline.conf.save
-		cp -a $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
+		echo -e "$yellow Would You Like To Save These Kernel Parameters $nocolor "
+		read -p "$(echo -e $green Y= YES SAVE PARAMETERS $nocolor $red N= DO NOT SAVE $nocolor)" Kerncmdssave
+        	if [ "$Kerncmdssave" = "Y" ]
+        	then
+        		echo -e "$yellow Saving Kernel Parameters $nocolor"
+			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/cmdline.conf.save
+			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
+		else
+                	echo -e "$yellow Not Saving To Config.save $nocolor"
+                	#Create an autosave but not a user save
+                	cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
+                fi
+
+
                 else
-                echo -e "$red Contiuning Without Changing Kernel Parameters $nocolor"
+                echo -e " $red Continuing Without Changing Kernel Parameters $nocolor "
         fi
 
-#Save Last Used Configuration By Date
-	cp -a "$basedir"/configs/cmdline.conf "$basedir"/configs/auto_backup_configs/$datecmds
-
-#Applying Mandatory Kernel Parameter Config
-		sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
-		sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
-		echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
+#Apply kernel CMD line to kernel config file
+	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor"
 	echo -e  "$xandeps $zfs_debian_deps" | column
 
 #Ask User If They Wish To Continue
-	read -p " Do you want to Install The Dependencies? (y/n)  " CONT
-	if [ "$CONT" = "y" ]
+	echo -e " $yellow Do you want to Install The Dependencies? $nocolor"
+	read -p "$(echo -e $green Y= YES INSTALL DEPS $nocolor $red N= NO DO NOT INSTALL DEPS $nocolor)" CONT
+	if [ "$CONT" = "Y" ]
 		then
 		echo -e " $yellow Installing Dependencies $nocolor "
 		echo -e $xandeps $zfs_debian_deps | xargs apt-get install -y
 		else
-		echo "Contiuning Without Dependencies"
+		echo -e " $red Continuing Without Dependencies $nocolor "
 	fi
 
 #Do you want to install the latest firmware?
-	read -p "Do You Want To Install The Latest Linux Firmware From Kernel.org (y/n)" FIRM
-	if [ "$FIRM" = "y" ]
+	echo -e " $yellow Do You Want To Install The Latest Firmware From Kernel.org $nocolor "
+	read -p "$(echo -e $green Y= YES INSTALL FIRMWARE $nocolor $red N= NO NOT NOW $nocolor)" FIRM
+
+	if [ "$FIRM" = "Y" ]
 	then
 
-#See If LZ4 File Already Exsists
+#Check if firmware directory is present
 		if [ -d $basedir/linux-firmware ]
 			then
-			echo -e "$red Firmware Folder Present, We Will Update Instead! $nocolor"
+			echo -e "$green Firmware Folder Present, We Will Update Instead! $nocolor"
 			cd $basedir/linux-firmware && git fetch --prune && git pull --all
 			echo -e "$green DONE! $nocolor "
 			else
@@ -133,15 +168,13 @@
 		fi
 
 #Install The Firmware
-	echo -e "$yellow Moving To Firmware Directory $nocolor"
-	cd $basedir/linux-firmware
 	echo -e "$yellow Installing The Latest Firmware $nocolor"
-	$make install
+	cd $basedir/linux-firmware && $make install
 	echo -e "$green DONE! $nocolor"
 
 #Skip Firmware
 	else
-	echo -e "$yellow Skipping Firmware $nocolor"
+	echo -e "$red SKIPPING LATEST FIRMWARE INSTALL $nocolor"
 	fi
 
 #Install Arch Linux ZFS Grub Patch?
@@ -157,7 +190,7 @@
 #Check To See If Xanmon Source Code Is Already On This System
 	if [ -d $basedir/linux ]
 		then
-		echo -e "$red Kernel Folder Present!, We Will Update Instead! $nocolor"
+		echo -e "$green Kernel Folder Present!, We Will Update Instead! $nocolor"
 		cd $basedir/linux && git fetch --prune && git pull --all
 		echo -e " $green DONE! $nocolor "
 		else
@@ -169,7 +202,7 @@
 #Check for presence of ZFS Folder
         if [ -d $basedir/zfs ]
                 then
-                echo -e "$red ZFS Folder Present, We Will Update Instead $nocolor"
+                echo -e "$green ZFS Folder Present, We Will Update Instead $nocolor"
 		cd $basedir/zfs && git fetch --prune && git pull --all
 		echo -e "$green DONE! $nocolor"
                 else
@@ -181,21 +214,35 @@
 
 #USE LAST MADE CONFIG
 	echo -e "$yellow Using Last Modified Kernel Configuration $nocolor"
-	cp -a $basedir/configs/kernel.config $basedir/linux/.config
+	cp -a -f $basedir/configs/kernel.config $basedir/linux/.config
 	echo -e "$green DONE! $nocolor "
 
 #Run Make Config W
 	echo  -e "$yellow Running Make Clean, Menuconfig And Make Prepare $nocolor "
 	echo  -e "$yellow Please Add Any Other Items You Wish To Add To Configuration $nocolor "
-	cd $basedir/linux && $make clean $menuconfig prepare
-	echo  -e "$green DONE! $nocolor "
+	cd $basedir/linux && $make clean
+	$menuconfig
+	$make prepare
+	echo  -e "$green DONE! $nocolor"
+
+#declare updated kernel version from make prepare
+	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
+
+#Change module directory name to match kernel version set in make menuconfig
+	if [ -d $basedir/initrd/lib/modules/$kver ]
+		then
+		echo  -e "$green initrd modules folder matches kernel version, continuing $nocolor"
+		else
+		echo  -e "$green kernel name has changed, updating folder path for initrd modules $nocolor"
+		mv $basedir/initrd/lib/modules/$initmodver $basedir/initrd/lib/modules/$kver
+	fi
 
 #Backup Changes From Menuconfig
 	 echo -e "$yellow Backing Up Configuration $nocolor "
-         cp -a $basedir/linux/.config $basedir/configs/auto_backup_configs/$dateconfig
+         cp -a -f $basedir/linux/.config $basedir/configs/auto_backup_configs/$dateconfig
 	 echo -e "$green DONE! $nocolor "
 	 echo -e "$yellow Saving Kernel Configuration To Be Used During Next Makemenu Config $nocolor "
-         cp -a $basedir/linux/.config $basedir/configs/kernel.config
+         cp -a -f $basedir/linux/.config $basedir/configs/kernel.config
 	 echo -e "$green DONE! $nocolor "
 
 #Make clean for ZFS
@@ -203,79 +250,149 @@
         cd $basedir/zfs && $make clean
         echo  -e "$green DONE! $nocolor "
 
+
+#Test Deleting Old Shared Libaries To Confirm Static Libs Are Enabled
 #ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
 	echo -e " $yellow Running ZFS Configuration $nocolor "
 	 ./autogen.sh
 	 ./configure 				\
 	 --with-linux="$basedir"/linux 		\
 	 --with-linux-obj="$basedir"/linux	\
-	 --enable-linux-builtin
-	#--with-gnu-ld 			\
+	 --enable-linux-builtin			\
+	 --enable-static			\
+	 --enable-shared			\
+	 --with-gnu-ld  			\
+	 --sbindir=/sbin			\
+	 --bindir=/bin                          \
+	 --libdir=/lib				\
+	 --localstatedir=/var   		\
+	 --includedir=/usr/include		\
+	 --enable-sysvinit			\
+	 --with-dracutdir			\
+	 --with-mounthelperdir			\
+	 --with-udevdir
+	#--with-config=all 			\
+	#--with-libintl-prefix			\
+	#--with-pkgconfigdir			\
+ 	#--with-aix-soname=both			\
+	#--enable-sysvinit			\
 	#--enable-pyzfs				\
 	#--enable-systemd 			\
 	#--enable-sysvinit 			\
-	#--with-udevdir				\
+	#--enable-dependency-tracking		\
+	#--oldincludedir			\
+	#--prefix=/				\
+	#--with-python-sys-prefix		\
+	#--sysconfdir=etc  			\
+	#--enable-static			\
+	#--disable-shared			\
+	#--includedir=/usr/include		\
+	#--disable-fast-install			\
+	#--exec-prefix				\
 	#--disable-systemd 			\
 	#--disable-sysvinit			\
-	#--enable-dependency-tracking 		\
 	#--with-spec=generic 			\
 	#--with-gcov=GCOV 			\
-	#--bindir=bin			 	\
-	#--includedir= 				\
-	#--sysconfdir=DIR 			\
-	#--sbindir=sbin 			\
 	echo -e "$green DONE! $nocolor"
 
 #Make Standard ZFS Install
-       echo -e " $yellow Running Make And Make Install For ZFS $nocolor "
-       $make && $make install
-       echo -n -e "$green DONE! $nocolor"
+        echo -e " $yellow Running Make And Make Install For ZFS $nocolor "
+        $make
+	$make install; ldconfig; depmod;
+       	echo -n -e "$green DONE! $nocolor"
 
 #Running Configure
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
 	./copy-builtin "$basedir"/linux
 	echo -e "$green DONE! $nocolor"
 
+#Applying Mandatory Kernel Parameter Config
+
+	sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
+	echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
+
 #Build New Kernel
  	echo -e " $yellow Installing Kernel, Modules, Headers And Symbol Layout With ZFS Built In $nocolor "
-	cd "$basedir"/linux && $make && $make headers_install && $make modules_prepare && $make vdso_install && $make modules_install && $make bzImage
+	cd "$basedir"/linux
+	$make prepare
+	$make
+	$make modules
+	$make headers
+	$make modules_prepare
+	$make headers_install
+	$make nsdeps
+	$make scripts
+	$make nsdeps
+	$make modules_install
 	echo -e "$green DONE! $nocolor"
 
 #Install Basic Debian Based Packages
-	echo -e "$green Installing ZFS Utils, ZFS-Dracut And ZFS-Initramfs $nocolor"
-        cd "$basedir"/zfs && $make deb-utils && dpkg -i --force-all *.deb
+#	echo -e "$green Installing ZFS Utils, ZFS-Dracut And ZFS-Initramfs $nocolor"
+#        cd "$basedir"/zfs && $make deb-utils && dpkg -i --force-all *.deb
 
 #Declare Variables
-  	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
+
         declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
-#Copy Kernel To Boot Directory
-	echo -e "$yellow Moving Kernel And System.map To Boot Directory $nocolor"
-	cp -a "$basedir"/linux/System.map /boot/System.map-"$kver"
-	cp -a "$basedir"/linux/arch/x86/boot/bzImage /boot/vmlinuz-"$kver"
+
+#Copy Modules Information To Initramfs
+	echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
+	cp -a -f /lib/modules/$kver/modules.alias $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.alias.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.builtin.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.dep $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.dep.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.devname $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.order $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.softdep $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.symbols $basedir/initrd/lib/modules/$kver/
+	cp -a -f /lib/modules/$kver/modules.symbols.bin $basedir/initrd/lib/modules/$kver/
+
+
+
+#Copy Symbol files only present in src
+#	cp -a -f $basedir/linux/Modules.symvers $basedir/initrd/lib/modules/$kver/
+#	cp -a -f $basedir/linux/modules-only.symvers $basedir/initrd/lib/modules/$kver/
+#	cp -a -f $basedir/linux/modules.nsdeps $basedir/initrd/lib/modules/$kver/
+
+
+#Installing System.map to multiple locations to confirm correct Symbol lookup
+	cp -a -f $basedir/linux/System.map /lib/modules/$kver/
+	cp -a -f $basedir/linux/System.map /
+	cp -a -f $basedir/linux/System.map /boot
+
+#Add items to bootdirectory
+	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"
+	$make bzImage
+	cp -a -f $basedir/linux/arch/x86/boot/bzImage /boot/vmlinuz-$kver
 
 #Update Grub
 	echo -e "$yellow Updating Grub, Note: Grubs kernel parameters are still passed to the kernel $nocolor"
 	update-grub
 
 #Finished
-	echo -e "Kernel $kver has been installed"
-	echo -e "ZFS $zfsv developer version has been installed"
+	echo -e "$green Kernel $kver has been installed $nocolor"
+	echo -e "$green ZFS $zfsv developer version has been installed $nocolor"
 
 #Install Arch Linux ZFS Grub Patch?
-        read -p "Do you want to add a UEFI boot menu entry directly to the Kernels EFI stub?, this is the fastest possbile way to boot the kernel but is known to be buggy on many motherboards. The the grubs menu entry will still be used if the EFI stub booting does not work (y/n) " efistub
-        if [ "$efistub" = "y" ]
+        echo -e " $yellow Do you want to add a UEFI boot menu entry directly to the Kernels EFI stub?, this is the fastest possbile way to boot the kernel but is known to be buggy on many motherboards. The the grubs menu entry will still be used if the EFI stub booting does not work $nocolor " 
+        read -p " $(echo -e $green Y= YES, INSTALL EFI STUB TO BOOT $nocolor $red N= NO, DO NOT INSTALL EFI STUB ENTRY TO BOOT $nocolor) " efistub
+        if [ "$efistub" = "Y" ]
                 then
-                echo -e "$red Delete Any Previously Installed Kernels By This Script $nocolor"
-		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs efibootmgr -B -b
+                echo -e "$red Deleting Any Previously Installed Kernel Boot Entries By This Script $nocolor"
+		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs -n1 efibootmgr -B -b
               	efibootmgr --disk "$bootdrive" --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
                 else
-                echo -e " $yellow NOT adding an EFI Stub $nocolor "
+                echo -e " $red NOT adding an EFI Stub $nocolor "
         fi
 
 #Ask To Reboot
-        read -p "DO YOU WISH TO REBOOT NOW (y/n) " rebootnow
-        if [ "$rebootnow" = "y" ]
+	echo -e "$yellow DO YOU WISH TO REBOOT NOW"
+        read -p " $(echo -e $green Y= YES $nocolor $red N=NO $nocolor) " rebootnow
+        if [ "$rebootnow" = "Y" ]
                 then
                 echo -e " $red REBOOTING NOW! $nocolor "
 		reboot
