@@ -364,6 +364,23 @@
 	cp -a -f $basedir/linux/System.map /
 	cp -a -f $basedir/linux/System.map /boot
 
+#Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
+	 cp -a -r -f -v /sbin/fsck.zfs {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zdb {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zed {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zfs {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zfs_ids_to_path {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zgenhostid {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zhack {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zinject {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zpool {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zstream {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/ztest {/usr/local/sbin/,/bin}
+	 cp -a -r -f -v /sbin/zstreamdump {/usr/local/sbin/,/bin}
+
+
+
+
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"
 	$make bzImage
