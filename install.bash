@@ -21,7 +21,7 @@
 	make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
-	red='\e[1;31m'	
+	red='\e[1;31m'
 	yellow='\e[1;33m'
 	orange='\e[0;33m'
 	green='\e[1;32m'
@@ -35,26 +35,30 @@
 	bootlocation=$(df | grep -i /boot  | awk '{print $1,$6}')
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
+	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Ultimate ZFS Scripts Installed $noclor " ; fi)
 
 #=======================BEGIN SCRIPT==================
+#Silently Clean Config
+	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Confirm base directory before execution
 	echo
 	cd $basedir
 	figlet -t -c Ultimate ZFS Xanmod Kernel Builder By Fixapc.net
 	echo
-	echo
-	echo -e "$green Script Working Directory: $nocolor" $basedir
-	echo -e "$green Current Boot: $nocolor" $bootlocation
+	echo -e "$yellow Script Working Directory: $nocolor" $basedir
 	echo -e "$green Current Kernel Version: $nocolor" $runkern
+	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
+	echo -e "$chk4scripts"
+	echo -e "$green Current Boot: $nocolor" $bootlocation
 	echo -e "$green Autobackupdir: $nocolor" $autobakdir
-	echo
+	
 
 
-#Create ZFS zpool create files
+#Create ZFS create files
 	#Default Zpool
-	cp -a -r -f -v $basedir/zfs_command_scripts/* /bin
-	cp -a -r -f -v $basedir/zfs_command_scripts/* /sbin
+	#cp -a -r -f -v $basedir/zfs_command_scripts/* {/sbin/,/bin/,/usr/local/sbin/}
+
 
 
 #Check to see if hostid0 is present for hassle free mounting.
@@ -69,6 +73,8 @@
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
+                echo
+                echo
                 echo -e "$green Configuration Directory Present, Not Making $nocolor" $(readlink -e configs/auto_backup_configs)
                 echo
                 echo
@@ -79,7 +85,7 @@
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
 	 if [ -f $basedir/configs/auto_backup_configs/cmdline.conf.save ]
 		then
-		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e configs/auto_backup_configs/cmdline.conf.save)
+		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e $basedir/configs/auto_backup_configs/cmdline.conf.save)
 		echo -e "$yellow Would You Like To Use Your Last Saved Kernel Parameters Configuration? $nocolor"
 		echo -e "$yellow You Can Edit This Configuration With Nano Before Continuing $nocolor"
 		read -p "$(echo -e $green Y= Use Last Saved Kernel Parameters $nocolor $red N= Use Default Kernel Parameter List $nocolor)" Savedcmds
@@ -255,12 +261,13 @@
 #ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
 	echo -e " $yellow Running ZFS Configuration $nocolor "
 	 ./autogen.sh
-	 ./configure 				\
+	 ./configure				\
 	 --with-linux="$basedir"/linux 		\
 	 --with-linux-obj="$basedir"/linux	\
 	 --enable-linux-builtin			\
 	 --enable-static			\
 	 --enable-shared			\
+	 --enable-pyzfs				\
 	 --with-gnu-ld  			\
 	 --sbindir=/sbin			\
 	 --bindir=/bin                          \
@@ -270,6 +277,7 @@
 	 --enable-sysvinit			\
 	 --with-dracutdir			\
 	 --with-mounthelperdir			\
+	 --disable-fast-install			\
 	 --with-udevdir
 	#--with-config=all 			\
 	#--with-libintl-prefix			\
@@ -281,13 +289,11 @@
 	#--enable-sysvinit 			\
 	#--enable-dependency-tracking		\
 	#--oldincludedir			\
-	#--prefix=/				\
 	#--with-python-sys-prefix		\
 	#--sysconfdir=etc  			\
 	#--enable-static			\
 	#--disable-shared			\
 	#--includedir=/usr/include		\
-	#--disable-fast-install			\
 	#--exec-prefix				\
 	#--disable-systemd 			\
 	#--disable-sysvinit			\
@@ -299,7 +305,7 @@
         echo -e " $yellow Running Make And Make Install For ZFS $nocolor "
         $make
 	$make install; ldconfig; depmod;
-       	echo -n -e "$green DONE! $nocolor"
+       	echo -e "$green DONE! $nocolor"
 
 #Running Configure
 	echo -e " $yellow Installing ZFS Built In Module To Kernel Source Directory $nocolor "
@@ -307,9 +313,7 @@
 	echo -e "$green DONE! $nocolor"
 
 #Applying Mandatory Kernel Parameter Config
-
-	sed -i '/CONFIG_ZFS/d' $basedir/configs/kernel.config
-	echo CONFIG_ZFS=y >> $basedir/configs/kernel.config
+	sed -i 's@.*CONFIG_ZFS.*@CONFIG_ZFS=y@' linux/.config
 
 #Build New Kernel
  	echo -e " $yellow Installing Kernel, Modules, Headers And Symbol Layout With ZFS Built In $nocolor "
