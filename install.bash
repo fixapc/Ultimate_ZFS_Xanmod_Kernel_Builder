@@ -17,8 +17,8 @@
 #=======================VARIABLES=====================
 	xandeps="\ngrub-efi-amd64 \nlz4 \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
-	#make="make LLVM=1 -j$(nproc)"
-	make="make -j$(nproc)"
+	make="make LLVM=1 -j$(nproc)"
+	#make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
@@ -35,6 +35,7 @@
 	bootlocation=$(df | grep -i /boot  | awk '{print $1,$6}')
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
+	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Ultimate ZFS Scripts Installed $noclor " ; fi)
 
 #=======================BEGIN SCRIPT==================
@@ -42,17 +43,15 @@
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Confirm base directory before execution
-	echo
 	cd $basedir
 	figlet -t -c Ultimate ZFS Xanmod Kernel Builder By Fixapc.net
-	echo
 	echo -e "$yellow Script Working Directory: $nocolor" $basedir
 	echo -e "$green Current Kernel Version: $nocolor" $runkern
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
 	echo -e "$chk4scripts"
 	echo -e "$green Current Boot: $nocolor" $bootlocation
 	echo -e "$green Autobackupdir: $nocolor" $autobakdir
-	
+	#echo -e "$green Recommended Performance Settings: $nocolor" Arcblk: 16K  Ashift: 8K/16K  Recsize: 16K  Avgblk: 16K
 
 
 #Create ZFS create files
@@ -73,11 +72,7 @@
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
                 then
-                echo
-                echo
                 echo -e "$green Configuration Directory Present, Not Making $nocolor" $(readlink -e configs/auto_backup_configs)
-                echo
-                echo
                 else
                 mkdir $basedir/configs/auto_backup_configs
         fi
