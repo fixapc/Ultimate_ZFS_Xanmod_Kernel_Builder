@@ -17,8 +17,9 @@
 #=======================VARIABLES=====================
 	xandeps="\ngrub-efi-amd64 \nlz4 \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
-	make="make LLVM=1 -j$(nproc)"
-	#make="make -j$(nproc)"
+	#make="make "CC=clang" "LD=ld.lld" "KERNEL_LLVM=1" "LLVM_IAS=1" "LLVM=1" "-j$(nproc)""
+	#make="make LLVM=1 -j$(nproc)"
+	make="make -j$(nproc)"
 	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
 	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
@@ -78,16 +79,16 @@
         fi
 
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
-	 if [ -f $basedir/configs/auto_backup_configs/cmdline.conf.save ]
+	 if [ -f $basedir/configs/cmdline.conf.save ]
 		then
-		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e $basedir/configs/auto_backup_configs/cmdline.conf.save)
+		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e $basedir/configs/cmdline.conf.save)
 		echo -e "$yellow Would You Like To Use Your Last Saved Kernel Parameters Configuration? $nocolor"
 		echo -e "$yellow You Can Edit This Configuration With Nano Before Continuing $nocolor"
 		read -p "$(echo -e $green Y= Use Last Saved Kernel Parameters $nocolor $red N= Use Default Kernel Parameter List $nocolor)" Savedcmds
 			if [ "$Savedcmds" = "Y" ]
 
 		        	then
-				cp -a $basedir/configs/auto_backup_configs/cmdline.conf.save $basedir/configs/cmdline.conf
+				cp -a $basedir/configs/cmdline.conf.save $basedir/configs/cmdline.conf
 
 				else
 				echo -e "$yellow Using Default Config $nocolor"
@@ -118,7 +119,7 @@
         	if [ "$Kerncmdssave" = "Y" ]
         	then
         		echo -e "$yellow Saving Kernel Parameters $nocolor"
-			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/cmdline.conf.save
+			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/cmdline.conf.save
 			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
 		else
                 	echo -e "$yellow Not Saving To Config.save $nocolor"
@@ -261,19 +262,19 @@
 	 --with-linux-obj="$basedir"/linux	\
 	 --enable-linux-builtin			\
 	 --enable-static			\
-	 --enable-shared			\
-	 --enable-pyzfs				\
-	 --with-gnu-ld  			\
+	 #--enable-shared			\
+	 #--enable-pyzfs			\
+	 #--with-gnu-ld  			\
 	 --sbindir=/sbin			\
 	 --bindir=/bin                          \
 	 --libdir=/lib				\
 	 --localstatedir=/var   		\
-	 --includedir=/usr/include		\
-	 --enable-sysvinit			\
-	 --with-dracutdir			\
-	 --with-mounthelperdir			\
-	 --disable-fast-install			\
-	 --with-udevdir
+	 --includedir=/usr/include
+	#--enable-sysvinit			\
+	#--with-dracutdir			\
+	#--with-mounthelperdir			\
+	#--disable-fast-install			\
+	#--with-udevdir				\
 	#--with-config=all 			\
 	#--with-libintl-prefix			\
 	#--with-pkgconfigdir			\
@@ -308,7 +309,7 @@
 	echo -e "$green DONE! $nocolor"
 
 #Applying Mandatory Kernel Parameter Config
-	sed -i 's@.*CONFIG_ZFS.*@CONFIG_ZFS=y@' linux/.config
+	sed -i 's@.*CONFIG_ZFS.*@CONFIG_ZFS=y@' $basedir/linux/.config
 
 #Build New Kernel
  	echo -e " $yellow Installing Kernel, Modules, Headers And Symbol Layout With ZFS Built In $nocolor "
@@ -364,19 +365,10 @@
 	cp -a -f $basedir/linux/System.map /boot
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
-	 cp -a -r -f -v /sbin/fsck.zfs {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zdb {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zed {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zfs {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zfs_ids_to_path {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zgenhostid {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zhack {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zinject {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zpool {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zstream {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/ztest {/usr/local/sbin/,/bin}
-	 cp -a -r -f -v /sbin/zstreamdump {/usr/local/sbin/,/bin}
 
+
+	echo -e "$yellow Copying Compiled ZFS Binaries To Multiple Distro Based Exported Paths $nocolor"
+	echo /bin/ /usr/local/bin /usr/local/sbin/ /sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 
 
