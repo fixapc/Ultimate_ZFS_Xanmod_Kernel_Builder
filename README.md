@@ -1,6 +1,6 @@
 # Ultimate ZFS Xanmod Kernel Builder README.MD - PRE-RELEASE DRAFT
 
-![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
+![image](https://user-images.githubusercontent.com/34402379/178106762-8ca16d23-5ac1-46a6-9fae-63cbe7a63823.png)
 
 - This script is for those of you who love ZFS and the Xanmod kernel
         and want to squeeze every drop of peformance out of your 
@@ -154,6 +154,8 @@ Install
  
  
 ## Screenies
+Custom HTOP Layout, Optional Configuration That Can Be Applied Upton Installation
+![image](https://user-images.githubusercontent.com/34402379/178106736-10a382e9-7c17-438a-bd2d-b7c2c1944f1a.png)
 ![image](https://user-images.githubusercontent.com/34402379/173275413-214a57b5-303f-40ca-b2a3-9cb6a1d650e5.png)
 ![image](https://user-images.githubusercontent.com/34402379/173275517-8df3038e-0d55-493f-ab13-18bbce0b5b8f.png)
 ![image](https://user-images.githubusercontent.com/34402379/173275562-63c79737-0e0e-4373-b2df-e65deb171d5b.png)
