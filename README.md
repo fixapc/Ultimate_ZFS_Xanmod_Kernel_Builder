@@ -2,17 +2,15 @@
 
 ![image](https://user-images.githubusercontent.com/34402379/178125916-b1fcd64a-2084-4410-b767-10c0c3792611.png)
 
-- This script is for those of you who love ZFS and the Xanmod kernel
-        and want to squeeze every drop of peformance out of your 
-        system you can with the perfectly thoughout performanced based configuration
-        NOTE: I spent 6 months on that blue kernel screen while you where sleeping 
-        with your girlfriend so trust me this is a really good kernel configuration 
-        from a script kiddy and can be easily proven by benchmarks
-- Help Teach Linux Enthusiast The Benefits Of A Highly Customized Kernel
-- Specifically Tuned For ZFS And Low Latency Based KVM Computing
-- Keeping The RIGHT Modules Out Of User Space Interferance And Away From Page Faults By Building The Most Important Ones Into Kernel
-- Automatically Downloads The Latest Developer Release Of Xanmod And ZFS, Than Configures It With A Tuned Configuration.
-- The idea is to keep the kernel from interfering with any resouces by workings of its resource management.
+
+This script is for those of you who love ZFS and the Xanmod kernel and want to squeeze every drop of peformance out of your system you can with a low latency based tuned kernel. This Kernel is specifical tuned for ZFS with all common hardware modules built in. It is recommend to NOT use module loading to prevent page faults and user space to kernel space access. This kernel and its child properties are all full compiled and turned to be built in. ZFS tuning for 4K blocks to patch the kernel block size and many internal settings have been modified to ensure the best performance for hi I/O. If you like a really snappy computer and like to execute command lines across many files using grep and sed this will give you a very nice processing kic with processing small files in bulk or running command lines  
+
+
+
+## Keypointers
+- Tuned for 4K blocks
+- During Install you will be asked some basic memory questions to help you use the ARC from ZFS.
+- 
 
 
 
