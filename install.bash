@@ -15,7 +15,7 @@
 	#set -x
 
 #=======================VARIABLES=====================
-	xandeps="\ngrub-efi-amd64 \nlz4 \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
+	xandeps="\ngrub-efi-amd64 \nlz4 \n libtool-bin \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make "CC=clang" "LD=ld.lld" "KERNEL_LLVM=1" "LLVM_IAS=1" "LLVM=1" "-j$(nproc)""
 	#make="make LLVM=1 -j$(nproc)"
@@ -37,7 +37,9 @@
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
-	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Ultimate ZFS Scripts Installed $noclor " ; fi)
+	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
+	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "$green UEFI 2.0 nsh helper script Located: $nocolor /boot/startup.nsh" ; else echo "$red startup.nsh EFI Startup File Installed $noclor" ; fi)
+	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's*root=**')
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
@@ -49,7 +51,9 @@
 	echo -e "$yellow Script Working Directory: $nocolor" $basedir
 	echo -e "$green Current Kernel Version: $nocolor" $runkern
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
+	echo -e "$red root=$nocolor"$root""
 	echo -e "$chk4scripts"
+	echo -e "$chk4nsh"
 	echo -e "$green Current Boot: $nocolor" $bootlocation
 	echo -e "$green Autobackupdir: $nocolor" $autobakdir
 	#echo -e "$green Recommended Performance Settings: $nocolor" Arcblk: 16K  Ashift: 8K/16K  Recsize: 16K  Avgblk: 16K
@@ -257,19 +261,21 @@
 #ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
 	echo -e " $yellow Running ZFS Configuration $nocolor "
 	 ./autogen.sh
-	 ./configure				\
+	 ./configure CFLAGS="-O3 -Wall --static" \
 	 --with-linux="$basedir"/linux 		\
 	 --with-linux-obj="$basedir"/linux	\
 	 --enable-linux-builtin			\
-	 --enable-static			\
-	 #--enable-shared			\
-	 #--enable-pyzfs			\
-	 #--with-gnu-ld  			\
 	 --sbindir=/sbin			\
 	 --bindir=/bin                          \
 	 --libdir=/lib				\
 	 --localstatedir=/var   		\
-	 --includedir=/usr/include
+	 --enable-maintainer-mode		\
+	 --includedir=/usr/include		\
+	 --enable-static
+	 #--disable-shared
+	 #--enable-shared			\
+	 #--enable-pyzfs			\
+	 #--with-gnu-ld  			\
 	#--enable-sysvinit			\
 	#--with-dracutdir			\
 	#--with-mounthelperdir			\
@@ -370,12 +376,21 @@
 	echo -e "$yellow Copying Compiled ZFS Binaries To Multiple Distro Based Exported Paths $nocolor"
 	echo /bin/ /usr/local/bin /usr/local/sbin/ /sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
+#Copying Updated ZFS Binarys To Initrd sbin folder
+	echo -e "$yellow Copying Updated ZFS Binarys To Initrd sbin folder $nocolor"
+	echo $basedir/initrd/sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
+#Copying Zpool Cache File To Initrd
+	cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
 
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"
 	$make bzImage
-	cp -a -f $basedir/linux/arch/x86/boot/bzImage /boot/vmlinuz-$kver
+	cp -a -r -f -v $basedir/linux/arch/x86/boot/bzImage /boot/vmlinuz-$kver
+
+#Update NSH EFI helper script
+	echo -e "$yellow Installing NSH helper script $nocolor"
+	echo "vmlinuz-"$kver" rw root=rpool"
 
 #Update Grub
 	echo -e "$yellow Updating Grub, Note: Grubs kernel parameters are still passed to the kernel $nocolor"
