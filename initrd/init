@@ -1,23 +1,61 @@
 #!/bin/busybox sh
 # Basic Mounting
-	/bin/busybox --install
-	LD_TRACE_LOADED_OBJECTS=1
-	LD_LIBRARY_PATH=/lib64
-	export LD_LIBRARY_PATH=/lib64
-	mount -t devtmpfs none  /dev
-	mount -t proc none /proc
-	mount -t sysfs none /sys
-	mount -t tmpfs none /tmp
-	umount /dev
-	LD_TRACE_LOADED_OBJECTS=1
-        LD_LIBRARY_PATH=/lib64
-        export LD_LIBRARY_PATH=/lib64
-	PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-	TERM=linux
-	echo /sbin/mdev > /proc/sys/kernel/hotplug
-	mdev -s
-#Declare ZFS root dataset
- 	root=$(grep -o -P '(?<=root=)[^ ]+' /proc/cmdline)
+#!/bin/sh
+
+# shellcheck source=initrd.defaults
+. /etc/initrd.defaults
+# shellcheck source=initrd.scripts
+. /etc/initrd.scripts
+
+# shellcheck source=/dev/null
+[ -e /etc/initrd.splash ] && . /etc/initrd.splash
+
+# Basic /dev content, we need it as fast as possible.
+[ ! -e /dev/console ]  && mknod /dev/console c 5 1
+[ ! -e /dev/null ]     && mknod /dev/null c 1 3
+[ ! -e /dev/random ]   && mknod /dev/random c 1 8
+[ ! -e /dev/tty ]      && mknod /dev/tty c 5 0
+[ ! -e /dev/tty0 ]     && mknod /dev/tty0 c 4 0
+[ ! -e /dev/tty1 ]     && mknod /dev/tty1 c 4 1
+[ ! -e /dev/ttyS0 ]    && mknod /dev/ttyS0 c 4 64
+[ ! -e /dev/ttyS1 ]    && mknod /dev/ttyS1 c 4 65
+[ ! -e /dev/urandom ]  && mknod /dev/urandom c 1 9
+[ ! -e /dev/zero ]     && mknod /dev/zero c 1 5
+
+# Take control
+CONSOLE="/dev/$(get_active_console)"
+exec 0<>${CONSOLE} 1<>${CONSOLE} 2<>${CONSOLE}
+
+if [ "$$" != '1' ]
+then
+	echo '/linuxrc has to be run as the init process as the one'
+	echo 'with a PID of 1. Try adding init="/linuxrc" to the'
+	echo 'kernel command line or running "exec /linuxrc".'
+	exit 1
+fi
+
+mount -t proc -o noexec,nosuid,nodev proc /proc >/dev/null 2>&1
+mount -o remount,rw / >/dev/null 2>&1
+mount -t tmpfs -o rw,nosuid,nodev,relatime,mode=755 none /run 2>&1
+
+if [ ! -d /run/initramfs ]
+then
+	mkdir  /run/initramfs
+	chmod 0750 /run/initramfs
+fi
+
+if [ ! -s /etc/ld.so.cache ]
+then
+	# Looks like we were unable to run ldconfig during initramfs generation
+	hash ldconfig >/dev/null 2>&1 && run ldconfig
+fi
+
+# Set up symlinks
+run busybox --install -s
+
+# Handle ZFS MOUNT command-line parameters
+ 	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's/root=//')
+
 	echo $root
 # Do your stuff here.
 	echo "Micro Initrd ZFS Script By Fixapc.net For Quick Booting And Easy Trouble Shooting"

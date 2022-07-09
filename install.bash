@@ -8,7 +8,7 @@
 #5. Debugging has been disabled
 #6. Cgroups and other resource managment has been Axed.
 #7. Built in sleep and power management functions have been disabled.
-#8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
+#8. This is script is currently is testing and balancing, currently working on static linking. 
 #9. USE AT YOUR OWM RISK UNTIL OFFICAL RELEASE
 
 #Enable Logging
@@ -271,9 +271,8 @@
 	 --localstatedir=/var   		\
 	 --enable-maintainer-mode		\
 	 --includedir=/usr/include		\
-	 --enable-static
-	 #--disable-shared
-	 #--enable-shared			\
+	 --enable-static			\
+	 --enable-shared
 	 #--enable-pyzfs			\
 	 #--with-gnu-ld  			\
 	#--enable-sysvinit			\
@@ -356,6 +355,34 @@
 	cp -a -f /lib/modules/$kver/modules.softdep $basedir/initrd/lib/modules/$kver/
 	cp -a -f /lib/modules/$kver/modules.symbols $basedir/initrd/lib/modules/$kver/
 	cp -a -f /lib/modules/$kver/modules.symbols.bin $basedir/initrd/lib/modules/$kver/
+
+	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
+	echo -e "$green Once libraries are built statically this will be removed $nocolor"
+	cp -a -f -r -v  /lib/libc.so.6 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libblkid.so.1 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libz.so.1 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libzfs.so.4 $basedir/initrd/lib/
+	cp -a -f -r -v	/lib/libzfs.so.4.1.0 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libnvpair.so.3 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libzfs_core.so.3 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libuutil.so.3 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/librt-2.33.so $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libuuid.so.1 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libudev.so.1 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libzpool.so.5.0.0 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libzpool.so.5 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libtirpc.so.3 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libpthread.so.0 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/librt.so.1 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/libm.so.6 $basedir/initrd/lib/
+	cp -a -f -r -v  /lib/ld-linux-x86-64.so.2 $basedir/initrd/lib/
+        cp -a -f -r -v  /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 $basedir/initrd/usr/lib/
+        cp -a -f -r -v  /usr/lib32/libgcc_s.so.1  $basedir/initrdzpooasdausr/lib/gcc/x86_64-pc-linux-gnu/11.3.0/
+	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so $basedir/initrd/usr/lib/
+	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 $basedir/initrd/usr/lib/
+	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so.3 $basedir/initrd/usr/lib/
+	cp -a -f -r -v  /lib/x86_64-linux-gnu/libdl-2.33.so $basedir/initrd/usr/lib/
+	cp -a -f -r -v  /lib/x86_64-linux-gnu/libdl.so.2 $basedir/initrd/usr/lib/
 
 
 

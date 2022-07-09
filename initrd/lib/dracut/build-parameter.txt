@@ -1,1 +1,1 @@
-
+--boot-font=none --keymap --compress-initramfs --no-microcode-initramfs --ramdisk-modules --busybox --no-bcache --no-b2sum --no-btrfs --no-iscsi --no-multipath --no-dmraid --no-mdadm --no-lvm --no-unionfs --zfs --no-splash --no-strace --no-gpg --no-luks --no-firmware --firmware-dir=/lib/firmware --no-ssh --no-e2fsprogs --no-xfsprogs

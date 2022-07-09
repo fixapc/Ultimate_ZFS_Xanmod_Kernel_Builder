@@ -1,0 +1,9 @@
+hv_sock
+hv_utils
+hv_vmbus
+hv_balloon
+hyperv-keyboard
+hid_hyperv
+hv_utils
+hyperv_fb
+hv_storvsc
