@@ -1,6 +1,6 @@
 # Ultimate ZFS Xanmod Kernel Builder README.MD - PRE-RELEASE DRAFT
 
-![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
+![image](https://user-images.githubusercontent.com/34402379/178125916-b1fcd64a-2084-4410-b767-10c0c3792611.png)
 
 - This script is for those of you who love ZFS and the Xanmod kernel
         and want to squeeze every drop of peformance out of your 
