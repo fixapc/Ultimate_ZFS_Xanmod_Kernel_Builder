@@ -13,6 +13,7 @@
 - Removal of most bugging features to prevent unneeded I/O access.
 
 ## Keypointers
+- Stripped symbols and CLANG LTO support for improving I/O performance further.  
 - Built in only kernel unless more options are added.
 - Tuned for 4K blocks
 - During Install you will be asked some basic memory questions to help you use the ARC from ZFS the correct way.
@@ -53,6 +54,7 @@ This kernel is used by some of my friends, family and clients on their servers a
 
 
 ## Roadmap
+- Use gentoo to build static libs and deploy compiler optimizations
 
 - Assisted Zpool Creation
 
