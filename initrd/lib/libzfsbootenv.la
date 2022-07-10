@@ -17,7 +17,7 @@ old_library='libzfsbootenv.a'
 inherited_linker_flags=' -pthread'
 
 # Libraries that this one depends upon.
-dependency_libs=' /lib/libzfs.la /lib/libzfs_core.la -luuid -lrt -lblkid -ludev /lib/libuutil.la -lm -lcrypto -lz -ldl /lib/libnvpair.la -ltirpc'
+dependency_libs=' /zfstempfrominstall/lib/libzfs.la /zfstempfrominstall/lib/libzfs_core.la -luuid -lrt -lblkid -ludev /zfstempfrominstall/lib/libuutil.la -lm -lcrypto -lz -ldl /zfstempfrominstall/lib/libnvpair.la -ltirpc'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/lib'
+libdir='/zfstempfrominstall/lib'

@@ -8,7 +8,7 @@
 #5. Debugging has been disabled
 #6. Cgroups and other resource managment has been Axed.
 #7. Built in sleep and power management functions have been disabled.
-#8. This is script is currently is testing and balancing, currently working on static linking. 
+#8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
 #9. USE AT YOUR OWM RISK UNTIL OFFICAL RELEASE
 
 #Enable Logging
@@ -259,22 +259,23 @@
 
 #Test Deleting Old Shared Libaries To Confirm Static Libs Are Enabled
 #ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
+# CFLAGS="-O3 -Wall --static"   
 	echo -e " $yellow Running ZFS Configuration $nocolor "
 	 ./autogen.sh
-	 ./configure CFLAGS="-O3 -Wall --static" \
+	 ./configure 				\
 	 --with-linux="$basedir"/linux 		\
 	 --with-linux-obj="$basedir"/linux	\
 	 --enable-linux-builtin			\
 	 --sbindir=/sbin			\
-	 --bindir=/bin                          \
-	 --libdir=/lib				\
+	 --bindir=/bin                     \
+	 --libdir=/lib			\
 	 --localstatedir=/var   		\
-	 --enable-maintainer-mode		\
-	 --includedir=/usr/include		\
-	 --enable-static			\
-	 --enable-shared
-	 #--enable-pyzfs			\
-	 #--with-gnu-ld  			\
+	 --includedir=/usr/include			\
+	 --sysconfdir=/etc       \
+	 --enable-static
+	#--enable-maintainer-mode		\
+	#--enable-pyzfs				\
+	#--with-gnu-ld  			\
 	#--enable-sysvinit			\
 	#--with-dracutdir			\
 	#--with-mounthelperdir			\
@@ -358,31 +359,8 @@
 
 	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
 	echo -e "$green Once libraries are built statically this will be removed $nocolor"
-	cp -a -f -r -v  /lib/libc.so.6 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libblkid.so.1 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libz.so.1 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libzfs.so.4 $basedir/initrd/lib/
-	cp -a -f -r -v	/lib/libzfs.so.4.1.0 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libnvpair.so.3 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libzfs_core.so.3 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libuutil.so.3 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/librt-2.33.so $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libuuid.so.1 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libudev.so.1 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libzpool.so.5.0.0 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libzpool.so.5 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libtirpc.so.3 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libpthread.so.0 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/librt.so.1 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/libm.so.6 $basedir/initrd/lib/
-	cp -a -f -r -v  /lib/ld-linux-x86-64.so.2 $basedir/initrd/lib/
-        cp -a -f -r -v  /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 $basedir/initrd/usr/lib/
-        cp -a -f -r -v  /usr/lib32/libgcc_s.so.1  $basedir/initrdzpooasdausr/lib/gcc/x86_64-pc-linux-gnu/11.3.0/
-	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so $basedir/initrd/usr/lib/
-	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 $basedir/initrd/usr/lib/
-	cp -a -f -r -v	/usr/lib/x86_64-linux-gnu/libcrypto.so.3 $basedir/initrd/usr/lib/
-	cp -a -f -r -v  /lib/x86_64-linux-gnu/libdl-2.33.so $basedir/initrd/usr/lib/
-	cp -a -f -r -v  /lib/x86_64-linux-gnu/libdl.so.2 $basedir/initrd/usr/lib/
+	ls /usr/lib | grep -o -E "libnvpair.la|libnvpair.so|libnvpair.so.3|libnvpair.so.3.0.0|libuutil.la|libuutil.so|libuutil.so.3|libuutil.so.3.0.0|libzfs.la|libzfs.so|libzfs.so.4|libzfs.so.4.1.0|libzfs_core.la|libzfs_core.so|libzfs_core.so.3|libzfs_core.so.3.0.0|libzfsbootenv.la|libzfsbootenv.so|libzfsbootenv.so.1|libzfsbootenv.so.1.0.0|libzpool.la|libzpool.so|libzpool.so.5|libzpool.so.5.0.0" | xargs cp -a -t $basedir/initrd/lib
+
 
 
 

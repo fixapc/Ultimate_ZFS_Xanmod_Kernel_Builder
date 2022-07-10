@@ -40,7 +40,7 @@ mount -t tmpfs -o rw,nosuid,nodev,relatime,mode=755 none /run 2>&1
 
 if [ ! -d /run/initramfs ]
 then
-	mkdir  /run/initramfs
+	mkdir -p  /run/initramfs
 	chmod 0750 /run/initramfs
 fi
 
@@ -51,7 +51,7 @@ then
 fi
 
 # Set up symlinks
-run busybox --install -s
+	run busybox --install -s
 
 # Handle ZFS MOUNT command-line parameters
  	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's/root=//')
