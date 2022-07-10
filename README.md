@@ -169,6 +169,13 @@ Install
  
  
 ## Screenies
+2 older gen nvme drives benchmarking while compiling and dedup on.
+![image](https://user-images.githubusercontent.com/34402379/178126455-36303c06-51d6-45b5-bc54-1b9d944e0914.png)
+
+Guest KVM latency while compiling, benchmarking NVME and running latency top.
+![image](https://user-images.githubusercontent.com/34402379/178126466-4af50d44-7874-47b2-bb6a-982940a90560.png)
+
+
 ![image](https://user-images.githubusercontent.com/34402379/173275413-214a57b5-303f-40ca-b2a3-9cb6a1d650e5.png)
 ![image](https://user-images.githubusercontent.com/34402379/173275517-8df3038e-0d55-493f-ab13-18bbce0b5b8f.png)
 ![image](https://user-images.githubusercontent.com/34402379/173275562-63c79737-0e0e-4373-b2df-e65deb171d5b.png)
