@@ -11,6 +11,9 @@
 #Default Kernel Tune For 4k, Very Good Dedup Benefits, helps to keep ddt tables in memory if you can spare it. Read workloads will be impressive
 #zfsforce=1
 #zfs.spa_config_path=/etc/zfs/zpool.cache
+idle=poll
+skew_tick=1
+rcu_nocb_poll
 zfs.zfs_vdev_max_auto_ashift=12
 zfs.zfs_vdev_min_auto_ashift=12
 zfs.zfs_deadman_failmode=continue
@@ -178,17 +181,17 @@ skew_tick=1
 #Helps keep rcu / kernel threads in an awakened state for latency improvements. 
 rcu_nocb_poll
 #Forwards softirqs to RCU / Kthreads instead, This is the default setting for realtime kernels.
-rcutree.use_softirq=0
+#rcutree.use_softirq=0
 #PREVENTS RCU callbacks and kernel threads from running on specificed cores.
-rcu_nocbs=0,4,6,8,10,12,14,16,5,7,9,11,13,15,17,18,22,24,26,28,30,32,34,23,25,27,29,31,33,35,20,3
+#rcu_nocbs=0,4,6,8,10,12,14,16,5,7,9,11,13,15,17,18,22,24,26,28,30,32,34,23,25,27,29,31,33,35,20,3
 #Disable Scheduler tick whenever possible on threads that only have 1 task running and that dont need task priority and balancing. This improves performance on cores with only 1 tasks and helps keep the kernels kthreads away from these cores as well. 
-nohz_full=4,6,8,10,12,14,5,7,9,11,13,15,22,24,26,28,30,32,23,25,27,29,31,33,20,3
+#nohz_full=4,6,8,10,12,14,5,7,9,11,13,15,22,24,26,28,30,32,23,25,27,29,31,33,20,3
 #CORES WHERE INTERRUPTS GO. HINT: CORE 0 IS A FALL BACK CORE, ALSO KEEP INTERRUPTS AWAY FROM HIGH PRIORITY RCU THREAD SPAWNS TO PREVENT LOCK UPS UNDER HIGH LOAD. 
-irqaffinity=0,18
+#irqaffinity=0,18
 #WHEN USING A HIGH RCU BOOST PRIORITY IT IS IMPORTANT TO KEEP RCU THREADS AWAWY FROM OTHER REALTIME TASKS TO PREVENT STALLS OF OTHER TASKS.
-rcutree.kthread_prio=99
+#rcutree.kthread_prio=99
 #Expedite RCU Updates
-rcupdate.rcu_expedited=1
+#rcupdate.rcu_expedited=1
 
 #================NETWORK TUNING===========================
 #Allows for NFS offloading via hardware to increase NFS network performance.
