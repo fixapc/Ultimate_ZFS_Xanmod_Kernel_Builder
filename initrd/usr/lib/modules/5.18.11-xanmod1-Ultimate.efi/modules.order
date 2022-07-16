@@ -1,0 +1,3 @@
+kernel/drivers/nvdimm/../../tools/testing/nvdimm/test/iomap.ko
+kernel/drivers/scsi/mpi3mr/mpi3mr.ko
+kernel/drivers/perf/thunderx2_pmu.ko

@@ -1,0 +1,20 @@
+#!/bin/bash
+#This is the choosen default for the ultimate kernel builder
+	zpool create $@ \
+	-O compression=lz4 \
+	-O dedup=edonr,verify \
+	-O checksum=edonr \
+	-O recordsize=4k \
+	-O dnodesize=4k \
+	-O canmount=on \
+	-O logbias=latency \
+	-O vscan=off \
+	-O volmode=full \
+	-O xattr=sa \
+	-O acltype=nfsv4 \
+	-O aclinherit=passthrough \
+	-O aclmode=passthrough \
+	-o ashift=12 \
+	-o autoexpand=on \
+	-o cachefile=/etc/zfs/zpool.cache \
+	-o listsnaps=on
