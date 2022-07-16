@@ -16,5 +16,4 @@
 	-o ashift=12 \
 	-o autoexpand=on \
 	-o cachefile=/etc/zfs/zpool.cache \
-	-O snapshot_limit=1950 \
 	-o listsnaps=off

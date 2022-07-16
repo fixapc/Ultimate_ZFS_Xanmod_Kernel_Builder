@@ -15,7 +15,7 @@
 	#set -x
 
 #=======================VARIABLES=====================
-	xandeps="\ngrub-efi-amd64 \nlz4 \n libtool-bin \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
+	xandeps="\nlz4 \n libtool-bin \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make "CC=clang" "LD=ld.lld" "KERNEL_LLVM=1" "LLVM_IAS=1" "LLVM=1" "-j$(nproc)""
 	#make="make LLVM=1 -j$(nproc)"
@@ -56,23 +56,8 @@
 	echo -e "$chk4nsh"
 	echo -e "$green Current Boot: $nocolor" $bootlocation
 	echo -e "$green Autobackupdir: $nocolor" $autobakdir
-	#echo -e "$green Recommended Performance Settings: $nocolor" Arcblk: 16K  Ashift: 8K/16K  Recsize: 16K  Avgblk: 16K
 
 
-#Create ZFS create files
-	#Default Zpool
-	#cp -a -r -f -v $basedir/zfs_command_scripts/* {/sbin/,/bin/,/usr/local/sbin/}
-
-
-
-#Check to see if hostid0 is present for hassle free mounting.
-#         if [ -f /etc/zfs/hostid0 ]
-#                 then
-#                 echo -e "$yellow hostid0 already present not making $nocolor"
-#                 else
-#                 touch /etc/zfs/hostid0
-#                 echo 0 > /etc/zfs/hostid0
-#         fi
 
 #Check to see if directory is present, if so do not make
         if [ -d $basedir/configs/auto_backup_configs ]
@@ -228,6 +213,8 @@
 	echo  -e "$yellow Please Add Any Other Items You Wish To Add To Configuration $nocolor "
 	cd $basedir/linux && $make clean
 	$menuconfig
+	#testing
+	#sed -i 's@CONFIG_MODULES=y@CONFIG_MODULES=n@' $basedir/linux/.config
 	$make prepare
 	echo  -e "$green DONE! $nocolor"
 
@@ -235,12 +222,14 @@
 	declare kver=$(cat "$basedir"/linux/include/config/kernel.release)
 
 #Change module directory name to match kernel version set in make menuconfig
+#USE SYMLINKS INSTEAD
 	if [ -d $basedir/initrd/lib/modules/$kver ]
 		then
 		echo  -e "$green initrd modules folder matches kernel version, continuing $nocolor"
 		else
 		echo  -e "$green kernel name has changed, updating folder path for initrd modules $nocolor"
-		mv $basedir/initrd/lib/modules/$initmodver $basedir/initrd/lib/modules/$kver
+		mkdir $basedir/initrd/lib/modules/$kver
+		rm -r $basedir/initrd/lib/modules/$initmodver
 	fi
 
 #Backup Changes From Menuconfig
@@ -259,7 +248,7 @@
 
 #Test Deleting Old Shared Libaries To Confirm Static Libs Are Enabled
 #ZFS Start 2nd Configuration Again For ZFS Builit In Configuration
-# CFLAGS="-O3 -Wall --static"   
+# CFLAGS="-O3 -Wall --static"
 	echo -e " $yellow Running ZFS Configuration $nocolor "
 	 ./autogen.sh
 	 ./configure 				\
@@ -267,20 +256,19 @@
 	 --with-linux-obj="$basedir"/linux	\
 	 --enable-linux-builtin			\
 	 --sbindir=/sbin			\
-	 --bindir=/bin                     \
-	 --libdir=/lib			\
+	 --bindir=/bin                          \
+	 --libdir=/lib/x86_64-linux-gnu		\
 	 --localstatedir=/var   		\
-	 --includedir=/usr/include			\
-	 --sysconfdir=/etc       \
-	 --enable-static
-	#--enable-maintainer-mode		\
-	#--enable-pyzfs				\
-	#--with-gnu-ld  			\
-	#--enable-sysvinit			\
-	#--with-dracutdir			\
-	#--with-mounthelperdir			\
-	#--disable-fast-install			\
-	#--with-udevdir				\
+	 --includedir=/usr/include		\
+	 --sysconfdir=/etc      	        \
+	 --enable-static			\
+	 --enable-shared			\
+	 --enable-pyzfs				\
+	 --with-gnu-ld				\
+	 --enable-sysvinit			\
+	 --with-dracutdir			\
+	 --with-mounthelperdir			\
+	 --with-udevdir
 	#--with-config=all 			\
 	#--with-libintl-prefix			\
 	#--with-pkgconfigdir			\
@@ -288,7 +276,6 @@
 	#--enable-sysvinit			\
 	#--enable-pyzfs				\
 	#--enable-systemd 			\
-	#--enable-sysvinit 			\
 	#--enable-dependency-tracking		\
 	#--oldincludedir			\
 	#--with-python-sys-prefix		\
@@ -337,37 +324,41 @@
 #        cd "$basedir"/zfs && $make deb-utils && dpkg -i --force-all *.deb
 
 #Declare Variables
-
         declare zfsv=$(cat "$basedir"/zfs/zfs_config.h | grep  ZFS_META_VERSION | awk '{print $3}' | grep -v ZFS_META_VERSION | tr -d ['"'])
 
 
-#Copy Modules Information To Initramfs
-	echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
-	cp -a -f /lib/modules/$kver/modules.alias $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.alias.bin $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.builtin.bin $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.dep $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.dep.bin $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.devname $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.order $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.softdep $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.symbols $basedir/initrd/lib/modules/$kver/
-	cp -a -f /lib/modules/$kver/modules.symbols.bin $basedir/initrd/lib/modules/$kver/
+#Copy Modules Information To Initramfs, DEFAULT Symbol Linking
+	#echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
+	cp -a -f -v /lib/modules/$kver/modules.alias $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.alias.bin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v/lib/modules/$kver/modules.builtin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.bin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.dep $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.dep.bin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.devname $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.order $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.softdep $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.symbols $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.symbols.bin $basedir/initrd_micro/lib/modules/$kver/
 
-	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
-	echo -e "$green Once libraries are built statically this will be removed $nocolor"
-	ls /usr/lib | grep -o -E "libnvpair.la|libnvpair.so|libnvpair.so.3|libnvpair.so.3.0.0|libuutil.la|libuutil.so|libuutil.so.3|libuutil.so.3.0.0|libzfs.la|libzfs.so|libzfs.so.4|libzfs.so.4.1.0|libzfs_core.la|libzfs_core.so|libzfs_core.so.3|libzfs_core.so.3.0.0|libzfsbootenv.la|libzfsbootenv.so|libzfsbootenv.so.1|libzfsbootenv.so.1.0.0|libzpool.la|libzpool.so|libzpool.so.5|libzpool.so.5.0.0" | xargs cp -a -t $basedir/initrd/lib
+#	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
+#	echo -e "$green Once libraries are built statically this will be removed $nocolor"
+	##THIS CORRECTLY COPIES ONLY WHAT ZFS IS USING ITS IMPORT THAT THE LIBS MATCH THE VERSION TO BE INSTALLED
+	##MAKE SURE SYMBLINKS ARE SET FOR OTHER POSSIBILIES AND DISTROS
+#	cp -a -r -f -v $basedir/libs $basedir/initrd/lib
+#	cp -a -r -f -v $basedir/libs $basedir/initrd_micro/lib
+
+
 
 
 
 
 #Copy Symbol files only present in src
-#	cp -a -f $basedir/linux/Modules.symvers $basedir/initrd/lib/modules/$kver/
-#	cp -a -f $basedir/linux/modules-only.symvers $basedir/initrd/lib/modules/$kver/
-#	cp -a -f $basedir/linux/modules.nsdeps $basedir/initrd/lib/modules/$kver/
+	#cp -a -f $basedir/linux/Modules.symvers $basedir/initrd/lib/modules/$kver/
+	#cp -a -f $basedir/linux/modules-only.symvers $basedir/initrd/lib/modules/$kver/
+	#cp -a -f $basedir/linux/modules.nsdeps $basedir/initrd/lib/modules/$kver/
 
 
 #Installing System.map to multiple locations to confirm correct Symbol lookup
@@ -386,7 +377,7 @@
 	echo $basedir/initrd/sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 #Copying Zpool Cache File To Initrd
-	cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
+	#cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
 
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"

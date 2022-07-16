@@ -1,9 +1,9 @@
 #
-# /usr/lib/udev/rules.d/69-vdev.rules
+# /lib/udev/rules.d/69-vdev.rules
 #
 
-ENV{DEVTYPE}=="disk", IMPORT{program}="/usr/lib/udev/vdev_id -d %k"
-ENV{DEVTYPE}=="partition", IMPORT{program}="/usr/lib/udev/vdev_id -d %k"
+ENV{DEVTYPE}=="disk", IMPORT{program}="/lib/udev/vdev_id -d %k"
+ENV{DEVTYPE}=="partition", IMPORT{program}="/lib/udev/vdev_id -d %k"
 
 KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
 KERNEL=="nvme*[0-9]n*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
@@ -11,5 +11,5 @@ KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDE
 KERNEL=="dm-[0-9]*", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
 
 # Enclosure device symlink rules
-ENV{SUBSYSTEM}=="scsi_generic", IMPORT{program}="/usr/lib/udev/vdev_id -e"
+ENV{SUBSYSTEM}=="scsi_generic", IMPORT{program}="/lib/udev/vdev_id -e"
 ENV{SUBSYSTEM}=="scsi_generic", ENV{ID_ENCLOSURE}=="?*", SYMLINK+="$env{ID_ENCLOSURE_PATH}"
