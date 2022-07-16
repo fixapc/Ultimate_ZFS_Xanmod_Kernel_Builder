@@ -1,6 +1,0 @@
-NAME="genkernel"
-VERSION="genkernel-4.2.6"
-ID=genkernel
-VERSION_ID=4.2.6
-PRETTY_NAME="Gentoo/Linux genkernel-4.2.6 (Initramfs)"
-ANSI_COLOR="0;34"

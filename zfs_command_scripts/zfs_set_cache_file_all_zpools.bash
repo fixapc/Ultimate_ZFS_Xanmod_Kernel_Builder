@@ -1,2 +1,0 @@
-#!/bin/bash
-zpool list -vP |
