@@ -20,8 +20,8 @@
 	#make="make "CC=clang" "LD=ld.lld" "KERNEL_LLVM=1" "LLVM_IAS=1" "LLVM=1" "-j$(nproc)""
 	#make="make LLVM=1 -j$(nproc)"
 	make="make -j$(nproc)"
-	dateconfig=$(date +"kernel.config_%Y-%m-%d-%I-%M%p")
-	datecmds=$(date +"cmdline.conf_%Y-%m-%d-%I-%M%p")
+	dateconfig=$(date +"kernel.config.$(hostname)_%Y-%m-%d-%I-%M%p")
+	datecmds=$(date +"cmdline.conf.$(hostname)_%Y-%m-%d-%I-%M%p")
 	red='\e[1;31m'
 	yellow='\e[1;33m'
 	orange='\e[0;33m'
@@ -66,16 +66,16 @@
         fi
 
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
-	 if [ -f $basedir/configs/cmdline.conf.save ]
+	 if [ -f $basedir/configs/cmdline.conf.$(hostname).save ]
 		then
-		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e $basedir/configs/cmdline.conf.save)
+		echo -e "$yellow Previous Kernel Parameters Configuration Found $nocolor" $(readlink -e $basedir/configs/cmdline.conf.$(hostname).save)
 		echo -e "$yellow Would You Like To Use Your Last Saved Kernel Parameters Configuration? $nocolor"
 		echo -e "$yellow You Can Edit This Configuration With Nano Before Continuing $nocolor"
 		read -p "$(echo -e $green Y= Use Last Saved Kernel Parameters $nocolor $red N= Use Default Kernel Parameter List $nocolor)" Savedcmds
 			if [ "$Savedcmds" = "Y" ]
 
 		        	then
-				cp -a $basedir/configs/cmdline.conf.save $basedir/configs/cmdline.conf
+				cp -a $basedir/configs/cmdline.conf.$(hostname).save $basedir/configs/cmdline.conf
 
 				else
 				echo -e "$yellow Using Default Config $nocolor"
@@ -106,7 +106,7 @@
         	if [ "$Kerncmdssave" = "Y" ]
         	then
         		echo -e "$yellow Saving Kernel Parameters $nocolor"
-			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/cmdline.conf.save
+			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/cmdline.conf.$(hostname).save
 			cp -a -f $basedir/configs/cmdline.conf $basedir/configs/auto_backup_configs/$datecmds
 		else
                 	echo -e "$yellow Not Saving To Config.save $nocolor"
@@ -328,7 +328,7 @@
 	#echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
 	cp -a -f -v /lib/modules/$kver/modules.alias $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.alias.bin $basedir/initrd/lib/modules/$kver/
-	cp -a -f -v/lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.builtin.bin $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd/lib/modules/$kver/
@@ -361,7 +361,7 @@
 #Installing System.map to multiple locations to confirm correct Symbol lookup
 	cp -a -f $basedir/linux/System.map /lib/modules/$kver/
 	cp -a -f $basedir/linux/System.map /
-	cp -a -f $basedir/linux/System.map /boot
+	cp -a -f $basedir/linux/System.map /boot/System.map-$kver
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
 
@@ -382,8 +382,8 @@
 	cp -a -r -f -v $basedir/linux/arch/x86/boot/bzImage /boot/vmlinuz-$kver
 
 #Update NSH EFI helper script
-	echo -e "$yellow Installing NSH helper script $nocolor"
-	echo "vmlinuz-"$kver" rw root=rpool"
+	#echo -e "$yellow Installing NSH helper script $nocolor"
+	#echo "vmlinuz-"$kver" rw root=rpool" > /boot/startup.nsh
 
 #Update Grub
 	echo -e "$yellow Updating Grub, Note: Grubs kernel parameters are still passed to the kernel $nocolor"
@@ -394,16 +394,16 @@
 	echo -e "$green ZFS $zfsv developer version has been installed $nocolor"
 
 #Install Arch Linux ZFS Grub Patch?
-        echo -e " $yellow Do you want to add a UEFI boot menu entry directly to the Kernels EFI stub?, this is the fastest possbile way to boot the kernel but is known to be buggy on many motherboards. The the grubs menu entry will still be used if the EFI stub booting does not work $nocolor " 
-        read -p " $(echo -e $green Y= YES, INSTALL EFI STUB TO BOOT $nocolor $red N= NO, DO NOT INSTALL EFI STUB ENTRY TO BOOT $nocolor) " efistub
-        if [ "$efistub" = "Y" ]
-                then
-                echo -e "$red Deleting Any Previously Installed Kernel Boot Entries By This Script $nocolor"
-		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs -n1 efibootmgr -B -b
-              	efibootmgr --disk "$bootdrive" --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
-                else
-                echo -e " $red NOT adding an EFI Stub $nocolor "
-        fi
+#        echo -e " $yellow Do you want to add a UEFI boot menu entry directly to the Kernels EFI stub?, this is the fastest possbile way to boot the kernel but is known to be buggy on many motherboards. The the grubs menu entry will still be used if the EFI stub booting does not work $nocolor " 
+#        read -p " $(echo -e $green Y= YES, INSTALL EFI STUB TO BOOT $nocolor $red N= NO, DO NOT INSTALL EFI STUB ENTRY TO BOOT $nocolor) " efistub
+#        if [ "$efistub" = "Y" ]
+#                then
+#                echo -e "$red Deleting Any Previously Installed Kernel Boot Entries By This Script $nocolor"
+#		efibootmgr | grep "Ultimate ZFS Kernel" | awk '{print $1}' | tr -d "[:punct:] [:alpha:]" | xargs -n1 efibootmgr -B -b
+#              	efibootmgr --disk "$bootdrive" --part 1 --create --label "Ultimate ZFS Kernel"  --loader vmlinuz-"$kver" --unicode 'root=zfs:rpool rw' --verbose
+#                else
+#                echo -e " $red NOT adding an EFI Stub $nocolor "
+#        fi
 
 #Ask To Reboot
 	echo -e "$yellow DO YOU WISH TO REBOOT NOW"

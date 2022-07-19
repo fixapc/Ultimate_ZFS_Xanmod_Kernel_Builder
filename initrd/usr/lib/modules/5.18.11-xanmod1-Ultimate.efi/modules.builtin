@@ -40,11 +40,6 @@ kernel/arch/x86/platform/intel/iosf_mbi.ko
 kernel/kernel/configs.ko
 kernel/kernel/kheaders.ko
 kernel/kernel/watch_queue.ko
-kernel/mm/zswap.ko
-kernel/mm/zpool.ko
-kernel/mm/zbud.ko
-kernel/mm/zsmalloc.ko
-kernel/mm/z3fold.ko
 kernel/fs/binfmt_misc.ko
 kernel/fs/binfmt_script.ko
 kernel/fs/binfmt_elf.ko
@@ -418,6 +413,7 @@ kernel/drivers/acpi/processor.ko
 kernel/drivers/dma/virt-dma.ko
 kernel/drivers/dma/altera-msgdma.ko
 kernel/drivers/dma/ptdma/ptdma.ko
+kernel/drivers/dma/bcm-sba-raid.ko
 kernel/drivers/dma/dw/dw_dmac_core.ko
 kernel/drivers/dma/dw/dw_dmac.ko
 kernel/drivers/dma/dw/dw_dmac_pci.ko
@@ -428,9 +424,14 @@ kernel/drivers/dma/idma64.ko
 kernel/drivers/dma/ioat/ioatdma.ko
 kernel/drivers/dma/idxd/idxd.ko
 kernel/drivers/dma/idxd/idxd_bus.ko
+kernel/drivers/dma/iop-adma.ko
 kernel/drivers/dma/plx_dma.ko
 kernel/drivers/dma/sh/shdma-base.ko
 kernel/drivers/dma/sf-pdma/sf-pdma.ko
+kernel/drivers/dma/tegra20-apb-dma.ko
+kernel/drivers/dma/tegra210-adma.ko
+kernel/drivers/dma/mediatek/mtk-hsdma.ko
+kernel/drivers/dma/mediatek/mtk-cqdma.ko
 kernel/drivers/dma/qcom/hdma_mgmt.ko
 kernel/drivers/dma/qcom/hdma.ko
 kernel/drivers/dma/ti/edma.ko
@@ -530,7 +531,6 @@ kernel/drivers/block/nbd.ko
 kernel/drivers/block/virtio_blk.ko
 kernel/drivers/block/drbd/drbd.ko
 kernel/drivers/block/rbd.ko
-kernel/drivers/block/zram/zram.ko
 kernel/drivers/block/rnbd/rnbd-client.ko
 kernel/drivers/block/rnbd/rnbd-server.ko
 kernel/drivers/misc/tifm_core.ko
@@ -797,7 +797,9 @@ kernel/drivers/net/slip/slhc.ko
 kernel/drivers/net/wireless/ath/wil6210/wil6210.ko
 kernel/drivers/net/wireless/ath/ath10k/ath10k_core.ko
 kernel/drivers/net/wireless/ath/ath10k/ath10k_pci.ko
+kernel/drivers/net/wireless/ath/ath10k/ath10k_sdio.ko
 kernel/drivers/net/wireless/ath/ath10k/ath10k_usb.ko
+kernel/drivers/net/wireless/ath/ath10k/ath10k_snoc.ko
 kernel/drivers/net/wireless/ath/wcn36xx/wcn36xx.ko
 kernel/drivers/net/wireless/ath/ath11k/ath11k.ko
 kernel/drivers/net/wireless/ath/ath11k/ath11k_pci.ko
@@ -806,6 +808,8 @@ kernel/drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.ko
 kernel/drivers/net/wireless/broadcom/brcm80211/brcmfmac/brcmfmac.ko
 kernel/drivers/net/wireless/broadcom/brcm80211/brcmsmac/brcmsmac.ko
 kernel/drivers/net/wireless/intel/iwlwifi/iwlwifi.ko
+kernel/drivers/net/wireless/intel/iwlwifi/dvm/iwldvm.ko
+kernel/drivers/net/wireless/intel/iwlwifi/mvm/iwlmvm.ko
 kernel/drivers/net/wireless/marvell/mwifiex/mwifiex.ko
 kernel/drivers/net/wireless/marvell/mwifiex/mwifiex_sdio.ko
 kernel/drivers/net/wireless/marvell/mwifiex/mwifiex_pcie.ko
@@ -874,6 +878,12 @@ kernel/drivers/vfio/vfio_iommu_type1.ko
 kernel/drivers/vfio/pci/vfio-pci-core.ko
 kernel/drivers/vfio/pci/vfio-pci.ko
 kernel/drivers/vfio/pci/mlx5/mlx5-vfio-pci.ko
+kernel/drivers/vfio/platform/vfio-platform.ko
+kernel/drivers/vfio/platform/vfio-platform-base.ko
+kernel/drivers/vfio/platform/reset/vfio-platform-calxedaxgmac.ko
+kernel/drivers/vfio/platform/reset/vfio-platform-amdxgbe.ko
+kernel/drivers/vfio/platform/reset/vfio_platform_bcmflexrm.ko
+kernel/drivers/vfio/platform/vfio-amba.ko
 kernel/drivers/vfio/mdev/mdev.ko
 kernel/drivers/usb/common/usb-common.ko
 kernel/drivers/usb/common/usb-conn-gpio.ko
@@ -1160,7 +1170,6 @@ kernel/drivers/input/mouse/vsxxxaa.ko
 kernel/drivers/input/joystick/xpad.ko
 kernel/drivers/input/rmi4/rmi_core.ko
 kernel/drivers/rtc/rtc-cmos.ko
-kernel/drivers/rtc/rtc-spear.ko
 kernel/drivers/i2c/i2c-core.ko
 kernel/drivers/i2c/i2c-dev.ko
 kernel/drivers/i2c/i2c-mux.ko
@@ -1394,6 +1403,18 @@ kernel/drivers/bluetooth/btrtl.ko
 kernel/drivers/bluetooth/btqca.ko
 kernel/drivers/bluetooth/btmtk.ko
 kernel/drivers/bluetooth/virtio_bt.ko
+kernel/drivers/edac/edac_core.ko
+kernel/drivers/edac/al_mc_edac.ko
+kernel/drivers/edac/i5000_edac.ko
+kernel/drivers/edac/i5100_edac.ko
+kernel/drivers/edac/i7300_edac.ko
+kernel/drivers/edac/i7core_edac.ko
+kernel/drivers/edac/sb_edac.ko
+kernel/drivers/edac/pnd2_edac.ko
+kernel/drivers/edac/igen6_edac.ko
+kernel/drivers/edac/skx_edac.ko
+kernel/drivers/edac/i10nm_edac.ko
+kernel/drivers/edac/xgene_edac.ko
 kernel/drivers/cpufreq/freq_table.ko
 kernel/drivers/cpufreq/cpufreq_performance.ko
 kernel/drivers/cpufreq/acpi-cpufreq.ko
@@ -1461,6 +1482,7 @@ kernel/drivers/firmware/dmi-sysfs.ko
 kernel/drivers/firmware/edd.ko
 kernel/drivers/firmware/iscsi_ibft.ko
 kernel/drivers/firmware/qemu_fw_cfg.ko
+kernel/drivers/firmware/qcom-scm.ko
 kernel/drivers/firmware/arm_scmi/scmi_pm_domain.ko
 kernel/drivers/firmware/efi/efivars.ko
 kernel/drivers/firmware/efi/efi-pstore.ko
@@ -1630,6 +1652,7 @@ kernel/drivers/memory/tegra/tegra-mc.ko
 kernel/drivers/memory/tegra/tegra20-emc.ko
 kernel/drivers/memory/tegra/tegra30-emc.ko
 kernel/drivers/memory/tegra/tegra124-emc.ko
+kernel/drivers/perf/thunderx2_pmu.ko
 kernel/drivers/thunderbolt/thunderbolt.ko
 kernel/drivers/android/binder_linux.ko
 kernel/drivers/nvmem/nvmem_core.ko
