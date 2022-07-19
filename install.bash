@@ -29,13 +29,11 @@
 	nocolor='\e[1;m'
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
-	kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
 	menuconfig=""$make" menuconfig MENUCONFIG_COLOR=blackbg"
 	bootdrive=$(df | grep -i /boot  | awk '{print $1}' | tr -d [:digit:])
 	initmodver=$(ls "$basedir"/initrd/lib/modules/ | grep -i xanmod)
 	bootlocation=$(df | grep -i /boot  | awk '{print $1,$6}')
 	runkern=$(uname -r)
-	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "$green UEFI 2.0 nsh helper script Located: $nocolor /boot/startup.nsh" ; else echo "$red startup.nsh EFI Startup File Installed $noclor" ; fi)
@@ -122,6 +120,7 @@
         fi
 
 #Apply kernel CMD line to kernel config file
+	declare kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
 	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
 
 #List Required Dependencies
@@ -262,19 +261,17 @@
 	 --includedir=/usr/include		\
 	 --sysconfdir=/etc      	        \
 	 --enable-static			\
-	 --enable-shared			\
 	 --enable-pyzfs				\
 	 --with-gnu-ld				\
 	 --enable-sysvinit			\
-	 --with-dracutdir			\
-	 --with-mounthelperdir			\
-	 --with-udevdir
+ 	 --enable-shared
+	#--with-dracutdir			\
+	#--with-mounthelperdir			\
+	#--with-udevdir				\
 	#--with-config=all 			\
 	#--with-libintl-prefix			\
 	#--with-pkgconfigdir			\
  	#--with-aix-soname=both			\
-	#--enable-sysvinit			\
-	#--enable-pyzfs				\
 	#--enable-systemd 			\
 	#--enable-dependency-tracking		\
 	#--oldincludedir			\
@@ -329,19 +326,19 @@
 
 #Copy Modules Information To Initramfs, DEFAULT Symbol Linking
 	#echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
-	cp -a -f -v /lib/modules/$kver/modules.alias $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.alias.bin $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v/lib/modules/$kver/modules.builtin $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.builtin.bin $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.dep $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.dep.bin $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.devname $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.order $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.softdep $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.symbols $basedir/initrd_micro/lib/modules/$kver/
-	cp -a -f -v /lib/modules/$kver/modules.symbols.bin $basedir/initrd_micro/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.alias $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.alias.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v/lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.alias.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.builtin.modinfo $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.dep $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.dep.bin $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.devname $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.order $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.softdep $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.symbols $basedir/initrd/lib/modules/$kver/
+	cp -a -f -v /lib/modules/$kver/modules.symbols.bin $basedir/initrd/lib/modules/$kver/
 
 #	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
 #	echo -e "$green Once libraries are built statically this will be removed $nocolor"
@@ -377,7 +374,7 @@
 	echo $basedir/initrd/sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 #Copying Zpool Cache File To Initrd
-	#cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
+	cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
 
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"

@@ -53,7 +53,7 @@ ZPOOL_IMPORT_ALL_VISIBLE='no'
 # It supersedes the old USE_DISK_BY_ID which indicated that it would only
 # try '/dev/disk/by-id'.
 # The old variable will still work in the code, but is deprecated.
-#ZPOOL_IMPORT_PATH="/dev/disk/by-vdev:/dev/disk/by-id"
+ZPOOL_IMPORT_PATH="/dev/disk/by-vdev:/dev/disk/by-id"
 
 # List of pools that should NOT be imported at boot
 # when ZPOOL_IMPORT_ALL_VISIBLE is 'yes'.
@@ -74,7 +74,7 @@ DO_OVERLAY_MOUNTS='no'
 # You don't need to put '-f' in here, unless you want it ALL the time.
 # Using the option 'zfsforce=1' on the grub/kernel command line will
 # do the same, but on a case-to-case basis.
-ZPOOL_IMPORT_OPTS=""
+#ZPOOL_IMPORT_OPTS=""
 
 # Full path to the ZFS cache file?
 # See "cachefile" in zpool(8).
@@ -87,8 +87,8 @@ ZPOOL_IMPORT_OPTS=""
 # Generally, the use of a cache file is usually not recommended on Linux
 # because it sometimes is more trouble than it's worth (laptops with external
 # devices or when/if device nodes changes names).
-#ZPOOL_IMPORT_OPTS="-c /etc/zfs/zpool.cache"
-#ZPOOL_CACHE=""
+ZPOOL_IMPORT_OPTS="-o failmode=continue -f -d /dev/disk/by-id"
+ZPOOL_CACHE="none"
 
 # Any additional option to the 'zfs mount' command line?
 # Include '-o' for each option wanted.

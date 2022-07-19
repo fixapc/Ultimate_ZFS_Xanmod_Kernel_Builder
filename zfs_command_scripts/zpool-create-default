@@ -14,7 +14,9 @@
 	-O acltype=nfsv4 \
 	-O aclinherit=passthrough \
 	-O aclmode=passthrough \
+	-O overlay=off \
 	-o ashift=12 \
 	-o autoexpand=on \
+	-o failmode=continue \
 	-o cachefile=/etc/zfs/zpool.cache \
 	-o listsnaps=on

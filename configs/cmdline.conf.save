@@ -4,16 +4,13 @@
 #THE DEFAULT PARAMETERS CURRENTLY BASED ON HIGH PERFORMANCE.
 #Mandatory to change in many circumstances
 #You can bake in your pool here if you need to
-#root=ZFS
-#pci-stub.ids=10de:1b80,10de:10f0
-#default_hugepagesz=1G hugepagesz=1G hugepages=64
+root=ZFS=rpool
+pci-stub.ids=10de:1b80,10de:10f0
+default_hugepagesz=1G hugepagesz=1G hugepages=64
 
 #Default Kernel Tune For 4k, Very Good Dedup Benefits, helps to keep ddt tables in memory if you can spare it. Read workloads will be impressive
-#zfsforce=1
-#zfs.spa_config_path=/etc/zfs/zpool.cache
-idle=poll
-skew_tick=1
-rcu_nocb_poll
+spl.spl_hostid=0
+zfs.spa_config_path="/etc/zfs/zpool.cache"
 zfs.zfs_vdev_max_auto_ashift=12
 zfs.zfs_vdev_min_auto_ashift=12
 zfs.zfs_deadman_failmode=continue
@@ -25,20 +22,12 @@ zfs.zfs_dedup_prefetch=1
 zfs.zvol_volmode=1
 zfs.zio_dva_throttle_enabled=0
 zfs.zfs_ddt_data_is_special=0
-zfs.l2arc_trim_ahead=25
+zfs.l2arc_trim_ahead=100
 zfs.l2arc_write_max=67108864
 zfs.l2arc_write_boost=67108864
 zfs.zfs_arc_min=34359738368
 zfs.zfs_arc_max=51539607552
 
-
-
-
-#======================ZSWAP / ZRAM SETTINGS=======================
-#zswap.compressor=lz4hc
-#zswap.enabled=1
-#zswap.max_pool_percent=25
-#zswap.zpool=z3fold
 
 #======================ZFS MOUNTING OPTIONS=======================
 #I HAVE DISABLED THE ZFS CACHE FILE BY DEFAULT TO PREVENT SPECIFIC RISKS WHEN MOVING POOLS BETWEEN SYSTEMS
@@ -47,13 +36,6 @@ zfs.zfs_arc_max=51539607552
 #TO 0 ON THIS KEREL TO ALLOW USERS TO SWITCH POOLS WITHOUT HOST ID MISMATCHES 
 #PREVENTS USING THE CACHE FILE
 #zfs.zfs_autoimport_disable=1
-#Sets A General Host ID Value Of 0. This is great if you like to swap ZFS drives around without proper importing and exporting commands. Just play it smart and dont try to >
-#spl.spl_hostid=0
-#Changes Hostid patch from default, this installer script also writes a 0 to it for helpping disable the host ID. 
-#spl.spl_hostid_path=/etc/zfs/hostid0
-#DISABLE MOUNT CACHE FILE AT THE KERNEL LEVEL, or bake in your cache file here
-#zfs.spa_config_path=/etc/zfs/zpool.cache
-
 
 #======================ZFS ARC TUNING=====================
 #Average Block Size For Arc, This Tune Is Based On A Static Block Size / Record Size Of 16K. So this has been increased to 16k. Default is 8K 
@@ -181,17 +163,17 @@ skew_tick=1
 #Helps keep rcu / kernel threads in an awakened state for latency improvements. 
 rcu_nocb_poll
 #Forwards softirqs to RCU / Kthreads instead, This is the default setting for realtime kernels.
-#rcutree.use_softirq=0
+rcutree.use_softirq=0
 #PREVENTS RCU callbacks and kernel threads from running on specificed cores.
-#rcu_nocbs=0,4,6,8,10,12,14,16,5,7,9,11,13,15,17,18,22,24,26,28,30,32,34,23,25,27,29,31,33,35,20,3
+rcu_nocbs=0,4,6,8,10,12,14,16,5,7,9,11,13,15,17,18,22,24,26,28,30,32,34,23,25,27,29,31,33,35,20,3
 #Disable Scheduler tick whenever possible on threads that only have 1 task running and that dont need task priority and balancing. This improves performance on cores with only 1 tasks and helps keep the kernels kthreads away from these cores as well. 
-#nohz_full=4,6,8,10,12,14,5,7,9,11,13,15,22,24,26,28,30,32,23,25,27,29,31,33,20,3
+nohz_full=4,6,8,10,12,14,5,7,9,11,13,15,22,24,26,28,30,32,23,25,27,29,31,33,20,3
 #CORES WHERE INTERRUPTS GO. HINT: CORE 0 IS A FALL BACK CORE, ALSO KEEP INTERRUPTS AWAY FROM HIGH PRIORITY RCU THREAD SPAWNS TO PREVENT LOCK UPS UNDER HIGH LOAD. 
-#irqaffinity=0,18
+irqaffinity=0,18
 #WHEN USING A HIGH RCU BOOST PRIORITY IT IS IMPORTANT TO KEEP RCU THREADS AWAWY FROM OTHER REALTIME TASKS TO PREVENT STALLS OF OTHER TASKS.
-#rcutree.kthread_prio=99
+rcutree.kthread_prio=99
 #Expedite RCU Updates
-#rcupdate.rcu_expedited=1
+rcupdate.rcu_expedited=1
 
 #================NETWORK TUNING===========================
 #Allows for NFS offloading via hardware to increase NFS network performance.

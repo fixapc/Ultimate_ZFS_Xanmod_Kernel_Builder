@@ -1,1 +1,22 @@
 # Aliases for symbols, used by symbol_request().
+alias symbol:__wrap_devm_ioremap iomap
+alias symbol:__wrap___release_region iomap
+alias symbol:__wrap_insert_resource iomap
+alias symbol:__wrap_devm_memremap iomap
+alias symbol:__wrap___request_region iomap
+alias symbol:__wrap___devm_request_region iomap
+alias symbol:__wrap_phys_to_pfn_t iomap
+alias symbol:__wrap_iounmap iomap
+alias symbol:__wrap_ioremap_wc iomap
+alias symbol:__wrap_ioremap iomap
+alias symbol:__wrap_memremap iomap
+alias symbol:__wrap_devm_memunmap iomap
+alias symbol:__wrap_devm_memremap_pages iomap
+alias symbol:__wrap_acpi_evaluate_dsm iomap
+alias symbol:__wrap_memunmap iomap
+alias symbol:nfit_test_setup iomap
+alias symbol:__wrap_acpi_evaluate_object iomap
+alias symbol:__wrap_remove_resource iomap
+alias symbol:get_nfit_res iomap
+alias symbol:nfit_test_teardown iomap
+alias symbol:__wrap___devm_release_region iomap
