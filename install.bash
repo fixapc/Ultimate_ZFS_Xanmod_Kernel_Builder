@@ -362,6 +362,7 @@
 	cp -a -f $basedir/linux/System.map /lib/modules/$kver/
 	cp -a -f $basedir/linux/System.map /
 	cp -a -f $basedir/linux/System.map /boot/System.map-$kver
+	cp -a -f $basedir/linux/System.map /boot/System.map
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
 
