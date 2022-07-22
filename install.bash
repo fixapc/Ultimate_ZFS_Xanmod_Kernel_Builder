@@ -15,7 +15,7 @@
 	#set -x
 
 #=======================VARIABLES=====================
-	xandeps="\nlz4 \n libtool-bin \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
+	xandeps="\nlz4 \nfiglet \n libtool-bin \ncoccinelle \nclang \nllvm \ngcc \nbc \nopenssl \niptables \nprocps \nlibnfs-utils \npcmciautils \nbtrfs-progs \nsquashfs-tools \nxfsprogs \nreiserfsprogs \njfsutils \ne2fsprogs \nutil-linux \nbison \nflex \nbinutils"
 	zfs_debian_deps="\ngdebi \nbuild-essential \nautoconf \nautomake \nlibtool \ngawk \nalien \nfakeroot \nlibblkid-dev \nuuid-dev \nlibudev-dev \nlibssl-dev \nzlib1g-dev \nlibaio-dev \nlibattr1-dev \nlibelf-dev \npython3 \npython3-dev \npython3-setuptools \npython3-cffi \nlibffi-dev \npython3-packaging \ngit \nlibcurl4-openssl-dev"
 	#make="make "CC=clang" "LD=ld.lld" "KERNEL_LLVM=1" "LLVM_IAS=1" "LLVM=1" "-j$(nproc)""
 	#make="make LLVM=1 -j$(nproc)"
@@ -45,11 +45,11 @@
 
 #Confirm base directory before execution
 	cd $basedir
-	figlet -t -c Ultimate ZFS Xanmod Kernel Builder By Fixapc.net
+	figlet -t -c "Ultimate ZFS Xanmod Kernel Builder By Fixapc.net"
 	echo -e "$yellow Script Working Directory: $nocolor" $basedir
 	echo -e "$green Current Kernel Version: $nocolor" $runkern
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
-	echo -e "$red root=$nocolor"$root""
+	echo -e "$green Current Root For Running Installation $nocolor root=$nocolor"$root""
 	echo -e "$chk4scripts"
 	echo -e "$chk4nsh"
 	echo -e "$green Current Boot: $nocolor" $bootlocation
@@ -365,17 +365,12 @@
 	cp -a -f $basedir/linux/System.map /boot/System.map
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
-
-
 	echo -e "$yellow Copying Compiled ZFS Binaries To Multiple Distro Based Exported Paths $nocolor"
 	echo /bin/ /usr/local/bin /usr/local/sbin/ /sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 #Copying Updated ZFS Binarys To Initrd sbin folder
 	echo -e "$yellow Copying Updated ZFS Binarys To Initrd sbin folder $nocolor"
 	echo $basedir/initrd/sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
-
-#Copying Zpool Cache File To Initrd
-	cp -a -r -f -v /etc/zfs/zpool.cache  $basedir/initrd/etc/zfs/zpool.cache
 
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"
