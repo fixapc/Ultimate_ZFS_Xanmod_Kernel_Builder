@@ -1,5 +1,5 @@
 #!/bin/bash
-#Ultimate ZFS Kernel Builder - Based On Xanmod Fixapc.net
+##Ultimate ZFS Kernel Builder - Based On Xanmod Fixapc.net
 #This script automatically downloads the latest ZFS and Xanmod kernel.
 #1. A customized kernel configuration has been added that has based on a pure latency based build.
 #2. ZFS is compiled and installed as a built in module.
