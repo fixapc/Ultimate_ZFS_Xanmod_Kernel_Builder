@@ -39,6 +39,12 @@
 - All common 1GB + NIC network cards support (Builtin)
 - Infiniband support (Builtin)
 
+## Installation Procedure
+# Debian / Devuan (Copy, Past And Run)
+- apt install figlet binutils build-essential git ksh bc fio acl sysstat mdadm lsscsi \ 
+parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
+
+
 ## Used By
 This kernel is used by some of my friends, family and clients on their servers and personal rigs:
 - [ITADINABOX](https://www.itadinabox.com/)
