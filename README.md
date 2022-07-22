@@ -2,6 +2,7 @@
 
 ![image](https://user-images.githubusercontent.com/34402379/178125916-b1fcd64a-2084-4410-b767-10c0c3792611.png)
 
+# Description
 This script is for those of you who love ZFS and the Xanmod kernel. If you want to squeeze every drop of peformance out of your system you can,
 with a low latency based tuned kernel. This Kernel is specifically tuned for ZFS with all common hardware modules built in.
 It is recommend to keep module loading fully DISABLED to prevent page faults and unneeded user space to kernel space access.
