@@ -2,17 +2,23 @@
 
 ![image](https://user-images.githubusercontent.com/34402379/178125916-b1fcd64a-2084-4410-b767-10c0c3792611.png)
 
+This script is for those of you who love ZFS and the Xanmod kernel. If you want to squeeze every drop of peformance out of your system you can,
+with a low latency based tuned kernel. This Kernel is specifically tuned for ZFS with all common hardware modules built in.
+It is recommend to keep module loading fully DISABLED to prevent page faults and unneeded user space to kernel space access.
+This kernel and its child properties are all fully compiled and turned to be built in. ZFS is tuned for 4K blocks to match the
+kernel block size. Many internal settings have been modified to ensure the best performance for HIGH I/O based SSDs / NVMEs.
+If you like a really snappy computer and like to execute command lines across many files using grep and sed this will give you
+a very nice processing kick for HIGH I/O in bulk. In other words if your a Linux nut and push the CLI to its max, this will help greatly with your efficency.
+ 
 
-     This script is for those of you who love ZFS and the Xanmod kernel and want to squeeze every drop of peformance out of your system you can with a low latency based tuned kernel. This Kernel is specifical tuned for ZFS with all common hardware modules built in. It is recommend to NOT use module loading to prevent page faults and user space to kernel space access. This kernel and its child properties are all full compiled and turned to be built in. ZFS tuning for 4K blocks to patch the kernel block size and many internal settings have been modified to ensure the best performance for hi I/O. If you like a really snappy computer and like to execute command lines across many files using grep and sed this will give you a very nice processing kic with processing small files in bulk or running command lines  
-
-## Ideology
+# Ideology
 - Prevent kernel from touch memory and or resources to prevent page faults and latency spice.
 - Match 4K blocks across dnode size, kernel page size, record size, cache block size to ensure data is written within its original boundries for HIGH I/O operation.
 - Use statically linked libraries when ever possible to prevent symbol mismatches or corrupt libraries that can lead to loss of pool.
 - Keep things simple by only needing to compile the kernel and not having to worry about external libraries, symbols and other dependencies that if not done in correct order can lead to pool lose. 
 - Removal of most bugging features to prevent unneeded I/O access.
 
-## Keypointers
+# Keypointers
 - Stripped symbols and CLANG LTO support for improving I/O performance further.  
 - Built in only kernel unless more options are added.
 - Tuned for 4K blocks
@@ -27,20 +33,20 @@
 - Select a performance profile for the kernel upon installation.
 - Removal of all QOS services from CPU, memory and networking functions to prevent latency spikes. 
 
-## Built in kernel software support - Built In
+# Built in kernel software support - Built In
 - All NFS / SMB functions besides read ahead 4.2
 - All file systems built in to provide good functionality across the board.
 - Network block device support for importing pools across network
 - Removal of most cgroups resource management.
 - All ip tables features built in for better network interoperation and latency. 
 
-## Supported Hardware
+# Supported Hardware
 - All common AC+ wireless cards (Built in)
 - All common 1GB + NIC network cards support (Builtin)
 - Infiniband support (Builtin)
 
-## Installation Procedure
-# Debian / Devuan (Copy, Past And Run)
+# Installation Procedure
+## Debian / Devuan (Copy, Past And Run)
 - apt install figlet binutils build-essential git ksh bc fio acl sysstat mdadm lsscsi \ 
 parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
 
