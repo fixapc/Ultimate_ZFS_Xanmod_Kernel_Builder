@@ -48,8 +48,11 @@ a very nice processing kick for HIGH I/O in bulk. In other words if your a Linux
 
 # Installation Procedure
 ## Debian / Devuan (Copy, Past And Run)
-- apt install rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi \ 
+
+```bash
+apt install rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi \ 
 parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
+```
 
 
 ## Used By
