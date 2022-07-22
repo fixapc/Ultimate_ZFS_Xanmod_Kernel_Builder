@@ -38,6 +38,10 @@
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "$green UEFI 2.0 nsh helper script Located: $nocolor /boot/startup.nsh" ; else echo "$red startup.nsh EFI Startup File Installed $noclor" ; fi)
 	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's*root=**')
+	totalmem=$(free --giga -h | grep -i Mem | awk '{print $2"B"}')
+	hugepagestotal=$(grep -i huge /proc/meminfo | grep -i Hugepages_total | awk '{print $2}' )
+	hugepage=$(grep -i huge /proc/meminfo | grep -i Hugepagesize | awk '{print $2/1024"MB"}')
+
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
@@ -49,7 +53,10 @@
 	echo -e "$yellow Script Working Directory: $nocolor" $basedir
 	echo -e "$green Current Kernel Version: $nocolor" $runkern
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
-	echo -e "$green Current Root For Running Installation $nocolor root=$nocolor"$root""
+	echo -e "$green Total Memory: $nocolor" $totalmem
+	echo -e "$green Single Hugepage Size: $nocolor" $hugepage
+	echo -e "$green Total Allocated Hugepages: $nocolor" $hugepagestotal
+	echo -e "$green Current Root For Running Installation: $nocolor root="$root""
 	echo -e "$chk4scripts"
 	echo -e "$chk4nsh"
 	echo -e "$green Current Boot: $nocolor" $bootlocation
