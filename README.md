@@ -52,7 +52,7 @@ a very nice processing kick for HIGH I/O in bulk. In other words if your a Linux
 ## Debian / Devuan (Copy, Past And Run)
 
 ```bash
-apt install intltool gtkdoc libtool gettext autoconf libelf-dev grub2-common grub-efi-amd64-bin libncurses-dev pkg-config rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
+apt install alien dh-make dh-dist-zilla dh-acc dh-autoreconf intltool intltool-debian libtool gettext autoconf libelf-dev grub2-common grub-efi-amd64-bin libncurses-dev pkg-config rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
 ```
 
 
