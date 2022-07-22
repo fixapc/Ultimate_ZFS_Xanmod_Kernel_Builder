@@ -1,6 +1,8 @@
 # Ultimate ZFS Xanmod Kernel Builder README.MD - PRE-RELEASE DRAFT
 
 ![image](https://user-images.githubusercontent.com/34402379/178125916-b1fcd64a-2084-4410-b767-10c0c3792611.png)
+# CURRENTLY TESTING
+## DO NOT INSTALL UNLESS YOU UNDERSTAND THE RISKS
 
 # Description
 This script is for those of you who love ZFS and the Xanmod kernel. If you want to squeeze every drop of peformance out of your system you can,
