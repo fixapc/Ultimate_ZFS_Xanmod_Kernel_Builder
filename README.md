@@ -50,7 +50,7 @@ a very nice processing kick for HIGH I/O in bulk. In other words if your a Linux
 ## Debian / Devuan (Copy, Past And Run)
 
 ```bash
-apt install rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
+apt install grub2-common grub-efi-amd64-bin libncurses-dev pkg-config rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota
 ```
 
 
