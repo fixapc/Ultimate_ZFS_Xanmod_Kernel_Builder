@@ -37,7 +37,7 @@
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located $nocolor" ; fi)
-	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's*root=**')
+	root=$(cat /proc/cmdline | grep -o -i -E "root=zfs.*|root=ZFS.*" | awk '{print $1}' | sed 's*root=zfs:**' | sed 's*root=ZFS:**' |  sed 's*root=zfs=**' | sed 's*root=ZFS=**')
 	totalmem=$(free --giga -h | grep -i Mem | awk '{print $2"B"}')
 	hugepagestotal=$(grep -i huge /proc/meminfo | grep -i Hugepages_total | awk '{print $2}' )
 	hugepage=$(grep -i huge /proc/meminfo | grep -i Hugepagesize | awk '{print $2/1024"MB"}')
@@ -45,6 +45,8 @@
 	homedirs=$(getent passwd | grep /bin/bash | cut -d: -f6)
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
 	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
+	bootfs=$(zpool list "$root" -H -o bootfs)
+	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
 	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
@@ -52,7 +54,7 @@
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Update Default Configuration For Root, PCI Passthrough IDs, Hugepages And Arc Settings Based On System Information
-	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*root=.*@root=zfs:'$bootfs'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
 
@@ -66,13 +68,16 @@
 	echo -e "$green Total Memory:"$nocolor""$totalmem""
 	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""
 	echo -e "$green Total Allocated Hugepages:"$nocolor""$hugepagestotal""
-	echo -e "$green Current Root For Running Installation:"$nocolor"root="$root""
+	echo -e "$green Current Root Pool:"$nocolor""$root""
+	echo -e "$green Current Bootfs:"$nocolor""$bootfs""
 	echo -e "$green Current PCI Passthrough IDs:"$nocolor""$pcipassthroughids""
 	echo -e "$chk4scripts"
 	echo -e "$green UEFI 2.0+ NSH Boot Helper Script:"$nocolor""$chk4nsh""
 	echo -e "$green Current Boot:"$nocolor""$bootlocation""
 	echo -e "$green Autobackupdir:"$nocolor""$autobakdir""
 	echo -e "$green Current Kernel Tune:"$nocolor"4K Blocks Ultra High I/O"
+	echo -e "$green Black Listed Kernel Modules: $nocolor $blacklistmodules"
+	echo -e "$green Hdsentinel Add-on:$nocolor"
 
 
 #Read More

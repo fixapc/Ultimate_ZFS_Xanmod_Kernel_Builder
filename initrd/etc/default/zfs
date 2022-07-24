@@ -87,7 +87,7 @@ DO_OVERLAY_MOUNTS='no'
 # Generally, the use of a cache file is usually not recommended on Linux
 # because it sometimes is more trouble than it's worth (laptops with external
 # devices or when/if device nodes changes names).
-ZPOOL_IMPORT_OPTS="-o failmode=continue -f -d /dev/disk/by-id"
+ZPOOL_IMPORT_OPTS="-o cachefile=none -o failmode=continue -f -d /dev/disk/by-id"
 ZPOOL_CACHE="none"
 
 # Any additional option to the 'zfs mount' command line?
