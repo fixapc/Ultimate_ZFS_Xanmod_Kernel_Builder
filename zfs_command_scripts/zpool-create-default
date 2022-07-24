@@ -18,5 +18,5 @@
 	-o ashift=12 \
 	-o autoexpand=on \
 	-o failmode=continue \
-	-o cachefile=/etc/zfs/zpool.cache \
+	-o cachefile=none \
 	-o listsnaps=on

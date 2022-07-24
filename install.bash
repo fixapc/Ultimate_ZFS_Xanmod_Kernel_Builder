@@ -36,41 +36,54 @@
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
-	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "$green UEFI 2.0 nsh helper script Located: $nocolor /boot/startup.nsh" ; else echo "$red startup.nsh EFI Startup File Installed $noclor" ; fi)
+	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located $nocolor" ; fi)
 	root=$(cat /proc/cmdline | grep -o "root=.*" | awk '{print $1}' | sed 's*root=**')
 	totalmem=$(free --giga -h | grep -i Mem | awk '{print $2"B"}')
 	hugepagestotal=$(grep -i huge /proc/meminfo | grep -i Hugepages_total | awk '{print $2}' )
 	hugepage=$(grep -i huge /proc/meminfo | grep -i Hugepagesize | awk '{print $2/1024"MB"}')
-
+	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's@pci-stub.ids=@@' | sed 's@vfio-pci.ids=@@')
+	homedirs=$(getent passwd | grep /bin/bash | cut -d: -f6)
+	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
+	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
+	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
+#Update Default Configuration For Root, PCI Passthrough IDs, Hugepages And Arc Settings Based On System Information
+	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
+#	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
+
 #Confirm base directory before execution
 	cd $basedir
 	figlet -t -c "Ultimate ZFS Xanmod Kernel Builder By Fixapc.net"
-	echo -e "$yellow Script Working Directory: $nocolor" $basedir
-	echo -e "$green Current Kernel Version: $nocolor" $runkern
+	echo -e "$yellow Distro:"$nocolor""$distro""
+	echo -e "$yellow Script Working Directory:"$nocolor""$basedir""
+	echo -e "$green Current Kernel Version:"$nocolor""$runkern""
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
-	echo -e "$green Total Memory: $nocolor" $totalmem
-	echo -e "$green Single Hugepage Size: $nocolor" $hugepage
-	echo -e "$green Total Allocated Hugepages: $nocolor" $hugepagestotal
-	echo -e "$green Current Root For Running Installation: $nocolor root="$root""
+	echo -e "$green Total Memory:"$nocolor""$totalmem""
+	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""
+	echo -e "$green Total Allocated Hugepages:"$nocolor""$hugepagestotal""
+	echo -e "$green Current Root For Running Installation:"$nocolor"root="$root""
+	echo -e "$green Current PCI Passthrough IDs:"$nocolor""$pcipassthroughids""
 	echo -e "$chk4scripts"
-	echo -e "$chk4nsh"
-	echo -e "$green Current Boot: $nocolor" $bootlocation
-	echo -e "$green Autobackupdir: $nocolor" $autobakdir
+	echo -e "$green UEFI 2.0+ NSH Boot Helper Script:"$nocolor""$chk4nsh""
+	echo -e "$green Current Boot:"$nocolor""$bootlocation""
+	echo -e "$green Autobackupdir:"$nocolor""$autobakdir""
+	echo -e "$green Current Kernel Tune:"$nocolor"4K Blocks Ultra High I/O"
 
 
-
-#Check to see if directory is present, if so do not make
-        if [ -d $basedir/configs/auto_backup_configs ]
-                then
-                echo -e "$green Configuration Directory Present, Not Making $nocolor" $(readlink -e configs/auto_backup_configs)
-                else
-                mkdir $basedir/configs/auto_backup_configs
-        fi
+#Read More
+	echo -e " $yellow Would You Like To Install The Custom HTOP Layout With ARC $nocolor "
+	read -p "$(echo -e $green Y= YES INSTALL CUSTOM HTOP LAYOUT $nocolor $red N= NO NOT NOW $nocolor)" htop
+	if [ "$htop" = "Y" ]
+	then
+	getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a $basedir/extras/htoprc -t {}/.config/htop/
+	else
+	echo -e "$yellow NOT INSTALLING $nocolor"
+	fi
 
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
 	 if [ -f $basedir/configs/cmdline.conf.$(hostname).save ]
@@ -128,7 +141,7 @@
 
 #Apply kernel CMD line to kernel config file
 	declare kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
-	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE="'"$kernelcmds"'"@' $basedir/configs/kernel.config
+	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE='$kernelcmds'@' $basedir/configs/kernel.config
 
 #List Required Dependencies
 	echo -e "$yellow Displaying List Of Dependencies That Will Be Installed $nocolor"

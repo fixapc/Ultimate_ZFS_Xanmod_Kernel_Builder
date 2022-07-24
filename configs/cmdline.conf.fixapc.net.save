@@ -50,8 +50,8 @@ skew_tick=1
 nvme.io_queue_depth=2048
 rcu_nocb_poll
 rcutree.use_softirq=0
-rcupdate.rcu_expedited=1
 net.ifnames=0
+apm=off
 #MIN AND MAX ARC MEMORY SETTINGS ADD AS QUESTION TO FUTURE RELEASE
 zfs.zfs_arc_min=68719476736
 zfs.zfs_arc_max=137438953472
@@ -161,43 +161,25 @@ zfs.zfs_arc_max=137438953472
 
 #NVME Tuning / PCIE Bus Tuning
 #Stops ACPI Control Of NVME To Prevent Performance Impacts Via Power Management And Resource Sharing.
-nvme.noacpi=Y
 #Increased queue depth to kernel max from 1024
-nvme.io_queue_depth=2048
-#Sets PCIE Bus To Highest Power Settings If Allowed By Bios
-pcie_aspm.policy=performance
-#Apm, Dont turn off APM unless you cant set the performance setting above. 
-#apm=off
 
 #===========================KVM TUNING============================
 #THESE SETTING ARE FINE TO RUN ON PERSONAL MACHINES, BUT NOT IN A HIGH TRAFFIC PRODUCTION ENVIRONMENT AS THEY REDUCE GUEST TO HOST SECURITY
 #Prevents VFIO Pci Idling
-vfio_pci.disable_idle_d3=Y
 #Helps Force Certain Hardware / Settings That Are Regulated By Deny List
-vfio_pci.disable_denylist=Y
 #Allows Insecure Interrupts In Favor Of Performance
-vfio_iommu_type1.allow_unsafe_interrupts=1
 #Gives A More Direct Approch To Memory Access
-iommu.passthrough=1
 #Nests The Virtual Machine To Allow A Lower Level Hardware Access, Sometimes It Is Required To CPU Flags In Order To Get This To Work. Also on some hardware it is even required to get Windows 11 to post, but it is primary to allow for a virtual machine to run in a virtual machine (nested) 
-kvm-intel.nested=1
 #Relaxes memory security
-iomem=relaxed
 #
-iommu=pt
 #Keep enabled for intel IOMMU
-intel_iommu=on
 #Disables Most Of The Security Patches Via The Kernel, Some May Still Be Enforced At a Micro Code Level By Intel. Some mitigations are required to be disabled for specific KVM features. Most of these security patches are to prevent guest to host access and security flaws in hyperthreading cache. 
-mitigations=off
 #Allows passthrough of devices that may or maynot be in the same IOMMU group depending on your hardware, this allows lowers security for guest to host access.
-pcie_acs_override=downstream,multifunction
 
 #======================CPU TUNING=========================
 #Locks all CPU cores to their highest clock speed and prevents any frequency stepping, you do not need to set any Cstate values if this is set. This also prevents turbo from reaching it highest value on a single core and locks turbo boost to its highest all core turbo value. This works slightly differently based on CPU model. But this setting is for latency and response times. In my opinion CPUs are already over kill for things like gaming anyway so i don't see a reason to not have this enabled. 
 #Lets the processor scheduler tick slip a little bit to benefit latency
-skew_tick=1
 #Helps keep rcu / kernel threads in an awakened state for latency improvements. 
-rcu_nocb_poll
 #Forwards softirqs to RCU / Kthreads instead, This is the default setting for realtime kernels.
 #rcutree.use_softirq=0
 #PREVENTS RCU callbacks and kernel threads from running on specificed cores.
@@ -209,7 +191,6 @@ rcu_nocb_poll
 #WHEN USING A HIGH RCU BOOST PRIORITY IT IS IMPORTANT TO KEEP RCU THREADS AWAWY FROM OTHER REALTIME TASKS TO PREVENT STALLS OF OTHER TASKS.
 #rcutree.kthread_prio=99
 #Expedite RCU Updates
-rcupdate.rcu_expedited=1
 
 #================NETWORK TUNING===========================
 #Allows for NFS offloading via hardware to increase NFS network performance.
