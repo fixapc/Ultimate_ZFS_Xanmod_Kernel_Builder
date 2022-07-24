@@ -51,7 +51,7 @@
 	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
 	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
 	autoarcminb=$(echo $hugepageamount | awk '{print $1*.25*1024000000}')
-	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.75*1024000000}')
 	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
 	numas=$(lscpu | grep -i "numa" | tail +2)
 	nohz=$(cat /sys/devices/system/cpu/nohz_full)
