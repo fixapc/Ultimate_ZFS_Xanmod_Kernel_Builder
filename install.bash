@@ -38,15 +38,18 @@
 	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located $nocolor" ; fi)
 	root=$(cat /proc/cmdline | grep -o -i -E "root=zfs.*|root=ZFS.*" | awk '{print $1}' | sed 's*root=zfs:**' | sed 's*root=ZFS:**' |  sed 's*root=zfs=**' | sed 's*root=ZFS=**')
-	totalmem=$(free --giga -h | grep -i Mem | awk '{print $2"B"}')
-	hugepagestotal=$(grep -i huge /proc/meminfo | grep -i Hugepages_total | awk '{print $2}' )
-	hugepage=$(grep -i huge /proc/meminfo | grep -i Hugepagesize | awk '{print $2/1024"MB"}')
+	totalmem=$(awk '( $1 == "MemTotal:" ) { print $2/1024^2 }' /proc/meminfo)
+	hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2/1024^2 }' /proc/meminfo)
+	hugepage=$(awk '( $1 == "Hugepagesize:" ) { print $2/1024^2 }' /proc/meminfo)
+	hugepageamount=$(awk '( $1 == "Hugetlb:" ) { print $2/1024^2 }' /proc/meminfo)
 	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's@pci-stub.ids=@@' | sed 's@vfio-pci.ids=@@')
 	homedirs=$(getent passwd | grep /bin/bash | cut -d: -f6)
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
 	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
 	bootfs=$(zpool list "$root" -H -o bootfs)
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
+	autoarcmin=$(echo $hugeinmb | awk '{print $1*.25}')
+	autoarcmax=$(echo $hugeinmb | awk '{print $1*.50}')
 	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
@@ -54,6 +57,8 @@
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Update Default Configuration For Root, PCI Passthrough IDs, Hugepages And Arc Settings Based On System Information
+	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min='$autoarcmin'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max='$autoarcmax'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*root=.*@root=zfs:'$bootfs'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
@@ -67,7 +72,9 @@
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
 	echo -e "$green Total Memory:"$nocolor""$totalmem""
 	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""
-	echo -e "$green Total Allocated Hugepages:"$nocolor""$hugepagestotal""
+	echo -e "$green "#" Of Allocated Hugepages:"$nocolor""$hugepagestotal""
+	echo -e "$green Auto Calculated Arc Min(TRam-HugepagesX.50):"$nocolor""$autoarcmin""
+	echo -e "$green Auto Calculated Arc Max(TRam-HugepagesX.75):"$nocolor""$autoarcmax""
 	echo -e "$green Current Root Pool:"$nocolor""$root""
 	echo -e "$green Current Bootfs:"$nocolor""$bootfs""
 	echo -e "$green Current PCI Passthrough IDs:"$nocolor""$pcipassthroughids""
@@ -89,6 +96,18 @@
 	else
 	echo -e "$yellow NOT INSTALLING $nocolor"
 	fi
+
+#Do Want To Use Cache File
+#	echo -e " $yellow This   $nocolor "
+#	read -p "$(echo -e $green Y= YES INSTALL CUSTOM HTOP LAYOUT $nocolor $red N= NO NOT NOW $nocolor)" htop
+#	if [ "$htop" = "Y" ]
+#	then
+#	getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a $basedir/extras/htoprc -t {}/.config/htop/
+#	else
+#	echo -e "$yellow NOT INSTALLING $nocolor"
+#	fi
+
+
 
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
 	 if [ -f $basedir/configs/cmdline.conf.$(hostname).save ]
