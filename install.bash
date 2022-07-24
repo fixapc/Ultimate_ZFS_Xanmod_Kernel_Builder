@@ -42,7 +42,7 @@
 	hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2 }' /proc/meminfo)
 	hugepage=$(awk '( $1 == "Hugepagesize:" ) { print $2/1024^2 }' /proc/meminfo)
 	hugepageamount=$(awk '( $1 == "Hugetlb:" ) { print $2/1024^2 }' /proc/meminfo)
-	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's@pci-stub.ids=@@' | sed 's@vfio-pci.ids=@@')
+	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's&pci-stub.ids=&&' | sed 's&vfio-pci.ids=&&')
 	homedirs=$(getent passwd | grep /bin/bash | cut -d: -f6)
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
 	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
@@ -50,7 +50,7 @@
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
 	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
 	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
-	autoarcminb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	autoarcminb=$(echo $hugepageamount | awk '{print $1*.25*1024000000}')
 	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#hugepagez=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
@@ -68,7 +68,7 @@
 	sed -i 's@default_hugepagesz=.*@default_hugepagesz='$hugepage''G'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@hugepages=.*@hugepages='$hugepagestotal'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@hugepagesz=.*@hugepagesz='$hugepage''G'@' $basedir/configs/cmdline_default.conf
-	sed -i "s%pci-stub.ids=.*%pci-stub.ids="$pcipassthroughids"%" $basedir/configs/cmdline_default.conf
+	sed -i "s@pci-stub.ids=.*@pci-stub.ids=$pcipassthroughids@" $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
 
 #Confirm base directory before execution
