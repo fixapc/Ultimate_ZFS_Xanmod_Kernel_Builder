@@ -52,6 +52,9 @@
 	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
 	autoarcminb=$(echo $hugepageamount | awk '{print $1*.25*1024000000}')
 	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
+	numas=$(lscpu | grep -i "numa" | tail +2)
+	nohz=$(cat /sys/devices/system/cpu/nohz_full)
 	#hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#hugepagez=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#default_hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
@@ -78,6 +81,10 @@
 	echo -e "$yellow Script Working Directory:"$nocolor""$basedir""
 	echo -e "$green Current Kernel Version:"$nocolor""$runkern""
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
+	echo -e "$green CPU Model:"$nocolor""$cpumodel""
+	echo -e "$green Numa Nodes:"$nocolor""$numas""
+	echo -e "$green nohz_full cpus:"$nocolor""$nohz""
+	echo -e "$green CPUs For IRQAfinity:"$nocolor""$irqaffinity""
 	echo -e "$green Total Memory:"$nocolor""$totalmem""GB""
 	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""GB""
 	echo -e "$green "#" Of Allocated Hugepages:"$nocolor""$hugepagestotal""GB""
