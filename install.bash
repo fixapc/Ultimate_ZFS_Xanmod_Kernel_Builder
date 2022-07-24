@@ -48,8 +48,8 @@
 	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
 	bootfs=$(zpool list "$root" -H -o bootfs)
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
-	autoarcmin=$(echo $hugeinmb | awk '{print $1*.25}')
-	autoarcmax=$(echo $hugeinmb | awk '{print $1*.50}')
+	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
+	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
 	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
