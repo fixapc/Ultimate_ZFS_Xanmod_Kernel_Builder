@@ -62,13 +62,13 @@
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Update Default Configuration For Root, PCI Passthrough IDs, Hugepages And Arc Settings Based On System Information
-	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min='$autoarcminb'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max='$autoarcmaxb'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*root=.*@root=zfs:'$bootfs'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*default_hugepagesz=.*@default_hugepagesz='$hugepage"G"'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*hugepages=.*@hugepages='$hugepagestotal'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*hugepagesz=.*@hugepagesz='$hugepage"G"'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min="$autoarcminb"@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max="$autoarcmaxb"@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*root=.*@root=zfs:"$bootfs"@' "$basedir"/configs/cmdline_default.conf
+	sed -i 's@.*default_hugepagesz=.*@default_hugepagesz="$hugepage""G"@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*hugepages=.*@hugepages="$hugepagestotal"@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*hugepagesz=.*@hugepagesz="$hugepage""G"@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*pci-stub.ids=.*@pci-stud.ids="$pcipassthroughids"@' $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
 
 #Confirm base directory before execution
