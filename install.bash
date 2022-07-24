@@ -50,8 +50,11 @@
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
 	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
 	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
-	autoarcminb=$(echo $hugepageamount | awk '{print $1*.50/1024^3}')
-	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50/1024^3}')
+	autoarcminb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	#hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	#hugepagez=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
+	#default_hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
@@ -62,6 +65,9 @@
 	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min='$autoarcminb'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max='$autoarcmaxb'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*root=.*@root=zfs:'$bootfs'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*default_hugepagesz=.*@default_hugepagesz='$hugepage"G"'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*hugepages=.*@hugepages='$hugepagestotal'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*hugepagesz=.*@hugepagesz='$hugepage"G"'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
 
