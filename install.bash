@@ -5,7 +5,7 @@
 #2. ZFS is compiled and installed as a built in module.
 #3. All I/O Scheduling has been removed for better I/O performance. Aka none / noop
 #4. All filesystems are baked in for compatibility, speed and to help guard against page faults.
-#5. Debugging has been disabled
+#5. Debugging Options that effect performance have been disabled
 #6. Cgroups and other resource managment has been Axed.
 #7. Built in sleep and power management functions have been disabled.
 #8. This is a basic first time upload and there will be more to come. Thanks to Xanmod for their work.
