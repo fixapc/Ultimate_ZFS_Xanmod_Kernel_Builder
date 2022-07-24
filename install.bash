@@ -39,7 +39,7 @@
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located $nocolor" ; fi)
 	root=$(cat /proc/cmdline | grep -o -i -E "root=zfs.*|root=ZFS.*" | awk '{print $1}' | sed 's*root=zfs:**' | sed 's*root=ZFS:**' |  sed 's*root=zfs=**' | sed 's*root=ZFS=**')
 	totalmem=$(awk '( $1 == "MemTotal:" ) { print $2/1024^2 }' /proc/meminfo)
-	hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2/1024^2 }' /proc/meminfo)
+	hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2 }' /proc/meminfo)
 	hugepage=$(awk '( $1 == "Hugepagesize:" ) { print $2/1024^2 }' /proc/meminfo)
 	hugepageamount=$(awk '( $1 == "Hugetlb:" ) { print $2/1024^2 }' /proc/meminfo)
 	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's@pci-stub.ids=@@' | sed 's@vfio-pci.ids=@@')
