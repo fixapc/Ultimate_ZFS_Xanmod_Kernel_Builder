@@ -50,6 +50,8 @@
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
 	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
 	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
+	autoarcminb=$(echo $hugepageamount | awk '{print $1*.50/1024^3}')
+	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.50/1024^3}')
 	ultimatezfs_scripts=
 
 #=======================BEGIN SCRIPT==================
@@ -57,8 +59,8 @@
 	grep -rl "CONFIG_ZFS" $basedir/configs | xargs sed -i '/CONFIG_ZFS/d' > /dev/null 2>&1 &
 
 #Update Default Configuration For Root, PCI Passthrough IDs, Hugepages And Arc Settings Based On System Information
-	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min='$autoarcmin'@' $basedir/configs/cmdline_default.conf
-	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max='$autoarcmax'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*zfs.zfs_arc_min=.*@zfs.zfs_arc_min='$autoarcminb'@' $basedir/configs/cmdline_default.conf
+	sed -i 's@.*zfs.zfs_arc_max=.*@zfs.zfs_arc_max='$autoarcmaxb'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*root=.*@root=zfs:'$bootfs'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@.*pci-stud.ids=.*@pci-stud.ids='$pcipassthroughids'@' $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
