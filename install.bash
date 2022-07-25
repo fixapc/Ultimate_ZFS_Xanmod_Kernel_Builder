@@ -55,10 +55,14 @@
 	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
 	numas=$(lscpu | grep -i "numa" | tail +2)
 	nohz=$(cat /sys/devices/system/cpu/nohz_full)
+	installpaths=$(env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&')
 	#hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#hugepagez=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	#default_hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
 	ultimatezfs_scripts=
+
+#testing
+#	find . -type f -path echo 
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
@@ -73,6 +77,10 @@
 	sed -i 's@hugepagesz=.*@hugepagesz='$hugepage''G'@' $basedir/configs/cmdline_default.conf
 	sed -i "s@pci-stub.ids=.*@pci-stub.ids=$pcipassthroughids@" $basedir/configs/cmdline_default.conf
 #	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
+
+#Install HDsentinel
+	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extra/hdsentinel-019c-x64 -t
+
 
 #Confirm base directory before execution
 	cd $basedir
@@ -384,7 +392,7 @@
 
 
 #Copy Modules Information To Initramfs, DEFAULT Symbol Linking
-	#echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
+	echo -e "$green Copying Module Symbols And Link Data To Initramfs $nocolor"
 	cp -a -f -v /lib/modules/$kver/modules.alias $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.alias.bin $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.builtin $basedir/initrd/lib/modules/$kver/
@@ -425,11 +433,11 @@
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
 	echo -e "$yellow Copying Compiled ZFS Binaries To Multiple Distro Based Exported Paths $nocolor"
-	echo /bin/ /usr/local/bin /usr/local/sbin/ /sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
+	echo $installpaths | xargs -n1 cp -a -r -f -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 #Copying Updated ZFS Binarys To Initrd sbin folder
 	echo -e "$yellow Copying Updated ZFS Binarys To Initrd sbin folder $nocolor"
-	echo $basedir/initrd/sbin | xargs -n1 cp -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
+	echo $basedir/initrd/sbin | xargs -n1 cp -a -r -f -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
 
 #Add items to bootdirectory
 	echo -e "$yellow Compiling Kernel A 2nd Time To Confirm Correct Symbol Lookup $nocolor"
@@ -438,7 +446,8 @@
 
 #Update NSH EFI helper script
 	#echo -e "$yellow Installing NSH helper script $nocolor"
-	#echo "vmlinuz-"$kver" rw root=rpool" > /boot/startup.nsh
+	touch /boot/startup.nsh
+	echo "vmlinuz-"$kver" rw root="$root"" > /boot/startup.nsh
 
 #Update Grub
 	echo -e "$yellow Updating Grub, Note: Grubs kernel parameters are still passed to the kernel $nocolor"
