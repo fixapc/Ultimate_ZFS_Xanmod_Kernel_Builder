@@ -30,13 +30,16 @@
 	SCRIPT=$(readlink -f "$0")
 	basedir=$(dirname "$SCRIPT")
 	menuconfig=""$make" menuconfig MENUCONFIG_COLOR=blackbg"
-	bootdrive=$(df | grep -i /boot  | awk '{print $1}' | tr -d [:digit:])
+	bootdrive=$(df | grep -i /boot | awk '{print $1}' | tr -d [:digit:])
 	initmodver=$(ls "$basedir"/initrd/lib/modules/ | grep -i xanmod)
-	bootlocation=$(df | grep -i /boot  | awk '{print $1,$6}')
+	bootlocation=$(df | grep -i /boot | awk '{print $1,$6}')
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
-	chk4scripts=$(if [ -f /bin/zpool_create_default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor /bin /sbin /usr/local/sbin " ; else echo "$red Optional Ultimate ZFS Scripts MISSING  $noclor " ; fi)
-	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located $nocolor" ; fi)
+	chk4scripts=$(if [ -f /bin/zpool-create-default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor $installpaths" ; else echo " $green Ultimate ZFS Scripts:$nocolor $red Not Located, Set For Install $noclor" ; fi)
+	hdsentinel=$(if [ -f /bin/hdsentinel ] ; then echo $hdsentpaths ; else echo "$red Not Located, Set For Install $nocolor" ; fi)
+	hdsentpaths=$(env | grep -i path | head -n1 | sed "s&:&/hdsentinel &g" | sed "s&PATH=&&" | sed "s& /bin& /bin/hdsentinel&")
+	chk4udevrules=$(if [ -f /etc/udev/rules.d/zfs_udev_auto_import.rules ] ; then echo "$green Ultimate ZFS Udev Rules Located:$nocolor /etc/udev/rules.d/zfs_udev_auto_import.rules" ; else echo "$red Ultimate ZFS Udev Rules Missing $noclor" ; fi)
+	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located, Set For Install $nocolor" ; fi)
 	root=$(cat /proc/cmdline | grep -o -i -E "root=zfs.*|root=ZFS.*" | awk '{print $1}' | sed 's*root=zfs:**' | sed 's*root=ZFS:**' |  sed 's*root=zfs=**' | sed 's*root=ZFS=**')
 	totalmem=$(awk '( $1 == "MemTotal:" ) { print $2/1024^2 }' /proc/meminfo)
 	hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2 }' /proc/meminfo)
@@ -45,7 +48,6 @@
 	pcipassthroughids=$(cat /proc/cmdline | grep -o -E "pci-stub.ids=.*|vfio-pci.ids=.*" | awk '{print $1}' | sed 's&pci-stub.ids=&&' | sed 's&vfio-pci.ids=&&')
 	homedirs=$(getent passwd | grep /bin/bash | cut -d: -f6)
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
-	customhtop=$(getent passwd | grep /bin/bash | cut -d: -f6 | sort -u | xargs -I {} cp -a extras/htoprc -t {}/.config/htop/)
 	bootfs=$(zpool list "$root" -H -o bootfs)
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
 	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
@@ -54,15 +56,11 @@
 	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.75*1024000000}')
 	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
 	numas=$(lscpu | grep -i "numa" | tail +2)
-	nohz=$(cat /sys/devices/system/cpu/nohz_full)
-	installpaths=$(env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&')
-	#hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
-	#hugepagez=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
-	#default_hugepages=$(echo $hugepageamount | awk '{print $1*.50*1024000000}')
-	ultimatezfs_scripts=
-
-#testing
-#	find . -type f -path echo 
+	nohz_full=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#"| grep -o "nohz_full=.*" | sed 's@nohz_full=@@g' )
+	installpaths=$(env | grep -i path | head -n1 | sed "s&:& &g" | sed "s&PATH=&&")
+	irqaffinity=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "irqaffinity=.*" | sed 's@irqaffinity=@@g')
+	rcu_nocbs=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "rcu_nocbs=.*"| sed 's@rcu_nocbs=@@g')
+	rcupriority=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "rcutree.kthread_prio=.*"| sed 's@rcutree.kthread_prio=@@g')
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
@@ -76,23 +74,22 @@
 	sed -i 's@hugepages=.*@hugepages='$hugepagestotal'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@hugepagesz=.*@hugepagesz='$hugepage''G'@' $basedir/configs/cmdline_default.conf
 	sed -i "s@pci-stub.ids=.*@pci-stub.ids=$pcipassthroughids@" $basedir/configs/cmdline_default.conf
-#	sed -i 's@.*root=.*@root='$root'@' $basedir/configs/cmdline_default.conf
-
-#Install HDsentinel
-	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extra/hdsentinel-019c-x64 -t
 
 
-#Confirm base directory before execution
+
+#Ultimate ZFS System Check
 	cd $basedir
 	figlet -t -c "Ultimate ZFS Xanmod Kernel Builder By Fixapc.net"
 	echo -e "$yellow Distro:"$nocolor""$distro""
 	echo -e "$yellow Script Working Directory:"$nocolor""$basedir""
 	echo -e "$green Current Kernel Version:"$nocolor""$runkern""
 	echo -e "$green Installed ZFS Version $nocolor" $(modinfo zfs | grep -E "version" )
-	echo -e "$green CPU Model:"$nocolor""$cpumodel""
-	echo -e "$green Numa Nodes:"$nocolor""$numas""
-	echo -e "$green nohz_full cpus:"$nocolor""$nohz""
-	echo -e "$green CPUs For IRQAfinity:"$nocolor""$irqaffinity""
+	echo -e "$green Host CPU:"$nocolor""$cpumodel""
+	echo -e "$green Numa Node  CPUs:"$nocolor""$numas""
+	echo -e "$green nohz_full  CPUs:"$nocolor""$nohz_full""
+	echo -e "$green rcu_nocb   CPUs:"$nocolor""$rcu_nocbs""
+	echo -e "$green irqafinity CPUs:"$nocolor""$irqaffinity""
+	echo -e "$green RCU KThread Priority 0-99 CPUs:"$nocolor""$rcupriority""
 	echo -e "$green Total Memory:"$nocolor""$totalmem""GB""
 	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""GB""
 	echo -e "$green "#" Of Allocated Hugepages:"$nocolor""$hugepagestotal""GB""
@@ -102,16 +99,17 @@
 	echo -e "$green Current Bootfs:"$nocolor""$bootfs""
 	echo -e "$green Current PCI Passthrough IDs:"$nocolor""$pcipassthroughids""
 	echo -e "$chk4scripts"
+	echo -e "$chk4udevrules"
 	echo -e "$green UEFI 2.0+ NSH Boot Helper Script:"$nocolor""$chk4nsh""
 	echo -e "$green Current Boot:"$nocolor""$bootlocation""
 	echo -e "$green Autobackupdir:"$nocolor""$autobakdir""
 	echo -e "$green Current Kernel Tune:"$nocolor"4K Blocks Ultra High I/O"
 	echo -e "$green Black Listed Kernel Modules: $nocolor $blacklistmodules"
-	echo -e "$green Hdsentinel Add-on:$nocolor"
+	echo -e "$green HDsentinel Hard Drive Status Tool:$nocolor $hdsentinel"
 
 
 #Read More
-	echo -e " $yellow Would You Like To Install The Custom HTOP Layout With ARC $nocolor "
+	echo -e " $yellow Would You Like To Install The Custom HTOP Layout With ARC, This Will Overwrite Current Htop Theme $nocolor "
 	read -p "$(echo -e $green Y= YES INSTALL CUSTOM HTOP LAYOUT $nocolor $red N= NO NOT NOW $nocolor)" htop
 	if [ "$htop" = "Y" ]
 	then
@@ -129,6 +127,11 @@
 #	else
 #	echo -e "$yellow NOT INSTALLING $nocolor"
 #	fi
+
+
+#Install HDsentinel
+	echo -e "$yellow Installing HDSentinal"
+	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extra/hdsentinel -t
 
 
 
@@ -384,7 +387,7 @@
 	echo -e "$green DONE! $nocolor"
 
 #Install Basic Debian Based Packages
-#	echo -e "$green Installing ZFS Utils, ZFS-Dracut And ZFS-Initramfs $nocolor"
+#	 echo -e "$green Installing ZFS Utils, ZFS-Dracut And ZFS-Initramfs $nocolor"
 #        cd "$basedir"/zfs && $make deb-utils && dpkg -i --force-all *.deb
 
 #Declare Variables
@@ -407,12 +410,11 @@
 	cp -a -f -v /lib/modules/$kver/modules.symbols $basedir/initrd/lib/modules/$kver/
 	cp -a -f -v /lib/modules/$kver/modules.symbols.bin $basedir/initrd/lib/modules/$kver/
 
-#	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
-#	echo -e "$green Once libraries are built statically this will be removed $nocolor"
+	echo -e "$green Copying Shared Libraries Over To Initramfs $nocolor"
+	echo -e "$green Once libraries are built statically this will be removed $nocolor"
 	##THIS CORRECTLY COPIES ONLY WHAT ZFS IS USING ITS IMPORT THAT THE LIBS MATCH THE VERSION TO BE INSTALLED
 	##MAKE SURE SYMBLINKS ARE SET FOR OTHER POSSIBILIES AND DISTROS
 #	cp -a -r -f -v $basedir/libs $basedir/initrd/lib
-#	cp -a -r -f -v $basedir/libs $basedir/initrd_micro/lib
 
 
 

@@ -1,3 +1,3 @@
 #!/bin/bash
 #zlist=$(zpool list -H | head -n1 | grep -v "NAME" | awk '{print $1}')
-zpool import -o failmode=continue -o cachefile=none -a -f -d /dev/disk/by-id && wall "zpool imported"
+zpool import -o failmode=continue -o cachefile=none -a -f -d /dev/disk/by-id && wall "ZFS FS Imported"
