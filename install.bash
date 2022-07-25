@@ -50,10 +50,10 @@
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
 	bootfs=$(zpool list "$root" -H -o bootfs)
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
-	autoarcmin=$(echo $hugepageamount | awk '{print $1*.25}')
-	autoarcmax=$(echo $hugepageamount | awk '{print $1*.50}')
-	autoarcminb=$(echo $hugepageamount | awk '{print $1*.25*1024000000}')
-	autoarcmaxb=$(echo $hugepageamount | awk '{print $1*.75*1024000000}')
+	autoarcmin=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.25}')
+	autoarcmax=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.75}')
+	autoarcminb=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.25*1024000000}')
+	autoarcmaxb=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.75*1024000000}')
 	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
 	numas=$(lscpu | grep -i "numa" | tail +2)
 	nohz_full=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#"| grep -o "nohz_full=.*" | sed 's@nohz_full=@@g' )
@@ -74,7 +74,6 @@
 	sed -i 's@hugepages=.*@hugepages='$hugepagestotal'@' $basedir/configs/cmdline_default.conf
 	sed -i 's@hugepagesz=.*@hugepagesz='$hugepage''G'@' $basedir/configs/cmdline_default.conf
 	sed -i "s@pci-stub.ids=.*@pci-stub.ids=$pcipassthroughids@" $basedir/configs/cmdline_default.conf
-
 
 
 #Ultimate ZFS System Check
@@ -130,8 +129,8 @@
 
 
 #Install HDsentinel
-	echo -e "$yellow Installing HDSentinal"
-	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extra/hdsentinel -t
+	echo -e "$yellow Installing HDSentinal $nocolor"
+	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extras/hdsentinel -t
 
 
 
