@@ -35,9 +35,9 @@
 	bootlocation=$(df | grep -i /boot | awk '{print $1,$6}')
 	runkern=$(uname -r)
 	autobakdir=$(readlink -e  configs/auto_backup_configs)
-	chk4scripts=$(if [ -f /bin/zpool-create-default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor $installpaths" ; else echo " $green Ultimate ZFS Scripts:$nocolor $red Not Located, Set For Install $noclor" ; fi)
-	hdsentinel=$(if [ -f /bin/hdsentinel ] ; then echo $hdsentpaths ; else echo "$red Not Located, Set For Install $nocolor" ; fi)
-	hdsentpaths=$(env | grep -i path | head -n1 | sed "s&:&/hdsentinel &g" | sed "s&PATH=&&" | sed "s& /bin& /bin/hdsentinel&")
+	chk4scripts=$(if [ -f /bin/zpool-create-default ] ; then echo "$green Ultimate ZFS Scripts Located: $nocolor $installpaths" ; else echo "$green Ultimate ZFS Scripts:$nocolor $red Not Located, Set For Install $noclor" ; fi)
+	ifhdsentinel=$(if [ -f /bin/hdsentinel ] ; then "$hdsentpaths" ; else echo "$red Not Located, Set For Install $nocolor" ; fi)
+	hdsentpaths=$(env | grep -i path | head -n1 | sed 's&:&/hdsentinel &g' | sed 's&PATH=&&' | sed 's& /bin& /bin/hdsentinel &' )
 	chk4udevrules=$(if [ -f /etc/udev/rules.d/zfs_udev_auto_import.rules ] ; then echo "$green Ultimate ZFS Udev Rules Located:$nocolor /etc/udev/rules.d/zfs_udev_auto_import.rules" ; else echo "$red Ultimate ZFS Udev Rules Missing $noclor" ; fi)
 	chk4nsh=$(if [ -f /boot/startup.nsh ] ; then echo "/boot/startup.nsh" ; else echo "$red Not Located, Set For Install $nocolor" ; fi)
 	root=$(cat /proc/cmdline | grep -o -i -E "root=zfs.*|root=ZFS.*" | awk '{print $1}' | sed 's*root=zfs:**' | sed 's*root=ZFS:**' |  sed 's*root=zfs=**' | sed 's*root=ZFS=**')
@@ -50,17 +50,20 @@
 	distro=$(cat /etc/os-release | grep -i pretty_name | sed 's*PRETTY_NAME=**' | tr -d ['"'])
 	bootfs=$(zpool list "$root" -H -o bootfs)
 	blacklistmodules=$(cat /sys/module/kernel/parameters/module_blacklist)
-	autoarcmin=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.25}')
-	autoarcmax=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.75}')
-	autoarcminb=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.25*1024000000}')
-	autoarcmaxb=$(echo $totalmem $hugepageamount | awk '{print $1-$2*.75*1024000000}')
+	autoarcmin=$(echo "$totalmem - $hugepageamount"|bc| awk '{print $1*.25}')
+	autoarcmax=$(echo "$totalmem - $hugepageamount"|bc| awk '{print $1*.75}')
+	autoarcminb=$(echo "$totalmem - $hugepageamount"|bc| awk '{print $1*.25*1024000000}')
+	autoarcmaxb=$(echo "$totalmem - $hugepageamount"|bc| awk '{print $1*.75*1024000000}')
+	test=$(echo "$totalmem - $hugepageamount"|bc)
 	cpumodel=$(lscpu | grep -i "model name" | head -n1 | awk '{$1="";$2="";print $0}')
 	numas=$(lscpu | grep -i "numa" | tail +2)
 	nohz_full=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#"| grep -o "nohz_full=.*" | sed 's@nohz_full=@@g' )
-	installpaths=$(env | grep -i path | head -n1 | sed "s&:& &g" | sed "s&PATH=&&")
+	installpaths=$(env | grep -i path | head -n1 | sed "s&:&\n&g" | sed "s&PATH=&&")
+	#einstallpaths=$(env | grep -i path | head -n1 | sed "s&:&\n&g" | sed "s&PATH=&&")
 	irqaffinity=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "irqaffinity=.*" | sed 's@irqaffinity=@@g')
 	rcu_nocbs=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "rcu_nocbs=.*"| sed 's@rcu_nocbs=@@g')
 	rcupriority=$(cat "$basedir"/configs/cmdline_default.conf | grep -v "#" | grep -o "rcutree.kthread_prio=.*"| sed 's@rcutree.kthread_prio=@@g')
+	ultimatescripts=$(ls -d "$basedir"/zfs_command_scripts/ | sed 's&zfs_udev_auto_import.rules&&' | tr '\n' ' ')
 
 #=======================BEGIN SCRIPT==================
 #Silently Clean Config
@@ -88,7 +91,7 @@
 	echo -e "$green nohz_full  CPUs:"$nocolor""$nohz_full""
 	echo -e "$green rcu_nocb   CPUs:"$nocolor""$rcu_nocbs""
 	echo -e "$green irqafinity CPUs:"$nocolor""$irqaffinity""
-	echo -e "$green RCU KThread Priority 0-99 CPUs:"$nocolor""$rcupriority""
+	echo -e "$green RCU KThread 0-99 Priority:"$nocolor""$rcupriority""
 	echo -e "$green Total Memory:"$nocolor""$totalmem""GB""
 	echo -e "$green Single Hugepage Size:"$nocolor""$hugepage""GB""
 	echo -e "$green "#" Of Allocated Hugepages:"$nocolor""$hugepagestotal""GB""
@@ -104,7 +107,9 @@
 	echo -e "$green Autobackupdir:"$nocolor""$autobakdir""
 	echo -e "$green Current Kernel Tune:"$nocolor"4K Blocks Ultra High I/O"
 	echo -e "$green Black Listed Kernel Modules: $nocolor $blacklistmodules"
-	echo -e "$green HDsentinel Hard Drive Status Tool:$nocolor $hdsentinel"
+	echo -n -e ""$green" HDsentinel Located:"$nocolor""
+	 if [ -e "/bin/hdsentinel" ]; then echo "$hdsentpaths" ; else echo -e "$red Not Located, Set For Install $nocolor"
+	 fi
 
 
 #Read More
@@ -132,6 +137,10 @@
 	echo -e "$yellow Installing HDSentinal $nocolor"
 	env | grep -i path | head -n1 | sed 's&:& &g' | sed 's&PATH=&&' | xargs -n1 cp -a -r -f -v $basedir/extras/hdsentinel -t
 
+
+#Install
+	echo -e "$yellow Installing Ultimate ZFS Scripts $nocolor"
+	echo $installpaths | xargs -n1 cp -a -r -f -v $ultimatescripts -t
 
 
 #Continue With Last Session (Kernel Parameters) Or Use Defaults
@@ -189,7 +198,7 @@
         fi
 
 #Apply kernel CMD line to kernel config file
-	declare kernelcmds=$(strings $basedir/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
+	declare kernelcmds=$(strings "$basedir"/configs/cmdline.conf | grep -v "#" | tr '\n' ' ')
 	sed -i 's@CONFIG_CMDLINE=.*@CONFIG_CMDLINE='$kernelcmds'@' $basedir/configs/kernel.config
 
 #List Required Dependencies
@@ -434,7 +443,7 @@
 
 #Confirm Binarys Match And Overwrite Any ZFS Package binares installed by distro to prevent miss matched libraries and symbol issues.
 	echo -e "$yellow Copying Compiled ZFS Binaries To Multiple Distro Based Exported Paths $nocolor"
-	echo $installpaths | xargs -n1 cp -a -r -f -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack
+	echo $installpaths | xargs -n1 cp -a -r -f -v /sbin/fsck.zfs /sbin/zdb /sbin/zed /sbin/zfs /sbin/zfs_ids_to_path /sbin/zgenhostid /sbin/zstreamdump /sbin/zpool /sbin/ztest /sbin/zstream /sbin/zinject /sbin/zhack -t
 
 #Copying Updated ZFS Binarys To Initrd sbin folder
 	echo -e "$yellow Copying Updated ZFS Binarys To Initrd sbin folder $nocolor"

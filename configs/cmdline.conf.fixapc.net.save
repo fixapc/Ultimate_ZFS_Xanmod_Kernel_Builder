@@ -4,14 +4,24 @@
 #HAS HAD FULL TRIM ENABLED AND IS HARD ON STANDARD CONSUMER SSDS.
 #CPU USAGE WILL BE HIGH UPON BOOT WHILE TRIMMING AND PREFETCHING IS OCCURING.  
 #View additional parameters at https://www.kernel.org/doc/html/v5.18/admin-guide/kernel-parameters.html
-#THE DEFAULT PARAMETERS CURRENTLY BASED ON HIGH PERFORMANCE.
+#THE DEFAULT PARAMETERS CURRENTLY BASED ON MATCHED THE KERNELS 4K BLOCK SIZE. IF YOU LIKE TO DO COMMAND LINE WORK ON ALOT OF FILES THIS WILL DRASTICALLY INCREASE PERFORMANCE. 
 #Mandatory to change in many circumstances
 #You can bake in your pool here if you need to
-root=zfs:rpool
-#pci-stub.ids=YOUR KVM PASSTHROUGH PCI IDS HERE
-#default_hugepagesz= hugepagesz= hugepages=
 
-#Default Kernel Tune For 4K block size with deduplication
+#Automatically set tuned by script can be changed here to apply desired parameters
+root=zfs:rpool
+pci-stub.ids=
+default_hugepagesz=0.00195312G
+hugepagesz=0.00195312G
+hugepages=0
+zfs.zfs_arc_min=48317184000
+zfs.zfs_arc_max=144951552000
+irqaffinity=
+rcu_nocbs=
+nohz_full=
+rcutree.kthread_prio=
+
+#DEFAULT KERNEL SETTINGS FOR 4K TUNE, TUNED FOR HIGH I/O WITH MATCHING KERNEL PAGE BLOCK SIZE. IMPROVES BOTH DEDUP PERFORMANCE AND LOWERS LATENCY. RECOMMENDED TO CREATE A NEW POOL AND COPY ALL DATA BACK TO POOL TO HAVE ALL DATA DEDUPPED FOR DDT TABLES. 
 spl.spl_hostid=1
 zfs.spa_config_path=none
 zfs.zfs_vdev_max_auto_ashift=12
@@ -52,80 +62,72 @@ rcu_nocb_poll
 rcutree.use_softirq=0
 net.ifnames=0
 apm=off
-#MIN AND MAX ARC MEMORY SETTINGS ADD AS QUESTION TO FUTURE RELEASE
-zfs.zfs_arc_min=68719476736
-zfs.zfs_arc_max=137438953472
+vm.overcommit_ratio=0
+vm.swappiness=0
+vm.page-cluster=0
+vm.vfs_cache_pressure=0
 
 
-#TESTING
-#spl.spl_taskq_thread_priority=0
-#spl.spl_taskq_kick=1
-
-#==========UNSET PARAMETER LIST WITH DESCRIPTION===========
-###MOUNTING AND IMPORT TUNING###
-#Prevents auto import using cache file
+#======================ZFS MOUNTING OPTIONS=======================
+#I HAVE DISABLED THE ZFS CACHE FILE BY DEFAULT TO PREVENT SPECIFIC RISKS WHEN MOVING POOLS BETWEEN SYSTEMS
+#IF YOU ARE USING MULTIHOST YOU WILL NEED TO RE-ENABLE THE CACHE FILE.
+#THIS WAS DONE BY DEFAULT TO ALLOW USERS TO EASILY SWITCH BETWEEN SYSTEMS AS THE HOST ID HAS BEEN SET
+#TO 0 ON THIS KEREL TO ALLOW USERS TO SWITCH POOLS WITHOUT HOST ID MISMATCHES 
+#PREVENTS USING THE CACHE FILE
 #zfs.zfs_autoimport_disable=1
 
-
-
-###ARC TUNING###
-#zfs.zfs_arc_prune_task_threads=8
-
-#zfs_arc_evict_batch_limit=10
-
+#======================ZFS ARC TUNING=====================
+#Average Block Size For Arc, This Tune Is Based On A Static Block Size / Record Size Of 16K. So this has been increased to 16k. Default is 8K 
+#Trottle Arc If System Memory Is Below 10percent, Default: 10Percent
 #zfs_arc_lotsfree_percent=10
-
+#Memory Arc Evict Max, Default: 10percent
+#zfs_arc_evict_batch_limit=10
+#Arc Cache (Ram, you want memory usage high to cache as much of the filesystem as you can)
+#CPU threads to be used for searching through and getting meta data ready for use, not much benefit unless you really bumped up your caching capabilities to work with current genhardware. Thats what this builder does, it properly deploys ZFS for systems that have the resouces to use it to its true potential. 
+#zfs.zfs_arc_prune_task_threads=8
+#Disables ram compression, your choice is speed and latency vs ram capacity. If you have lots of ram keep this off. I personally thing only your storage pool should be compressed because it usually has performance gains for using compression. 
 #zfs.zfs_compressed_arc_enabled=1
-
+#Sets the max usage to 48GB, use multiples of 4 to match kernel page size for fastest possible I/O
+#Sets the arc min to 56GB, this forces arc to use 56GB at all times once at has filled its cache store. This helps keep the filesystem in your arc cache.
 #Target memory for arc to keep free on the system, for example set to 32GB ZFS will attempt to use all ram but 32GB.
 #zfs.zfs_arc_sys_free=17179869184
 
-
-
-###L2ARC TUNING###
+#=========================L2ARC TUNING=====================
+#Prefetch l2arch, Default: 1
 #Queue limit for trim
-#zfs.zfs_trim_queue_limit=16
- 
+#zfs.zfs_trim_queue_limit=16 
 #zfs.l2arc_headroom_boost=200
-
-#Prevents l2arc compression 
+#Trims ahead of of your l2arch cache during system use by 25%. This is disabled by default because it puts more stress on the SSD. Buy some used enterprise SSDs on Ebay. They are close to indestructable compared to consumer SSDs and their estimated TBWs before death are usually 10 to 100+ times higher than consumer SSDs at the cost of some performance. 
+#Prevents l2arc compression, i believe this is depreciated because the kernel says it is not a valid parameter but i kept it here anyway, it wont hurt anything. 
 #zfs.l2arc_nocompress=1
-
 #Pending comment
 #zfs.l2arc_headroom=0
 
-
-
-###TRIM TUNING###
+#ZFS Trim Tuning
 #zfs.zfs_vdev_trim_min_active=4
 #zfs.zfs_vdev_trim_max_active=8
 
-
-
-###SCHEDULER TUNING###
+#Zvol General Tuning
+#Sets the zvol to full volume mode for complete zvol access.
 #Sets the max CPU usage perfect to 100%, this sounds like a bad idea but threads are only spawned on RCU / Kernel threads which are set to below via rcu no cbs list below. this value is the cpu list that you DONT want RCU callbacks / Kernel threads to spawn on. 
 #zfs.zio_taskq_batch_pct=100
-
 #Sets the ZFS scheduler
 #zfs.zfs_vdev_scheduler=deadline
-
+#Prefetches dedup data to help it be used more effectivly. Dedup can have a large performance impact as in a lose and a gain depending on work loads. But being able to DD a 10000GB file to a 250GB SDD because it uses the same blocks is priceless. 
+#Allows direct editing of mounted snapshots
 #Prevents meta data compression in favor of latency
 #zfs.zfs_mdcomp_disable=1
-
 #Does as it says but iam not sure if it is safe, so iam disabling it
 #zfs.zfs_keep_log_spacemaps_at_export=1
-
 #Increases metaslab performance on better hardware, meaning it didnt come from the early 2000s like ZFS did. 
 #zfs.metaslab_lba_weighting_enabled=1
-
 #Helps Get Object Data In Parrel, default:1
 #zfs.zap_iterate_prefetch=1
-
 #Allows for auto importing of vdevs via the cache file during early boot, i think this may be required if you are attempting to build a kernel that will work with built in kernel only and not initram which is an eventual goal of this project. 
 #zfs.metaslab_preload_enabled=1
 
 
-###ZFS Vdev I/O Tunables###
+#ZFS Vdev I/O Tunables
 #Max IO for vdevs, this was increased from 1024 just as the kernels queue limit was from 1024 as well. 
 #zfs.zfs_vdev_max_active=2048
 #Doubled checksum events per sec at the cost of breaking ZED, you dont really need it unless you want to run tasks based on ZFS events. 
@@ -162,6 +164,9 @@ zfs.zfs_arc_max=137438953472
 #NVME Tuning / PCIE Bus Tuning
 #Stops ACPI Control Of NVME To Prevent Performance Impacts Via Power Management And Resource Sharing.
 #Increased queue depth to kernel max from 1024
+#Sets PCIE Bus To Highest Power Settings If Allowed By Bios
+#Apm, Dont turn off APM unless you cant set the performance setting above. 
+#apm=off
 
 #===========================KVM TUNING============================
 #THESE SETTING ARE FINE TO RUN ON PERSONAL MACHINES, BUT NOT IN A HIGH TRAFFIC PRODUCTION ENVIRONMENT AS THEY REDUCE GUEST TO HOST SECURITY
@@ -177,11 +182,6 @@ zfs.zfs_arc_max=137438953472
 #Allows passthrough of devices that may or maynot be in the same IOMMU group depending on your hardware, this allows lowers security for guest to host access.
 
 #======================CPU TUNING=========================
-#Locks all CPU cores to their highest clock speed and prevents any frequency stepping, you do not need to set any Cstate values if this is set. This also prevents turbo from reaching it highest value on a single core and locks turbo boost to its highest all core turbo value. This works slightly differently based on CPU model. But this setting is for latency and response times. In my opinion CPUs are already over kill for things like gaming anyway so i don't see a reason to not have this enabled. 
-#Lets the processor scheduler tick slip a little bit to benefit latency
-#Helps keep rcu / kernel threads in an awakened state for latency improvements. 
-#Forwards softirqs to RCU / Kthreads instead, This is the default setting for realtime kernels.
-#rcutree.use_softirq=0
 #PREVENTS RCU callbacks and kernel threads from running on specificed cores.
 #rcu_nocbs=0,4,6,8,10,12,14,16,5,7,9,11,13,15,17,18,22,24,26,28,30,32,34,23,25,27,29,31,33,35,20,3
 #Disable Scheduler tick whenever possible on threads that only have 1 task running and that dont need task priority and balancing. This improves performance on cores with only 1 tasks and helps keep the kernels kthreads away from these cores as well. 
@@ -189,8 +189,6 @@ zfs.zfs_arc_max=137438953472
 #CORES WHERE INTERRUPTS GO. HINT: CORE 0 IS A FALL BACK CORE, ALSO KEEP INTERRUPTS AWAY FROM HIGH PRIORITY RCU THREAD SPAWNS TO PREVENT LOCK UPS UNDER HIGH LOAD. 
 #irqaffinity=0,18
 #WHEN USING A HIGH RCU BOOST PRIORITY IT IS IMPORTANT TO KEEP RCU THREADS AWAWY FROM OTHER REALTIME TASKS TO PREVENT STALLS OF OTHER TASKS.
-#rcutree.kthread_prio=99
-#Expedite RCU Updates
 
 #================NETWORK TUNING===========================
 #Allows for NFS offloading via hardware to increase NFS network performance.
