@@ -2,7 +2,7 @@
 echo "WARNING: When using cachefile=none, pools should be imported using only the vdev file or /dev/disk/by-id (WWN) to prevent label corruption"
 echo "Note: I recommend not using a cache file as long as your using the World Wide Name under /dev/disk/by-id"
 echo "Note2: The cache file can help improve label effectiveness and import times slighlty BUT also can cause alot of chaos on the other hand."
-zfs list -t filesystem | awk '{print $1}' | tail -n +2 | xargs -n1 zpool set cachefile=none
+zfs list -t filesystem | awk '{print $1}' | tail -n +2 | grep -v "/" | xargs -n1 zpool set cachefile=none
 echo "cachefile set to none across all pools"
 rm /etc/zfs/zpool.cache
 echo "cachefile removed zpool.cache"

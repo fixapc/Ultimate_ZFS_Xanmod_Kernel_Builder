@@ -24,8 +24,8 @@ rcutree.kthread_prio=
 #DEFAULT KERNEL SETTINGS FOR 4K TUNE, TUNED FOR HIGH I/O WITH MATCHING KERNEL PAGE BLOCK SIZE. IMPROVES BOTH DEDUP PERFORMANCE AND LOWERS LATENCY. RECOMMENDED TO CREATE A NEW POOL AND COPY ALL DATA BACK TO POOL TO HAVE ALL DATA DEDUPPED FOR DDT TABLES. 
 spl.spl_hostid=1
 zfs.spa_config_path=none
-zfs.zfs_vdev_max_auto_ashift=12
-zfs.zfs_vdev_min_auto_ashift=12
+#zfs.zfs_vdev_max_auto_ashift=12
+#zfs.zfs_vdev_min_auto_ashift=12
 spl.spl_kmem_cache_slab_limit=4096
 zfs.zfs_deadman_failmode=continue
 zfs.zfs_arc_prune_task_threads=2
