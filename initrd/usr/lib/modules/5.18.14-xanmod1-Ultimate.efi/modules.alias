@@ -1,0 +1,2 @@
+# Aliases extracted from modules themselves.
+alias pci:v00001000d000000A5sv*sd*bc*sc*i* mpi3mr
