@@ -1,0 +1,7 @@
+#!/bin/sh 
+proc /proc proc defaults 0 0
+sys /sys sys defaults 0 0
+devtmpfs /dev defaults 0 0
+not a realmount / zfs zfsutil 0 0
+
+

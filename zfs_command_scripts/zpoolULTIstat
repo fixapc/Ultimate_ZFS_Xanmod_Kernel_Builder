@@ -1,0 +1,226 @@
+#!/bin/bash
+env -i
+IFS=$'\n'
+black="\033[0;30m"  	&& export black
+red="\033[0;31m"    	&& export red
+green="\033[0;32m"  	&& export green
+orange="\033[0;33m" 	&& export orange
+yellow="\033[0;33m" 	&& export yellow
+blue="\033[0;34m"   	&& export blue
+purple="\033[0;35m" 	&& export purple
+cyan="\033[0;36m"   	&& export cyan
+white="\033[0;37m"  	&& export white
+nocolor="\033[0m"   	&& export nocolor
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+date9=$(date +%Y-%m-%d__%I-%M-%S-%p) && export date9
+#ZFSSNAPSHOURLY=$(echo -e "$green LAST_5_SNAPSHOTS_HOURLY $nocolor"; zfs list -t snapshot | awk /HOURLY/'{print $1}' | tail -n5 | sort)
+#ZFSSNAPSDAILY=$(echo -e "$green LAST_5_SNAPSHOTS_DAILY $nocolor"; zfs list -t snapshot | awk /DAILY/'{print $1}'| tail -n5 | sort)
+#ZFSSNAPSWEEKLY=$(echo -e "$green LAST_5_SNAPSHOTS_WEEKLY $nocolor"; zfs list -t snapshot | awk /WEEKLY/'{print $1}'| tail -n5 | sort)
+#ZFSSNAPSMONTHLY=$(echo -e "$green LAST_5_SNAPSHOTS_MONTHLY $nocolor"; zfs list -t snapshot | awk /MONTHLY/'{print $1}'| tail -n5 $.*  | sort)
+#while read name property value source; do
+#    printf -v "$name$property" '%s' "$name$property=$value"
+#done < <(zfs get all rpool)
+#read -rd '' -a RPOOLhdsentinel <<< "$(hdsentinel -solidi)"
+read -rd '' -a ZPOOLlistSET <<< "$(zpool list -vP rpool)"
+read -rd '' -a HDSENTZPOOLDRIVES <<< "$(zpool list -vP rpool | sed 's&\s& &gI' | awk '{print $1}' | xargs -n1 readlink -e| sort -u)"
+
+for ((i=0; i<${#HDSENTZPOOLDRIVES[@]}; i++ ))
+do
+hdsentinelSINGLETEST[$i]=$(hdsentinel -solidi -dev "$(echo -e "${HDSENTZPOOLDRIVES[$i]}")")
+#echo -e "${hdsentinelSINGLETEST[$i]}" >> /tmp/rpoolvariables.txt
+echo -e "${hdsentinelSINGLETEST[$i]}" 
+ZPOOLlistSETsortdrive[$i]="$(echo -e -n "${hdsentinelSINGLETEST[$i]}" | sed 's&\s& &gI' | awk '{print $1}' | xargs -n1 readlink -e| sort -u)"
+ZPOOLlistSETsize[$i]="$(echo -e -n  "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $2}' )"
+ZPOOLlistSETalloc[$i]="$(echo -e -n "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $3}' )"
+ZPOOLlistSETfree[$i]="$(echo -e -n "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $4}' )"
+ZPOOLlistSETfrag[$i]="$(echo -e -n "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $7}' )"
+ZPOOLlistSETcap[$i]="$(echo -e -n "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $8}' )"
+ZPOOLlistSETdedup[$i]="$(echo -e -n "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $9}' )"
+RPOOLhdsentinelTEMP[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $2}' )"
+RPOOLhdsentinelHEALTH[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $3}' )"
+RPOOLhdsentinelHOURS[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $4}' )"
+RPOOLhdsentinelMODEL[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}" | awk '{print $5}' )"
+RPOOLhdsentinelSERIAL[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}"       | awk '{print $6}' )"
+RPOOLhdsentinelTOTALWRITES[$i]="$(echo -e "${ZPOOLlistSETsortdrive[$i]}"  | awk '{print $7}' )"
+RPOOLhdsentinelINTERFACE[$i]="$(echo -e "${ZPOOLlistSETsortdrivez[$i]}"   | awk '{print $8}' )"
+done
+
+
+echo -e -n "NAME SIZE ALLOC FREE FRAG CAP DEDUP HEALTH TEMP VDEV INTERFACE TOTALWRITTEN MODEL SERIAL"
+echo -e -n "${ZPOOLlistSETsize[*]} ${ZPOOLlistSETalloc[*]} ${ZPOOLlistSETfree[*]} ${ZPOOLlistSETfrag[*]} ${ZPOOLlistSETcap[*]} ${ZPOOLlistSETdedup[*]}"
+
+
+#for ((i=0; i<${#RPOOLhdsentinel[@]}; i++ ))
+#do
+#RPOOLhdsentinelSORTDRIVE[$i]="$(echo -e -n "${ZPOOLlistSET[$i]}" | sed 's&\s& &gI' | awk '{print $1}' | xargs -n1 readlink -e| sort -u)"
+#
+#echo -e "NAME SIZE ALLOC FREE FRAG CAP DEDUP HEALTH TEMP VDEV INTERFACE TOTALWRITTEN MODEL SERIAL \
+#${ZPOOLlistSETsortdrive[*]} 
+
+
+#RPOOL
+#
+#
+#"${RPOOL[1]} ${hdsentinel[1]}"
+#echo -e "
+#${RPOOL[0]} TEMP HEALTH% TIMEON(HRs) Size(MB)"
+#"${RPOOL[1]} ${hdsentinel[1]}"
+#echo "$(hdsentinel -solidi | awk '{ print $2,"$3 %","$4 Hrs",$5,$6,"$7 MB",$8 }' | column -t)"
+
+
+
+
+#echo"${hdsentinel[1]}"
+#for ((i=0; i<${#RPOOLhdsentinel[@]}; i++ ))
+#	do
+#        echo -e "${RPOOLhdsentinel[$i]}"    
+#    done
+#
+#read -rd '' -a RPOOL <<< "$(zpool list -vPL rpool | awk '{print $1,$2,$3,$4,$7,$8,$9}' | column -t)"
+#for ((i=1; i<${#RPOOL[@]}; i++ ))
+#	do
+#        echo -e "${RPOOL[0]} TEMP HEALTH% TIMEON(HRs) Size(MB)"
+#        echo -e "${RPOOL[$i]}"
+#    done
+
+
+figlet -c rpool stats
+
+echo -e "
+$rpoolcasesensitivity      $rpooltype          $rpoolrefcompressratio     $rpoolfilesystem_limit
+$rpoolvscan                $rpoolcreation      $rpoolwritten              $rpoolsnapshot_limit
+$rpoolnbmand               $rpoolused          $rpoollogicalused          $rpoolfilesystem_count
+$rpoolsharesmb             $rpoolavailable     $rpoollogicalreferenced    $rpoolsnapshot_count
+$rpoolrefquota             $rpoolreferenced    $rpoolvolmode              $rpoolsnapdev
+$rpoolrefreservation       $rpoolcompressratio $rpoolzoned                $rpoolacltype
+$rpoolguid                 $rpoolmounted       $rpoolsnapdir              $rpoolcanmount
+$rpoolprimarycache         $rpoolquota         $rpoolaclmode              $rpoolxattr
+$rpoolsecondarycache       $rpoolreservation   $rpoolaclinherit           $rpoolcopies
+$rpoolusedbysnapshots      $rpoolrecordsize    $rpoolcreatetxg            $rpoolversion
+$rpoolusedbydataset        $rpoolmountpoint    $rpoolencryption           $rpoolutf8only
+$rpoolusedbychildren       $rpoolsharenfs      $rpoolkeylocation          $rpoolnormalization
+$rpoolusedbyrefreservation $rpoolchecksum      $rpoolkeyformat            $rpoolcontext
+$rpoollogbias              $rpoolcompression   $rpoolpbkdf2iters          $rpoolfscontext
+$rpoolobjsetid             $rpoolatime         $rpoolspecial_small_blocks $rpooldefcontext
+$rpooldedup                $rpooldevices       $rpoolrootcontext          $rpoolredundant_metadata
+$rpoolmlslabel             $rpoolexec          $rpoolrelatime             $rpoolreadonly 
+$rpoolsync                 $rpoolsetuid        $rpooloverlay              $rpooldnodesize
+$rpoolsnapshots_changed" | column -t | bat -l bash --style plain
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#echo -e "$orange LAST 5 SNAPSHOTS WEEKLY$nocolor"
+#zfs list -t snapshot | awk /WEEKLY/'{print $1}' | tail -n5 | bat -n -l bash
+#echo -e "$orange LAST 5 SNAPSHOTS DAILY $nocolor"
+#zfs list -t snapshot | awk /DAILY/'{print $1}' | tail -n5 | bat -n -l bash
+#echo -e "$orange LAST 5 SNAPSHOTS HOURLY $nocolor"
+#zfs list -t snapshot | awk /HOURLY/'{print $1}' | tail -n5 | bat -n -l bash
+
+
+
+
+
+
+
+#source /tmp/zpoolULTIstat
+
+#COMPAREhdsent=$(hdsentinel -solid | awk '{print $6}')
+#COMPAREzfs=$(zpool list -vP | awk '{print $0}' | tail +2)
+#zpool list -vP | awk '{print $1,$2,$3,$4,$7,$8,$9}' | column -t > /tmp/zpoollist
+#diff -y <(echo "$COMPAREhdsent") <(echo "$COMPAREzfs")
+#snapshotcount=$(zfs get all rpool | rg snapshot_count  | awk '{ print $3 }')
+#ZFSrecordsize=$(zfs get all rpool | rg recordsize  | awk '{ print $3 }')
+#arcHITRATE=$(arc_summary  | rg -i -o  -m1 "cache hit ratio.*%" | awk '{print $4$5}')
+#archCURRENTSIZE=$(arc_summary  | rg -i -o  -m1 "current.*" | awk '{print $4$5}')
+#archCURRENTPERC=$(arc_summary  | rg -i -o  -m1 "current.*" | awk '{print $2$3}')
+##combind into 1 graph to see how much the arc is being used
+#echo "zpool list"
+#cat /tmp/zpoollist
+#echo "HDSentinel"
+#hdsentinel -solid | awk '{print $1,$2,$3,$4,$5,$6}'
+#echo "ZFS"
+#ZFSdrivelist=$(zpool list -vP | awk '{print $1,$2,$3,$4,$7,$8,$9}' | column -t)
+#echo "ZFS snapshot_count: $snapshotcount"
+#echo "ZFS recordsize: $ZFSrecordsize"
+#echo "arc hitrate: $arcHITRATE"
+#echo "arc current size: $archCURRENTSIZE"
+#echo "arc current percentage: $archCURRENTPERC"
+#ZFSrecordsize=$(zfs get all rpool | rg recordsize  | awk '{ print $3 }')
+#snapshotcount=$(zfs get all rpool | rg snapshot_count  | awk '{ print $3 }')
+#arcHITRATE=$(arc_summary  | rg -i -o  -m1 "cache hit ratio.*%" | awk '{print $4$5}')
+#archCURRENTSIZE=$(arc_summary  | rg -i -o  -m1 "current.*" | awk '{print $4$5}')
+#archCURRENTPERC=$(arc_summary  | rg -i -o  -m1 "current.*" | awk '{print $2$3}')
+#
+#
+#echo -n -e "$ZFSdrivelist $ZFSrecordsize"
+# zpool list -vL | awk '{print $1,$2,$3,$4,$7,$8,$9}' | column -t | sed '1 s&$&   SNAPSHOTS&g' | sed '2 s&$&   SNAPSHOTS&g'  $ZFSrecordsize
+
+
+
+#combind into 1 graph to see how much the arc is being used
+#echo "zpool list"
+#cat /tmp/zpoollist
+#echo "HDSentinel"
+#hdsentinel -solid | awk '{print $1,$2,$3,$4,$5,$6}'
+#echo "ZFS"
+#zpool list -vP | awk '{print $1,$2,$3,$4,$7,$8,$9}' | column -t
+#echo "ZFS snapshot_count: $snapshotcount"
+#echo "ZFS recordsize: $ZFSrecordsize"
+#echo "arc hitrate: $arcHITRATE"
+#echo "arc current size: $archCURRENTSIZE"
+#echo "arc current percentage: $archCURRENTPERC"
+#ZFSrecordsize=$(zfs get all rpool | rg recordsize  | awk '{ print $3 }')
+#snapshotcount=$(zfs get all rpool | rg snapshot_count  | awk '{ print $3 }')
+
+
+
+
+
+
+
+
+

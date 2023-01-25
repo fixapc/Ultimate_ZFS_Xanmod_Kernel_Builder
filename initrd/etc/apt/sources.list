@@ -1,0 +1,19 @@
+#Standard Report With Back Ports
+# Package repositories
+deb http://deb.devuan.org/merged chimaera main non-free contrib
+deb http://deb.devuan.org/merged chimaera-updates main non-free contrib
+deb http://deb.devuan.org/merged chimaera-security main non-free contrib
+deb http://deb.devuan.org/merged chimaera-backports main non-free contrib
+
+# Source repositories
+deb-src http://deb.devuan.org/merged chimaera main non-free contrib
+deb-src http://deb.devuan.org/merged chimaera-updates main non-free contrib
+deb-src http://deb.devuan.org/merged chimaera-security main non-free contrib
+deb-src http://deb.devuan.org/merged chimaera-backports main non-free contrib
+
+#Bleeding edge
+# Package repositories
+deb http://deb.devuan.org/merged ceres main non-free contrib
+
+# Source repositories
+deb-src http://deb.devuan.org/merged ceres main non-free contrib

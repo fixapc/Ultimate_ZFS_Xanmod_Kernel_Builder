@@ -1,0 +1,16 @@
+[Unit]
+Description=Initial Check File System Quotas
+Documentation=man:quotacheck(8)
+DefaultDependencies=no
+After=systemd-remount-fs.service
+Before=systemd-quotacheck.service shutdown.target
+ConditionPathExists=/usr/share/quota/quota-initial-check.sh
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/share/quota/quota-initial-check.sh
+StandardOutput=journal+console
+
+[Install]
+WantedBy=sysinit.target

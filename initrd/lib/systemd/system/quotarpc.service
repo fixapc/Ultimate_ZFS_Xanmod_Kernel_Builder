@@ -1,0 +1,15 @@
+[Unit]
+Description=RPC Remote Quota Server
+Documentation=man:rpc.rquotad(8)
+Wants=rpcbind.service
+PartOf=nfs-server.target
+After=rpcbind.service
+Before=nfs-server.target
+ConditionFileIsExecutable=/sbin/rpcbind
+ 
+[Service]
+Type=forking
+ExecStart=/usr/share/quota/quotarpc.sh
+ 
+[Install]
+WantedBy=multi-user.target

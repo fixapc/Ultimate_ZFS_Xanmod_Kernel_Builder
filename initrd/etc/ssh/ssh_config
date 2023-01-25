@@ -1,0 +1,22 @@
+Host *
+ControlMaster auto
+#ControlPath ~/.ssh/control-%h-%p-%r
+ControlPersist 30m
+HostbasedAuthentication no
+CheckHostIP no
+AddressFamily any
+StrictHostKeyChecking no
+GlobalKnownHostsFile=/etc/ssh/known_hosts 
+UserKnownHostsFile=~/.ssh/known_hosts
+IdentityFile ~/.ssh/id_rsa
+IdentityFile ~/.ssh/id_dsa
+IdentityFile ~/.ssh/id_ecdsa
+IdentityFile ~/.ssh/id_ed25519
+#Tunnel yes
+#TunnelDevice any:any
+#PermitLocalCommand yes
+SendEnv LANG LC_*
+HashKnownHosts no
+GSSAPIAuthentication yes
+ServerAliveInterval 60
+ServerAliveCountMax 10

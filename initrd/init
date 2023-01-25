@@ -1,0 +1,49 @@
+#!/bin/busybox sh
+#!/bin/sh
+set -o allexport
+/bin/busybox sleep 1
+/bin/busybox mount -t proc none /proc
+/bin/busybox mount -t sysfs none /sys
+/bin/busybox mount -t devtmpfs none /dev
+/bin/busybox mount -t devpts none /dev/pts
+/bin/busybox --install -s
+/bin/busybox sleep 3
+#SET BASIC VARIABLES
+
+#CONFIRM LD CONFIG
+/sbin/ldconfig
+#SET HOSTNAME
+/sbin/hostname
+
+#Start standard init process
+/sbin/udevd --daemon --resolve-names=never
+/bin/udevadm trigger --action=add
+/bin/udevadm settle
+
+#START NETWORKING
+#/sbin/rc-service networking start &
+#/sbin/ifconfig eth0 up &
+#/sbin/dhclient eth0 &
+
+#SOURCE ENVIRONMENT
+. /etc/environment
+export
+
+#Check for NFSROOT
+if [ "$(grep -i -o -m1 NFS </proc/cmdline)" = "nfs" ]; then mountnfs; fi
+
+#CHECK FOR BREAKNOW
+if [ "$(grep -i -o -m1 breaknow </proc/cmdline)" = "breaknow" ]; then rescue breaknow; fi
+
+#attempt pool import
+importpool || rescue importpool
+
+#Attempt mount
+mountpool || rescue mountpool
+
+#Check for breakpreboot
+if [ "$(grep -i -o -m1 breakpreboot </proc/cmdline)" = "breakpreboot" ]; then rescue breakpreboot; fi
+
+#Startboot command
+boot
+exec switch_root /root /sbin/init

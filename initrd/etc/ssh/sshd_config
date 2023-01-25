@@ -1,0 +1,22 @@
+port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+PermitRootLogin yes
+StrictModes no
+UsePAM yes
+AllowAgentForwarding yes
+AllowTcpForwarding yes
+GatewayPorts yes
+X11Forwarding yes
+PermitTTY yes
+PrintMotd no
+TCPKeepAlive yes
+UseDNS yes
+PermitTunnel yes
+HostbasedAuthentication no
+KbdInteractiveAuthentication no
+ClientAliveInterval 60
+ClientAliveCountMax 10
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server

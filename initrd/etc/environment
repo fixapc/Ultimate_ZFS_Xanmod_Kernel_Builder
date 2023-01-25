@@ -1,0 +1,85 @@
+PATH="/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:" && export PATH
+path="/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:" && export path
+red="\e[1;31m" && export red
+yellow="\e[1;33m" && export yellow
+orange="\e[0;33m" && export orange
+green="\e[1;32m" && export green
+nocolor="\e[1;m" && export nocolor
+LANG="en_US.UTF-8" && export LANG
+LANGUAGE="en_US.UTF-8" && export LANGUAGE
+LC_CTYPE="en_US.UTF-8" && export LC_CTYPE
+LC_NUMERIC="en_US.UTF-8" && export LC_NUMERIC
+LC_TIME="en_US.UTF-8" && export LC_TIME
+LC_COLLATE="en_US.UTF-8" && export LC_COLLATE
+LC_MONETARY="en_US.UTF-8" && export LC_MONETARY
+LC_MESSAGES="en_US.UTF-8" && export LC_MESSAGES
+LC_PAPER="en_US.UTF-8" && export LC_PAPER
+LC_NAME="en_US.UTF-8" && export LC_NAME
+LC_ADDRESS="en_US.UTF-8" && export LC_ADDRESS
+LC_TELEPHONE="en_US.UTF-8" && export LC_TELEPHONE
+LC_MEASUREMENT="en_US.UTF-8" && export LC_MEASUREMENT
+LC_IDENTIFICATION="en_US.UTF-8" && export LC_IDENTIFICATION
+LC_ALL="en_US.UTF-8" && export LC_ALL
+TERM="linux" && export TERM
+interface=eth0 && export interface
+
+root=$(cat /proc/cmdline | sed 's& &\n&gI' | grep -m1 -i "root=.*" | sed 's&root=&&gI')
+rpool=$(/sbin/zdb -l "$root" | grep -m1 -i "name.*" | cut -d\' -f2)
+nfsrootip=$(grep -m1 -o -i "nfsrootip=.*" </proc/cmdline | awk '{print $1}' | sed 's&nfsrootip=&&gI')
+nfsrootpath=$(grep -m1 -o -i "nfsrootpath=.*" </proc/cmdline | awk '{print $1}' | sed 's&nfsrootpath=&&gI')
+nfsrootoptions=$(grep -m1 -o -i "nfsrootoptions=.*" </proc/cmdline | awk '{print $1}' | sed 's&nfsrootoptions=&&gI')
+
+function rescue() (
+    if [ "$1" = importpool ]; then
+        echo -e "$red ZFS POOL IMPORT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+    fi
+    if [ "$1" = mountpool ]; then
+        echo -e "$red ZFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+    fi
+    if [ "$1" = mountnfs ]; then
+        echo -e "$red NFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+    fi
+    if [ "$1" = breaknow ]; then
+        echo -e "$red BREAKNOW COMMAND ISSUED, $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+    fi
+    if [ "$1" = breakpreboot ]; then
+        echo -e "$red BREAKPREBOOT COMMAND ISSUED,  $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+    fi
+    echo -e "$green ZFS COMMAND LIST $nocolor"
+    echo -e "$green importpool $nocolor imports pool by looking at the root= kernel commandline"
+    echo -e "$green mountpool $nocolor mounts imported pool"
+    echo -e "$green boot $nocolor - boots into primary OS requires pool to be imported and mounted first"
+    echo -e "$green startnetworking $nocolor - Starts Network"
+    echo -e "$green showcommands $nocolor - List Init Commands"
+    echo -e "$green search $nocolor - Starts Fast Filebase search to check"
+    exec sh
+)
+
+importpool() (
+    echo -e "$yellow attempting to import pool $nocolor"
+    /sbin/zpool import -o cachefile=none -o failmode=continue -N -f -d /dev/disk/by-id "$rpool" || rescue import
+)
+
+mountnfs() (
+    echo -e "$yellow attempting to mount NFSROOT $nocolor"
+    rc-service networking start
+    mount -t nfs4 -o "$nfsrootoptions" "$nfsrootip":"$nfsrootpath" /root || rescue mountnfs
+)
+
+mountpool() (
+    if [ "$(/sbin/zfs get encryption "$rpool" | tail -n1 | awk '{print $3}')" = "aes-256-gcm" ]; then /sbin/zfs load-key "$rpool"; fi
+    bootfs=$(/sbin/zpool get bootfs "$rpool" | tail +2 | awk '{print $3}' | xargs)
+    export bootfs
+    mount -t zfs "$bootfs" /root
+    echo -e "$green MOUNTED pool $rpool With $bootfs on /root for boot attempt $nocolor"
+)
+
+boot() (
+    echo -e "$yellow Attempting Boot......:$nocolor :)"
+    /bin/udevadm control --exit
+    cd root || return
+    mount --move /dev /root/dev || rescue mount
+    mount --move /sys /root/sys || rescue mount
+    mount --move /proc /root/proc || rescue mount
+    nuke /dev
+)

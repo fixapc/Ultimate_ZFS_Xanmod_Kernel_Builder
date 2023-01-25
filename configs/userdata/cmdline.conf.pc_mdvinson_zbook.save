@@ -1,0 +1,63 @@
+#KERNEL COMMAND LINE CONFIG, Please add or edit to your hearts content.
+#THE KERNEL CMDLINE HAS A LIMIT, IF YOU ADD TOO MANY IT WILL FAIL TO COMPILE.
+#THIS CONFIGURATION IS PRECONFIGURED FOR 4K BLOCK SIZES, LATENCY AND DEDUP PERFORMANCE. THIS CONFIGURATION
+#HAS HAD FULL TRIM ENABLED AND IS HARD ON STANDARD CONSUMER SSDS.
+#CPU USAGE WILL BE HIGH UPON BOOT WHILE TRIMMING AND PREFETCHING IS OCCURING.  
+#View additional parameters at https://www.kernel.org/doc/html/v5.18/admin-guide/kernel-parameters.html
+#THE DEFAULT PARAMETERS CURRENTLY BASED ON MATCHED THE KERNELS 4K BLOCK SIZE. IF YOU LIKE TO DO COMMAND LINE WORK ON ALOT OF FILES THIS WILL DRASTICALLY INCREASE PERFORMANCE. 
+#Mandatory to change in many circumstances
+#You can bake in your pool here if you need to
+
+#Automatically set tuned by script can be changed here to apply desired parameters
+root=/dev/nvme0n1p1
+#pci-stub.ids=10de:1b80,10de:10f0
+default_hugepagesz=1G
+hugepagesz=1G
+hugepages=12
+zfs.zfs_arc_min=6000960000
+zfs.zfs_arc_max=12000960000
+irqaffinity=0
+rcu_nocbs=0,1,2
+nohz_full=0,1,2
+rcutree.kthread_prio=99
+
+#DEFAULT KERNEL SETTINGS FOR 4K TUNE, TUNED FOR HIGH I/O WITH MATCHING KERNEL PAGE BLOCK SIZE. IMPROVES BOTH DEDUP PERFORMANCE AND LOWERS LATENCY. RECOMMENDED TO CREATE A NEW POOL AND COPY ALL DATA BACK TO POOL TO HAVE ALL DATA DEDUPPED FOR DDT TABLES. 
+spl.spl_hostid=1
+zfs.spa_config_path=none
+#spl.spl_kmem_cache_slab_limit=4096
+zfs.zfs_deadman_failmode=continue
+zfs.l2arc_noprefetch=0
+zfs.zfs_dedup_prefetch=1
+zfs.zvol_volmode=1
+zfs.zio_dva_throttle_enabled=0
+zfs.zfs_ddt_data_is_special=0
+#zfs.l2arc_write_max=67108864
+#zfs.l2arc_write_boost=67108864
+zfs.l2arc_feed_again=1
+#zfs.metaslab_aliquot=4096
+#zfs.zfs_arc_average_blocksize=4096
+#zfs.dmu_prefetch_max=1073741824
+#zfs.zvol_max_discard_blocks=4096
+vfio_iommu_type1.allow_unsafe_interrupts=1
+pcie_acs_override=downstream,multifunction
+pcie_aspm.policy=performance
+vfio_pci.disable_idle_d3=Y
+vfio_pci.disable_denylist=Y
+iommu.passthrough=1
+kvm-intel.nested=1
+nvme.noacpi=Y
+intel_iommu=on
+iommu=pt
+iomem=relaxed
+mitigations=off
+idle=poll
+skew_tick=1
+nvme.io_queue_depth=2048
+rcu_nocb_poll
+rcutree.use_softirq=0
+net.ifnames=0
+apm=off
+vm.overcommit_ratio=0
+vm.swappiness=0
+vm.page-cluster=0
+vm.vfs_cache_pressure=0
