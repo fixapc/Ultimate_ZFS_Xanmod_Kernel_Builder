@@ -72,7 +72,7 @@ kverorg=$(cat "$basedir/linux/include/config/kernel.release" 2>/dev/null)
 kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release)
 
 #
-zfsv=$(grep zfs_meta_version <"$basedir/zfs/zfs_config.h" 2>/dev/null | awk '{print $3}' | grep -v zfs_meta_version | sed 's&"&&g')
+
 
 #
 xanmodlinks() {
@@ -164,8 +164,8 @@ kerneloptionscheck() {
 	echo -e "confirming zfs module is buildin for $sethostname"
 	sed -i 's&.*CONFIG_ZFS.*&CONFIG_ZFS=y&gi' "$basedir/linux/.config"
 	if [[ $(hostname) == "$sethostname" ]]; then
-		echo -e "local:$green$(hostname)$nocolor $yellow pickedhostname:$nocolor $green $sethostname
-	localhostname:$(hostname) matches picked hostname:$sethostname skipping generic cpu v1 set for compiler"
+		echo -e "local:$green$(hostname) $nocolor $yellow pickedhostname:$nocolor $green $sethostname $nocolor"
+		echo -e "localhostname:$(hostname) matches picked hostname:$sethostname skipping generic cpu v1 set for compiler"
 	else
 		echo -e "localhost does not match picked hostname, confirming generic cpu v1 set for compiler"
 		sed -i 's&CONFIG_MK8=.*&# CONFIG_MK8 is not set&gI' "$basedir/linux/.config"
@@ -377,7 +377,7 @@ copyfilestoinit() (
 	#Copy Required Library files to initrd
 	for ((i = 0; i < ${#filesarray[@]}; i++)); do
 		echo -e "$green Copying ${filesarray[i]} to initrd $nocolor THIS IS A TEST WITH IFS"
-		libfile[$i]=$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u | sed -n "$i"p)
+		libfile[i]=$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u | sed -n "$i"p)
 		echo -e "This is libfile ${libfile[i]}"
 		cp -v --force --preserve --remove-destination "${libfile[i]}" -T "$basedir"/initrd"${libfile[i]}"
 	done
@@ -752,7 +752,7 @@ updategrub() {
 finishedinstall() {
 	echo -e "finished installing zfs ultimate kernel builder for $sethostname
 	kernel version $kver / $kverorg installed to $bootmount on $bootdrive for $sethostname
-	zfs developer version $() installed to $bootmount on $bootdrive for $sethostname"
+	zfs developer version $zfsv installed to $bootmount on $bootdrive for $sethostname"
 	createautosave finished-installing-kernel
 }
 
@@ -777,6 +777,7 @@ if [[ $(hostname) == "$sethostname" ]]; then
 	kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
+	zfsv=$(grep zfs_meta_version <"$basedir/zfs/zfs_config.h" 2>/dev/null | awk '{print $3}' | grep -v zfs_meta_version | sed 's&"&&g')
 	zfspkginstall
 	copyfilestoinit
 	kerneloptionscheck
