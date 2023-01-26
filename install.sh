@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 black="\033[0;30m"
 red="\033[0;31m"
 green="\033[0;32m"
@@ -525,7 +525,7 @@ loadhostnameprofile() {
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.defaults.save"
 	fi
 
-	#read choices in array bash set variable based on selection
+#read choices in array bash set variable based on selection
 	echo -e "$lastconfigurationlist"
 	read -r -p "pick from a list of previous saves:" pickedconfig
 	sethostname=$pickedconfig
@@ -565,7 +565,7 @@ loadhostnameprofile() {
 firmwareinstall() {
 	createautosave before-firmware-question
 	echo -e " $yellow do you want to install the latest firmware from kernel.org"
-	read -r -p "$(echo -e "$green y=yes install firmware $nocolor $yellow v= view full change log $nocolor $red n= no not now")" firm
+	read -r -p "$(echo -e "$green y=yes install firmware $nocolor $yellow v= $nocolor view full change log $nocolor $red n= no not now $nocolor")" firm
 	if [ "$firm" = Y ] || [ "$firm" = y ]; then
 		if [ -d "$basedir/linux-firmware" ]; then
 			echo -e "firmware folder present - starting update"
@@ -614,7 +614,7 @@ saveuserconfigtokernelbuilder() {
 
 #
 zfsdownload() {
-	#check for presence of zfs folder
+#check for presence of zfs folder
 	if [ -d "$basedir/zfs" ]; then
 		echo -e "zfs folder present, we will update instead"
 		cd "$basedir/zfs" || return
