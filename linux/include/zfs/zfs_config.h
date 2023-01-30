@@ -660,6 +660,9 @@
 /* iops->set_acl() takes 4 args */
 #define HAVE_SET_ACL_USERNS 1
 
+/* iops->set_acl() takes 4 args, arg2 is struct dentry * */
+/* #undef HAVE_SET_ACL_USERNS_DENTRY_ARG2 */
+
 /* set_cached_acl() is usable */
 #define HAVE_SET_CACHED_ACL_USABLE 1
 
@@ -969,7 +972,7 @@
 /* #undef ZFS_IS_GPL_COMPATIBLE */
 
 /* Define the project alias string. */
-#define ZFS_META_ALIAS "zfs-2.1.99-1702_g37a27b430"
+#define ZFS_META_ALIAS "zfs-2.1.99-1710_g973934b96"
 
 /* Define the project author. */
 #define ZFS_META_AUTHOR "OpenZFS"
@@ -999,7 +1002,7 @@
 #define ZFS_META_NAME "zfs"
 
 /* Define the project release. */
-#define ZFS_META_RELEASE "1702_g37a27b430"
+#define ZFS_META_RELEASE "1710_g973934b96"
 
 /* Define the project version. */
 #define ZFS_META_VERSION "2.1.99"
