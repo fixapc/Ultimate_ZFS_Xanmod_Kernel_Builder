@@ -40,6 +40,10 @@ rcu_nocbs=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rcu_
 rcupriority=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rcutree.kthread_prio=.*" | sed 's@rcutree.kthread_prio=@@g')
 initfiles=(gpg gpgv perl ssh-keygen wpa_supplicant wget parted wipefs rc-status dpkg arch-chroot automount debootstrap rc-service rc-update ifup ifquery ifdown apt apt-get apt-cache apt-mark dhclient ssh sshfs zfs zdb zed zfs_ids_to_path zhack zinject zpool zstream ztest ldd openrc bash locale-gen locale agetty gpm tmux grc figlet fish nano udevadm udevd bat)
 
+
+#export basedir
+#export basedir
+
 #
 mkdir -p "$basedir/linux/include"
 mkdir -p "$basedir/linux/include/config"
@@ -69,10 +73,7 @@ cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty
 kverorg=$(cat "$basedir/linux/include/config/kernel.release" 2>/dev/null)
 
 #
-kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release)
-
-#
-
+kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 
 #
 xanmodlinks() {
@@ -160,9 +161,9 @@ function pooltunerz() {
 #
 kerneloptionscheck() {
 	echo -e "confirming module loading is disabled for $sethostname"
-	sed -i 's&.*CONFIG_MODULES=.*&CONFIG_MODULES=# is not set&gi' "$basedir/linux/.config"
+	sed -i 's&.*CONFIG_MODULES=.*&CONFIG_MODULES=# is not set&gI' "$basedir/linux/.config"
 	echo -e "confirming zfs module is buildin for $sethostname"
-	sed -i 's&.*CONFIG_ZFS.*&CONFIG_ZFS=y&gi' "$basedir/linux/.config"
+	sed -i 's&.*CONFIG_ZFS.*&CONFIG_ZFS=y&gI' "$basedir/linux/.config"
 	if [[ $(hostname) == "$sethostname" ]]; then
 		echo -e "local:$green$(hostname) $nocolor $yellow pickedhostname:$nocolor $green $sethostname $nocolor"
 		echo -e "localhostname:$(hostname) matches picked hostname:$sethostname skipping generic cpu v1 set for compiler"
@@ -170,7 +171,7 @@ kerneloptionscheck() {
 		echo -e "localhost does not match picked hostname, confirming generic cpu v1 set for compiler"
 		sed -i 's&CONFIG_MK8=.*&# CONFIG_MK8 is not set&gI' "$basedir/linux/.config"
 		sed -i 's&CONFIG_MK8SSE3=.*&# CONFIG_MK8SSE3 is not set&gI' "$basedir/linux/.config"
-		sed -i 's&CONFIG_MK10=.*&# CONFIG_MK10 is not set&gI' "$/linux/.config"
+		sed -i 's&CONFIG_MK10=.*&# CONFIG_MK10 is not set&gI' "$basedir/linux/.config"
 		sed -i 's&CONFIG_MBARCELONA=.*&# CONFIG_MBARCELONA is not set&gI' "$basedir/linux/.config"
 		sed -i 's&CONFIG_MBOBCAT=.*&# CONFIG_MBOBCAT is not set&gI' "$basedir/linux/.config"
 		sed -i 's&CONFIG_MJAGUAR=.*&# CONFIG_MJAGUAR is not set&gI' "$basedir/linux/.config"
@@ -371,10 +372,10 @@ copyfilestoinit() (
 		cp -v --force --preserve --remove-destination "${file[i]}" -T "$basedir"/initrd"${file[i]}"
 	done
 
-	#Get libs and prepare for injection to initrd, create array based on libs line numbers
+#Get libs and prepare for injection to initrd, create array based on libs line numbers
 	IFS=$'\n' read -rd '' -a filesarray <<<"$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u)"
 
-	#Copy Required Library files to initrd
+#Copy Required Library files to initrd
 	for ((i = 0; i < ${#filesarray[@]}; i++)); do
 		echo -e "$green Copying ${filesarray[i]} to initrd $nocolor THIS IS A TEST WITH IFS"
 		libfile[i]=$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u | sed -n "$i"p)
@@ -650,6 +651,10 @@ saveconfiguredkernelchanges() {
 	cp -a -f "$basedir/linux/.config" "$sethostnamekernelconfig"
 }
 
+#copymoduleinfotoinit() {
+#	cp -a -r -f "$basedir"/linux/
+#}
+
 #
 zfspkginstall() {
 	echo -e "moving to zfs folder - starting"
@@ -760,7 +765,9 @@ finishedinstall() {
 zfsinstalldeps
 getzfsultisysteminfo
 loadhostnameprofile
+export sethostname
 selectkernel
+kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 zfsdownload
 saveuserconfigtokernelbuilder
 
@@ -774,13 +781,13 @@ if [[ $(hostname) == "$sethostname" ]]; then
 	firmwareinstall
 	saveuserconfigtokernelbuilder
 	kernelconfig
-	kerneloptionscheck
+	#kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
 	zfsv=$(grep zfs_meta_version <"$basedir/zfs/zfs_config.h" 2>/dev/null | awk '{print $3}' | grep -v zfs_meta_version | sed 's&"&&g')
 	zfspkginstall
 	copyfilestoinit
-	kerneloptionscheck
+	#kerneloptionscheck
 	compilekernel
 	setupsymlinksformoduleinfo
 	checkifbootmounted
@@ -788,11 +795,11 @@ if [[ $(hostname) == "$sethostname" ]]; then
 else
 	echo -e "hostname does not match savedhostname, starting kernel only install $sethostname"
 	kernelconfig
-	kerneloptionscheck
+	#kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
 	copyfilestoinit
-	kerneloptionscheck
+	#kerneloptionscheck
 	compilekernel
 	checkifbootmounted
 	kerneltobootmissmatch
@@ -800,4 +807,13 @@ fi
 
 updategrub
 finishedinstall
-#testing
+#testing  	installhdsentinel
+	starthtopinstall
+	installzfsulticrons
+	pooltuning
+	firmwareinstall
+	saveuserconfigtokernelbuilder
+	kernelconfig
+	kerneloptionscheck
+	saveconfiguredkernelchanges
+	zfsbuiltininstall

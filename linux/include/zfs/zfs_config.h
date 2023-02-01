@@ -595,7 +595,7 @@
 /* #undef HAVE_PUT_LINK_NAMEIDATA */
 
 /* If available, contains the Python version number currently in use. */
-#define HAVE_PYTHON "3.10"
+#define HAVE_PYTHON "3.11"
 
 /* qat is enabled and existed */
 /* #undef HAVE_QAT */
