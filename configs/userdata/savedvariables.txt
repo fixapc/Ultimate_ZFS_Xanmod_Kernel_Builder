@@ -1,0 +1,9 @@
+default
+diskler
+disklerpxe
+fixapc.net
+mainrig
+mainrigwrk
+mdvinsonlaptop
+PXE
+PXEfixapcserver
