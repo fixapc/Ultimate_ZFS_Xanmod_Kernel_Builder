@@ -509,12 +509,12 @@ starthtopinstall() {
 
 #
 loadhostnameprofile() {
+	sort -u "$basedir/configs/userdata/savedvariables.txt" > /tmp/savedvariables.txt && mv /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
 	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt")
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "config files found for $(hostname) skipping first run"
 	else
 		echo -e "config files not fund for $(hostname) generating defaults"
-		echo savedname hostname pooltuning firmwareupdate hdsentineinstall htopinstall date >>"$basedir/configs/userdata/savedvariables.txt"
 		echo -e "fully-loaded-intel-kernel-default $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
 		echo -e "gutted-intel-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
 		echo -e "gutted-amd-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
