@@ -613,7 +613,7 @@ saveuserconfigtokernelbuilder() {
 #
 zfsdownload() {
 #check for presence of zfs folder
-	if [ -d "$basedir/zfs" ]; then
+	if [ -f "$basedir/zfs/Makefile.am" ]; then
 		echo -e "zfs folder present, we will update instead"
 		cd "$basedir/zfs" || return
 		git fetch --prune
@@ -778,6 +778,7 @@ if [[ $(hostname) == "$sethostname" ]]; then
 	firmwareinstall
 	saveuserconfigtokernelbuilder
 	kernelconfig
+	kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 	#kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
