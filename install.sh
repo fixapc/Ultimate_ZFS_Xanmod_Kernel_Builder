@@ -514,12 +514,9 @@ loadhostnameprofile() {
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "config files found for $(hostname) skipping first run"
 	else
-		echo -e "config files not fund for $(hostname) generating defaults"
-		echo -e "fully-loaded-intel-kernel-default $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
-		echo -e "gutted-intel-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
-		echo -e "gutted-amd-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
-		echo -e "fully-loaded-intel-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
-		echo -e "fully-loaded-amd-kernel $(hostname) nopooltuneselected firmwarenotupdated hdsentinelnotinstalled htopnotinstalled $(date)" >>"$basedir/configs/userdata/savedvariables.txt"
+		echo -e config files not fund for "$(hostname)" generating defaults
+		echo -e cmdline.conf."$(hostname)".save >> "$basedir/configs/userdata/savedvariables.txt"
+		echo -e kernel.config."$(hostname)".save >> "$basedir/configs/userdata/savedvariables.txt"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
