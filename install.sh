@@ -275,7 +275,7 @@ setupsymlinksformoduleinfo() {
 	ln -sf "$basedir"/linux "/lib/modules/$kverorg/kernel"
 	echo -e "creating symlinks to kernel sources ($kverorg) for $sethostname - finished"
 }
-s
+
 #
 pooltuning() {
 	if [ "$tunepoolsq" != N ] && [ "$tunepoolsq" != n ]; then
