@@ -275,7 +275,7 @@ setupsymlinksformoduleinfo() {
 	ln -sf "$basedir"/linux "/lib/modules/$kverorg/kernel"
 	echo -e "creating symlinks to kernel sources ($kverorg) for $sethostname - finished"
 }
-
+s
 #
 pooltuning() {
 	if [ "$tunepoolsq" != N ] && [ "$tunepoolsq" != n ]; then
@@ -423,8 +423,8 @@ function applyautocalcs() {
 #
 function createautosave() {
 	echo -e "creating autosave for $purple $sethostname $nocolor description:$yellow$1$nocolor time:$yellow$(date)$nocolor"
-	cp -a -f "$sethostnamecmdlineconfig" "$basedir/configs/userdata/cmdline.conf.$sethostname.$1.$datemonitor.save"
-	cp -a -f "$sethostnamekernelconfig" "$basedir/configs/userdata/kernel.config.$sethostname.$1.$datemonitor.save"
+	cp -a -f "$sethostnamecmdlineconfig" "$basedir/configs/userdata/autosaves/cmdline.conf.$sethostname.$1.$datemonitor.save"
+	cp -a -f "$sethostnamekernelconfig" "$basedir/configs/userdata/autosaves/kernel.config.$sethostname.$1.$datemonitor.save"
 }
 
 #
