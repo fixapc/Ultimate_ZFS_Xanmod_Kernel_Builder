@@ -40,11 +40,9 @@ rcu_nocbs=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rcu_
 rcupriority=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rcutree.kthread_prio=.*" | sed 's@rcutree.kthread_prio=@@g')
 initfiles=(gpg gpgv perl ssh-keygen wpa_supplicant wget parted wipefs rc-status dpkg arch-chroot automount debootstrap rc-service rc-update ifup ifquery ifdown apt apt-get apt-cache apt-mark dhclient ssh sshfs zfs zdb zed zfs_ids_to_path zhack zinject zpool zstream ztest ldd openrc bash locale-gen locale agetty gpm tmux grc figlet fish nano udevadm udevd bat)
 
-
-#export basedir
-#export basedir
-
 #
+mkdir -p "$basedir/configs/userdata"
+mkdir -p "$basedir/configs/userdata/autosaves"
 mkdir -p "$basedir/linux/include"
 mkdir -p "$basedir/linux/include/config"
 touch "$basedir/linux/include/config/kernel.release"
