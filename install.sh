@@ -41,6 +41,7 @@ rcupriority=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rc
 initfiles=(gpg gpgv perl ssh-keygen wpa_supplicant wget parted wipefs rc-status dpkg arch-chroot automount debootstrap rc-service rc-update ifup ifquery ifdown apt apt-get apt-cache apt-mark dhclient ssh sshfs zfs zdb zed zfs_ids_to_path zhack zinject zpool zstream ztest ldd openrc bash locale-gen locale agetty gpm tmux grc figlet fish nano udevadm udevd bat)
 
 #
+mkdir -p "/bootback"
 mkdir -p "$basedir/configs/userdata"
 mkdir -p "$basedir/configs/userdata/autosaves"
 mkdir -p "$basedir/linux/include"
@@ -351,10 +352,10 @@ copyfilestoinit() (
 		cp -v --force --preserve --remove-destination "${file[i]}" -T "$basedir"/initrd"${file[i]}"
 	done
 
-#Get libs and prepare for injection to initrd, create array based on libs line numbers
+	#Get libs and prepare for injection to initrd, create array based on libs line numbers
 	IFS=$'\n' read -rd '' -a filesarray <<<"$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u)"
 
-#Copy Required Library files to initrd
+	#Copy Required Library files to initrd
 	for ((i = 0; i < ${#filesarray[@]}; i++)); do
 		echo -e "$green Copying ${filesarray[i]} to initrd $nocolor THIS IS A TEST WITH IFS"
 		libfile[i]=$(echo -e "${libs[*]}" | sort -u | xargs readlink -e | sort -u | sed -n "$i"p)
@@ -488,21 +489,21 @@ starthtopinstall() {
 
 #
 loadhostnameprofile() {
-	sort -u "$basedir/configs/userdata/savedvariables.txt" > /tmp/savedvariables.txt && mv /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
+	sort -u "$basedir/configs/userdata/savedvariables.txt" >/tmp/savedvariables.txt && mv /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
 	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt")
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "config files found for $(hostname) skipping first run"
 	else
 		echo -e config files not fund for "$(hostname)" generating defaults
-		echo -e cmdline.conf."$(hostname)".save >> "$basedir/configs/userdata/savedvariables.txt"
-		echo -e kernel.config."$(hostname)".save >> "$basedir/configs/userdata/savedvariables.txt"
+		echo -e cmdline.conf."$(hostname)".save >>"$basedir/configs/userdata/savedvariables.txt"
+		echo -e kernel.config."$(hostname)".save >>"$basedir/configs/userdata/savedvariables.txt"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.defaults.save"
 	fi
 
-#read choices in array bash set variable based on selection
+	#read choices in array bash set variable based on selection
 	echo -e "$lastconfigurationlist"
 	read -r -p "pick from a list of previous saves:" pickedconfig
 	sethostname=$pickedconfig
@@ -591,7 +592,7 @@ saveuserconfigtokernelbuilder() {
 
 #
 zfsdownload() {
-#check for presence of zfs folder
+	#check for presence of zfs folder
 	if [[ -f "$basedir/zfs/Makefile.am" ]]; then
 		echo -e "zfs folder present, we will update instead"
 		cd "$basedir/zfs" || return
@@ -710,6 +711,10 @@ kerneltobootmatcheshost() {
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/$bootmount/vmlinuz-$kver"
 	cp -a -f -v -v "$basedir/linux/System.map" "/$bootmount/System.map-$kver"
 	echo -e "savedhostname matches hostname, copying to $bootmount on $bootdrive for $sethostname - finished"
+	echo -e "Creating kernel backup for $sethostname - starting"
+	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/bootback/vmlinuz-$kver"
+	cp -a -f -v -v "$basedir/linux/System.map" "/bootback/System.map-$kver"
+	echo -e "Creating kernel backup for $sethostname - finished"
 }
 
 #
@@ -719,6 +724,12 @@ kerneltobootmissmatch() {
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "$bootmount/otherhosts/vmlinuz-$kver"
 	cp -a -f -v -v "$basedir/linux/System.map" "$bootmount/otherhosts/System.map-$kver"
 	echo -e "savedhostname does not match hostname, copying to subdirectory in $bootmount on $bootdrive for $sethostname - finished"
+	echo -e "Creating kernel backup for $sethostname - starting"
+	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/bootback/vmlinuz-$kver"
+	cp -a -f -v -v "$basedir/linux/System.map" "/bootback/System.map-$kver"
+	chattr +x "/bootback/vmlinuz-$kver"
+	chattr +x "/bootback/System.map-$kver"
+	echo -e "Creating kernel backup for $sethostname - finished"
 }
 
 #
