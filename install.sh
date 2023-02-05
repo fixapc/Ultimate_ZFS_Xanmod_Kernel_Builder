@@ -75,30 +75,10 @@ kverorg=$(cat "$basedir/linux/include/config/kernel.release" 2>/dev/null)
 kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 
 #
-xanmodlinks() {
-	python3 <<'EOF'
-from bs4 import BeautifulSoup
-import re
-import os
-import sys
-from urllib.request import urlopen
-
-html = urlopen("https://github.com/xanmod/linux/tags/")
-bsobj = BeautifulSoup(html, "html.parser")
-
-links = bsobj.find_all("a", href=re.compile(".*tar.gz"))
-for link in links:
-    findrt = "rt"
-    urladd = "https://github.com/"
-    print(urladd+link['href'])
-EOF
-}
-
-#
-xanmodstdv=$(xanmodlinks | awk 'BEGIN { FS = "/" } ; { print $10 }' | sort --version-sort | rg -v "rt" | tail -n1 | sed 's&.tar.gz&&gI')
-xanmodstddl=$(xanmodlinks | sort --version-sort | rg -v "rt" | tail -n1)
-xanmodrtv=$(xanmodlinks | awk 'BEGIN { FS = "/" } ; { print $10 }' | sort --version-sort | rg "rt" | tail -n1 | sed 's&.tar.gz&&gI')
-xanmodrtdl=$(xanmodlinks | sort --version-sort | rg "rt" | tail -n1)
+xanmodstdv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | rg -v "rt" | tail -n1)
+xanmodstddl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | rg -v "rt" | tail -n1)
+xanmodrtv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | rg "rt" | tail -n1)
+xanmodrtdl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | rg "rt" | tail -n1)
 
 #
 function checkxanmodversion() {
