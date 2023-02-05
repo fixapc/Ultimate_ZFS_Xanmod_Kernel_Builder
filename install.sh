@@ -46,19 +46,20 @@ mkdir -p "$basedir/configs/userdata/autosaves"
 mkdir -p "$basedir/linux/include"
 mkdir -p "$basedir/linux/include/config"
 touch "$basedir/linux/include/config/kernel.release"
-mkdir -p "$basedir/linux/"
-mkdir -p "$basedir/configs/auto_backup_configs/"
-mkdir -p "$basedir/configs/userdata/"
-mkdir -p "$basedir/initrd/usr/"
-mkdir -p "$basedir/initrd/usr/bin/"
-mkdir -p "$basedir/initrd/sys/"
-mkdir -p "$basedir/initrd/proc/"
-mkdir -p "$basedir/initrd/dev/"
-mkdir -p "$basedir/initrd/dev/pts/"
-mkdir -p "$basedir/initrd/dev/shm/"
+mkdir -p "$basedir/linux"
+mkdir -p "$basedir/configs/auto_backup_configs"
+mkdir -p "$basedir/configs/userdata"
+mkdir -p "$basedir/initrd/usr"
+mkdir -p "$basedir/initrd/usr/bin"
+mkdir -p "$basedir/initrd/sys"
+mkdir -p "$basedir/initrd/proc"
+mkdir -p "$basedir/initrd/dev"
+mkdir -p "$basedir/initrd/dev/pts"
+mkdir -p "$basedir/initrd/dev/shm"
 #sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release
 cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty8,tty9,sda1} "$basedir/initrd/dev/" 2>/dev/null
 
+#
 #makerust() {
 #make CC=clang -j36
 #}
@@ -593,7 +594,7 @@ selectkernel() {
 	echo -e "would you like to install the standard or realtime kernel
 		latest rt version:$xanmodrtv
 		latest standard version:$xanmodstdv"
-	read -r -p "$(echo -e "$red=rt$nocolor kernel $yellow s=$nocolor standard kernel")" rtorrolling
+	read -r -p "$(echo -e "$red R$nocolor=rt kernel $yellow S$nocolor= standard kernel")" rtorrolling
 	if [[ "$rtorrolling" == "r" ]] || [[ "$rtorrolling" == "R" ]]; then
 		checkxanmodversion "$xanmodrtv" "$xanmodrtdl"
 	else
@@ -611,7 +612,7 @@ saveuserconfigtokernelbuilder() {
 #
 zfsdownload() {
 #check for presence of zfs folder
-	if [ -f "$basedir/zfs/Makefile.am" ]; then
+	if [[ -f "$basedir/zfs/Makefile.am" ]]; then
 		echo -e "zfs folder present, we will update instead"
 		cd "$basedir/zfs" || return
 		git fetch --prune
@@ -777,13 +778,13 @@ if [[ $(hostname) == "$sethostname" ]]; then
 	saveuserconfigtokernelbuilder
 	kernelconfig
 	kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
-	#kerneloptionscheck
+	kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
 	zfsv=$(grep zfs_meta_version <"$basedir/zfs/zfs_config.h" 2>/dev/null | awk '{print $3}' | grep -v zfs_meta_version | sed 's&"&&g')
 	zfspkginstall
 	copyfilestoinit
-	#kerneloptionscheck
+	kerneloptionscheck
 	compilekernel
 	setupsymlinksformoduleinfo
 	checkifbootmounted
@@ -791,11 +792,11 @@ if [[ $(hostname) == "$sethostname" ]]; then
 else
 	echo -e "hostname does not match savedhostname, starting kernel only install $sethostname"
 	kernelconfig
-	#kerneloptionscheck
+	kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
 	copyfilestoinit
-	#kerneloptionscheck
+	kerneloptionscheck
 	compilekernel
 	checkifbootmounted
 	kerneltobootmissmatch
@@ -803,13 +804,3 @@ fi
 
 updategrub
 finishedinstall
-#testing  	installhdsentinel
-	starthtopinstall
-	installzfsulticrons
-	pooltuning
-	firmwareinstall
-	saveuserconfigtokernelbuilder
-	kernelconfig
-	kerneloptionscheck
-	saveconfiguredkernelchanges
-	zfsbuiltininstall
