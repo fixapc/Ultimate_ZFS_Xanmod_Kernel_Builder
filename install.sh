@@ -66,7 +66,7 @@ cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty
 #}
 #
 #make() {
-#make -j36
+#make -j128
 #}
 
 #
@@ -562,8 +562,8 @@ firmwareinstall() {
 		fi
 		echo -e "installing the latest firmware - starting"
 		cd "$basedir/linux-firmware" || return
-		make -j36
-		make install -j36
+		make -j128
+		make install -j128
 		echo -e "installing the latest firmware - finished"
 	else
 		echo -e "skipping firmware update"
@@ -612,13 +612,13 @@ kernelconfig() {
 	echo -e "running make clean, for kernel configuration pertaining to $sethostname - starting"
 	echo -e "please feel free to edit the kernel configuration"
 	cd "$basedir/linux" || return
-	make clean -j36
+	make clean -j128
 	echo -e "running make clean, for kernel configuration pertaining to $sethostname - finished"
 	echo -e "running make menuconfig, for kernel configuration pertaining to $sethostname - starting"
 	make menuconfig MENUCONFIG_COLOR=blackbg -j36
 	echo -e "running make menuconfig, for kernel configuration pertaining to $sethostname - finished"
 	echo -e "running make prepare, for kernel configuration pertaining to $sethostname - starting"
-	make prepare -j36
+	make prepare -j128
 	echo -e "running make prepare, for kernel configuration pertaining to $sethostname - finished"
 }
 
@@ -638,17 +638,17 @@ zfspkginstall() {
 	cd "$basedir/zfs" || return
 	echo -e "moving to zfs folder - finished"
 	echo -e "running make clean for zfs buildin module, pertaining to $sethostname - starting"
-	make clean -j36
+	make clean -j128
 	echo -e "running make clean for zfs buildin module, pertaining to $sethostname - finished"
 	echo -e "running make prepare for zfs buildin module, pertaining to $sethostname - starting"
-	make prepare -j36
+	make prepare -j128
 	echo -e "running make prepare for zfs buildin module, pertaining to $sethostname - finished"
 	echo -e "confirming deb pkgs and rpmg are removed to ensure clean install $sethostname - starting"
 	rm -r -f -v ./*.deb
 	rm -r -f -v ./*.rpm
 	echo -e "confirming deb pkgs and rpmg are removed to ensure clean install $sethostname - finished"
 	echo -e "building zfs deb files for $sethostname - starting"
-	make deb-utils -j36
+	make deb-utils -j128
 	echo -e "building zfs deb files for $sethostname - finished"
 	echo -e "installing zfs debs for $sethostname - starting"
 	dpkg -i ./*.deb
@@ -677,19 +677,19 @@ compilekernel() {
 	cd "$basedir/linux" || return
 	echo -e "moving to kernel folder - finished"
 	echo -e "running make prepare for kernel ($kver / $kverorg) pertaining to $sethostname - starting"
-	make prepare -j36
+	make prepare -j128
 	echo -e "running make prepare for kernel ($kver / $kverorg) pertaining to $sethostname - finished"
 	echo -e "running make for kernel ($kver / $kverorg) pertaining to $sethostname - starting"
-	make -j36
+	make -j128
 	echo -e "running make for kernel ($kver / $kverorg) pertaining to $sethostname - finished"
 	echo -e "running make headers for kernel ($kver / $kverorg) pertaining to $sethostname - starting"
-	make headers -j36
+	make headers -j128
 	echo -e "running make headers for kernel ($kver / $kverorg) pertaining to $sethostname - finished"
 	echo -e "running make headers_install for kernel ($kver / $kverorg) pertaining to $sethostname - starting"
-	make headers_install -j36
+	make headers_install -j128
 	echo -e "running make headers_install for kernel ($kver / $kverorg) pertaining to $sethostname - finished"
 	echo -e "running make scripts for kernel ($kver / $kverorg) pertaining to $sethostname - starting"
-	make scripts -j36
+	make scripts -j128
 	echo -e "running make scripts for kernel ($kver / $kverorg) pertaining to $sethostname - finished"
 }
 
