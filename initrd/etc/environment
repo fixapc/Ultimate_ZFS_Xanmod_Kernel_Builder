@@ -31,19 +31,19 @@ nfsrootoptions=$(grep -m1 -o -i "nfsrootoptions=.*" </proc/cmdline | awk '{print
 
 function rescue() (
     if [ "$1" = importpool ]; then
-        echo -e "$red ZFS POOL IMPORT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+        echo -e "$red ZFS POOL IMPORT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE"
     fi
     if [ "$1" = mountpool ]; then
-        echo -e "$red ZFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+        echo -e "$red ZFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE"
     fi
     if [ "$1" = mountnfs ]; then
-        echo -e "$red NFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+        echo -e "$red NFS MOUNT FAILED: $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE"
     fi
     if [ "$1" = breaknow ]; then
-        echo -e "$red BREAKNOW COMMAND ISSUED, $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+        echo -e "$red BREAKNOW COMMAND ISSUED, $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE"
     fi
     if [ "$1" = breakpreboot ]; then
-        echo -e "$red BREAKPREBOOT COMMAND ISSUED,  $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE :)"
+        echo -e "$red BREAKPREBOOT COMMAND ISSUED,  $nocolor DROPPING TO A BAD ASS INIT THAT ANYONE CAN USE"
     fi
     echo -e "$green ZFS COMMAND LIST $nocolor"
     echo -e "$green importpool $nocolor imports pool by looking at the root= kernel commandline"
@@ -56,7 +56,8 @@ function rescue() (
 )
 
 importpool() (
-    echo -e "$yellow attempting to import pool $nocolor"
+    echo -e "$yellow attempting to import pool, sleeping for 5 sec $nocolor"
+    sleep 5
     /sbin/zpool import -o cachefile=none -o failmode=continue -N -f -d /dev/disk/by-id "$rpool" || rescue import
 )
 
