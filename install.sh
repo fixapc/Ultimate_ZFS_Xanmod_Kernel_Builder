@@ -57,6 +57,7 @@ mkdir -p "$basedir/initrd/proc"
 mkdir -p "$basedir/initrd/dev"
 mkdir -p "$basedir/initrd/dev/pts"
 mkdir -p "$basedir/initrd/dev/shm"
+touch "$basedir/configs/userdata/savedvariables.txt"
 #sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release
 cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty8,tty9,sda1} "$basedir/initrd/dev/" 2>/dev/null
 
