@@ -496,9 +496,10 @@ loadhostnameprofile() {
 		echo -e "$lastconfigurationlist"
 	else
 		echo -e config files not fund for "$(hostname)" generating defaults
-		echo -e "$(hostname)" >>"$basedir/configs/userdata/savedvariables.txt"
-		unset lastconfigurationlist
-		set lastconfigurationlist
+		echo -e "$(hostname)" >> "$basedir/configs/userdata/savedvariables.txt"
+		echo -e "$yellow List Of Hostname Configs $nocolor"
+		lastconfigurationlist=$(cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" | xargs -n1)
+		echo -e "$lastconfigurationlist"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
