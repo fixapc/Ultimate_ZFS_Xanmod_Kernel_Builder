@@ -46,7 +46,7 @@ mkdir -p "$basedir/configs/userdata"
 mkdir -p "$basedir/configs/userdata/autosaves"
 mkdir -p "$basedir/linux/include"
 mkdir -p "$basedir/linux/include/config"
-touch "$basedir/linux/include/config/kernel.release"
+touch 	 "$basedir/linux/include/config/kernel.release"
 mkdir -p "$basedir/linux"
 mkdir -p "$basedir/configs/auto_backup_configs"
 mkdir -p "$basedir/configs/userdata"
@@ -491,8 +491,10 @@ starthtopinstall() {
 #
 loadhostnameprofile() {
 	sort -u "$basedir/configs/userdata/savedvariables.txt" >/tmp/savedvariables.txt && mv /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
+	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt")
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "config files found for $(hostname) skipping first run"
+		echo -e "$lastconfigurationlist"
 	else
 		echo -e config files not fund for "$(hostname)" generating defaults
 		echo -e "$(hostname)" >>"$basedir/configs/userdata/savedvariables.txt"
