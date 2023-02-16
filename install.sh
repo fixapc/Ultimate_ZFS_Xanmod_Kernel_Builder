@@ -41,6 +41,9 @@ rcupriority=$(grep -v "#" <"$basedir"/configs/cmdline_default.conf | grep -o "rc
 initfiles=(gpg gpgv perl ssh-keygen wpa_supplicant wget parted wipefs rc-status dpkg arch-chroot automount debootstrap rc-service rc-update ifup ifquery ifdown apt apt-get apt-cache apt-mark dhclient ssh sshfs zfs zdb zed zfs_ids_to_path zhack zinject zpool zstream ztest ldd openrc bash locale-gen locale agetty gpm tmux grc figlet fish nano udevadm udevd bat)
 
 #
+export basedir
+
+#
 mkdir -p "/bootback"
 mkdir -p "$basedir/configs/userdata"
 mkdir -p "$basedir/configs/userdata/autosaves"
@@ -58,6 +61,7 @@ mkdir -p "$basedir/initrd/dev"
 mkdir -p "$basedir/initrd/dev/pts"
 mkdir -p "$basedir/initrd/dev/shm"
 touch "$basedir/configs/userdata/savedvariables.txt"
+touch "/tmp/savedvariables.txt"
 #sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release
 cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty8,tty9,sda1} "$basedir/initrd/dev/" 2>/dev/null
 
@@ -490,7 +494,9 @@ starthtopinstall() {
 
 #
 loadhostnameprofile() {
-	lastconfigurationlist=$(cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" | xargs -n1)
+	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" | xargs -n1 > /tmp/savedvariables.txt && cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" && cat "$basedir/configs/userdata/savedvariables.txt")
+	sleep 10
+	echo -e "$lastconfigurationlist"
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "$yellow config files found for $(hostname) skipping first run $nocolor"
 		#echo -e "$lastconfigurationlist"
@@ -498,7 +504,7 @@ loadhostnameprofile() {
 		echo -e config files not fund for "$(hostname)" generating defaults
 		echo -e "$(hostname)" >> "$basedir/configs/userdata/savedvariables.txt"
 		echo -e "$yellow List Of Hostname Configs $nocolor"
-		unset "$lastconfigurationlist" && lastconfigurationlist=$(cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" | xargs -n1)
+		lastconfigurationlist=$(cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" | xargs -n1)
 		echo -e "$lastconfigurationlist"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
