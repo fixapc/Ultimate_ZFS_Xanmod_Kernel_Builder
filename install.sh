@@ -87,6 +87,53 @@ xanmodrtv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page
 xanmodrtdl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | rg "rt" | tail -n1)
 
 #
+generatedefaultcmdline() {
+	cat <<EOF > "$basedir"/configs/cmdline_default.conf
+default_hugepagesz=
+hugepages=
+hugepagesz=
+idle=poll
+intel_iommu=on
+iomem=relaxed
+iommu.passthrough=1
+iommu=pt
+irqaffinity=
+kvm-intel.nested=1
+mitigations=off
+net.ifnames=0
+nohz_full=
+nvme.io_queue_depth=2048
+nvme.noacpi=Y
+pcie_acs_override=downstream,multifunction
+pcie_aspm.policy=performance
+pci-stub.ids=
+rcu_nocb_poll
+rcu_nocbs=
+rcutree.kthread_prio=
+rcutree.use_softirq=0
+skew_tick=1
+spl.spl_hostid=1
+vfio_iommu_type1.allow_unsafe_interrupts=1
+vfio_pci.disable_denylist=Y
+vfio_pci.disable_idle_d3=Y
+vm.overcommit_ratio=0
+vm.page-cluster=0
+vm.swappiness=0
+vm.vfs_cache_pressure=0
+#zfs.l2arc_feed_again=1
+zfs.l2arc_noprefetch=0
+zfs.spa_config_path=none
+zfs.zfs_arc_max=
+zfs.zfs_arc_min=
+zfs.zfs_ddt_data_is_special=0
+zfs.zfs_deadman_failmode=continue
+zfs.zfs_dedup_prefetch=1
+zfs.zio_dva_throttle_enabled=0
+zfs.zvol_volmode=1
+EOF
+}
+
+#
 function checkxanmodversion() {
 	if [ "$1" = "$(cat "$basedir"/linux/include/config/kernel.release 2>/dev/null)" ]; then
 		echo -e "kernel versions matched, skipping download"
