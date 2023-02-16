@@ -802,6 +802,7 @@ finishedinstall() {
 }
 
 #
+generatedefaultcmdline
 zfsinstalldeps
 getzfsultisysteminfo
 loadhostnameprofile
