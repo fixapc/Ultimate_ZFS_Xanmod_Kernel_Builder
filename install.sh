@@ -496,8 +496,7 @@ loadhostnameprofile() {
 		echo -e "config files found for $(hostname) skipping first run"
 	else
 		echo -e config files not fund for "$(hostname)" generating defaults
-		echo -e cmdline.conf."$(hostname)".save >>"$basedir/configs/userdata/savedvariables.txt"
-		echo -e kernel.config."$(hostname)".save >>"$basedir/configs/userdata/savedvariables.txt"
+		echo -e "$(hostname)" >>"$basedir/configs/userdata/savedvariables.txt"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
