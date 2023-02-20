@@ -137,6 +137,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/always-arch.m4 \
 	$(top_srcdir)/config/kernel-fallocate.m4 \
 	$(top_srcdir)/config/kernel-file-dentry.m4 \
 	$(top_srcdir)/config/kernel-file-inode.m4 \
+	$(top_srcdir)/config/kernel-filemap.m4 \
 	$(top_srcdir)/config/kernel-fmode-t.m4 \
 	$(top_srcdir)/config/kernel-follow-down-one.m4 \
 	$(top_srcdir)/config/kernel-fpu.m4 \
@@ -684,7 +685,7 @@ LIBUUID_PC = uuid
 LINUX = /home/usr/Ultimate_ZFS_Xanmod_Kernel_Builder/linux
 LINUX_OBJ = /home/usr/Ultimate_ZFS_Xanmod_Kernel_Builder/linux
 LINUX_SYMBOLS = NONE
-LINUX_VERSION = 6.1.11-xanmod1
+LINUX_VERSION = 6.1.12-Ulti.efi-xanmod1
 LIPO = 
 LN_S = ln -s
 LTLIBICONV = -liconv
@@ -739,7 +740,7 @@ QAT_OBJ =
 QAT_SRC = 
 QAT_SYMBOLS = 
 RANLIB = ranlib
-RELEASE = 1726_g7883ea223
+RELEASE = 1736_g9f08b6e31
 RM = rm -f
 RPM = rpm
 RPMBUILD = rpmbuild
@@ -774,7 +775,7 @@ XGETTEXT = /usr/bin/xgettext
 XGETTEXT_015 = /usr/bin/xgettext
 XGETTEXT_EXTRA_OPTIONS = 
 ZFS_CONFIG = all
-ZFS_META_ALIAS = zfs-2.1.99-1726_g7883ea223
+ZFS_META_ALIAS = zfs-2.1.99-1736_g9f08b6e31
 ZFS_META_AUTHOR = OpenZFS
 ZFS_META_DATA = 
 ZFS_META_KVER_MAX = 6.1
@@ -784,7 +785,7 @@ ZFS_META_LT_AGE =
 ZFS_META_LT_CURRENT = 
 ZFS_META_LT_REVISION = 
 ZFS_META_NAME = zfs
-ZFS_META_RELEASE = 1726_g7883ea223
+ZFS_META_RELEASE = 1736_g9f08b6e31
 ZFS_META_VERSION = 2.1.99
 ZLIB_CFLAGS = 
 ZLIB_LIBS = -lz 
