@@ -56,8 +56,7 @@ function rescue() (
 )
 
 importpool() (
-    echo -e "$yellow attempting to import pool, sleeping for 10 sec $nocolor"
-    sleep 10
+    echo -e "$yellow attempting to import pool $nocolor"
     /sbin/zpool import -o cachefile=none -o failmode=continue -N -f -d /dev/disk/by-id "$rpool" || rescue import
 )
 
