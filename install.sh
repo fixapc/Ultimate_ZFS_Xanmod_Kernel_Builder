@@ -793,6 +793,21 @@ updategrub() {
 	echo -e "updating grub for $sethostname - finished"
 }
 
+installefibootmgr() {
+	read -r -p "$(echo -e "would you like to install the required/following dependencies? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgr
+	if [ "$efibootmgr" = Y ] || [ "$efibootmgr" = y ]; then
+	read -r -p "$(echo -e "Would you like to delete all your efi boot entires first? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgrdel
+	if [ "$efibootmgrdel" = Y ] || [ "$efibootmgrdel" = y ]; then
+	efibootmgr | grep Boot | cut -c 5- | while read entry; do sudo efibootmgr -b $entry -B; done
+	fi
+	echo -e "$yellow installing efibootmgr for $sethostname - starting $nocolor"
+	efibootmgr -c -d /dev/sda -p 1 -L "$kver" -l "$bootmount/vmlinuz-$kver" -u 'root=/dev/sda1 ro'
+	echo -e "$yellow installing efibootmgr for $sethostname - finished $nocolor"
+	else
+	echo -e "$red skipping efibootmgr install for $sethostname $nocolor"
+fi
+}
+
 #
 finishedinstall() {
 	echo -e "finished installing zfs ultimate kernel builder for $sethostname
@@ -837,6 +852,7 @@ if [[ $(hostname) == "$sethostname" ]]; then
 else
 	echo -e "hostname does not match savedhostname, starting kernel only install $sethostname"
 	kernelconfig
+	kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 	kerneloptionscheck
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
