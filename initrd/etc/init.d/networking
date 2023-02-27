@@ -148,7 +148,7 @@ stop)
 	check_network_swap
 
 	log_action_begin_msg "Deconfiguring network interfaces"
-	if ifdown -a --exclude=lo $verbose; then
+	if ifdown -a $verbose; then
 	    log_action_end_msg $?
 	else
 	    log_action_end_msg $?
@@ -160,7 +160,7 @@ reload)
 
 	log_action_begin_msg "Reloading network interfaces configuration"
 	state=$(ifquery --state)
-	ifdown -a --exclude=lo $verbose || true
+	ifdown -a $verbose || true
 	if ifup "$state" $verbose ; then
 	    log_action_end_msg $?
 	else
@@ -173,10 +173,10 @@ force-reload|restart)
 
 	log_warning_msg "Running $0 $1 is deprecated because it may not re-enable some interfaces"
 	log_action_begin_msg "Reconfiguring network interfaces"
-	ifdown -a --exclude=lo $verbose || true
+	ifdown -a $verbose || true
 	set -f
 	exclusions=$(process_exclusions)
-	if ifup -a --exclude=lo "$exclusions" $verbose && ifup_hotplug "$exclusions" $verbose
+	if ifup -a  "$exclusions" $verbose && ifup_hotplug "$exclusions" $verbose
 	then
 	    log_action_end_msg $?
 	else
