@@ -30,7 +30,7 @@ set -o allexport
 export
 
 #Check for NFSROOT
-if [ "$(grep -i -o -m1 NFS </proc/cmdline)" = "nfs" ]; then mountnfs; fi
+if [ "$(grep -i -o -m1 "nfs=enabled" </proc/cmdline | head -n1)" = "nfs=enabled" ]; then mountnfs; fi
 
 #CHECK FOR BREAKNOW
 if [ "$(grep -i -o -m1 breaknow </proc/cmdline)" = "breaknow" ]; then rescue breaknow; fi

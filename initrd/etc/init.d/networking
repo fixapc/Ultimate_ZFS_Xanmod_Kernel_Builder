@@ -29,13 +29,13 @@ verbose=""
 [ "$VERBOSE" = yes ] && verbose=-v
 
 process_exclusions() {
-    set -- $EXCLUDE_INTERFACES
+    set -- "$EXCLUDE_INTERFACES"
     exclusions=""
     for d
     do
 	exclusions="-X $d $exclusions"
     done
-    echo $exclusions
+    echo "$exclusions"
 }
 
 process_options() {
@@ -112,7 +112,7 @@ ifup_hotplug () {
 			    done)
 	    if [ -n "$ifaces" ]
 	    then
-		ifup $ifaces "$@" || true
+		ifup "$ifaces" "$@" || true
 	    fi
     fi
 }
@@ -131,11 +131,11 @@ start)
 	exclusions=$(process_exclusions)
 	log_action_begin_msg "Configuring network interfaces"
 	if [ -x /bin/udevadm ]; then
-		if [ -n "$(ifquery --list --exclude=lo)" ] || [ -n "$(ifquery --list --allow=hotplug)" ]; then
+		if [ -n "$(ifquery --list)" ] || [ -n "$(ifquery --list --allow=hotplug)" ]; then
 			/bin/udevadm settle || true
 		fi
 	fi
-	if ifup -a $exclusions $verbose && ifup_hotplug $exclusions $verbose
+	if ifup -a "$exclusions" $verbose && ifup_hotplug "$exclusions" $verbose
 	then
 	    log_action_end_msg $?
 	else
@@ -161,7 +161,7 @@ reload)
 	log_action_begin_msg "Reloading network interfaces configuration"
 	state=$(ifquery --state)
 	ifdown -a --exclude=lo $verbose || true
-	if ifup --exclude=lo $state $verbose ; then
+	if ifup "$state" $verbose ; then
 	    log_action_end_msg $?
 	else
 	    log_action_end_msg $?
@@ -176,7 +176,7 @@ force-reload|restart)
 	ifdown -a --exclude=lo $verbose || true
 	set -f
 	exclusions=$(process_exclusions)
-	if ifup -a --exclude=lo $exclusions $verbose && ifup_hotplug $exclusions $verbose
+	if ifup -a --exclude=lo "$exclusions" $verbose && ifup_hotplug "$exclusions" $verbose
 	then
 	    log_action_end_msg $?
 	else
