@@ -244,58 +244,68 @@ kerneloptionscheck() {
 	fi
 }
 
-#
-zfscronjobshourly() {
-	cat <<'EOF'
-#!/bin/bash
-zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__HOURLY)
-echo -1 > /proc/sys/kernel/sched_rt_runtime_us
-echo -1 > /proc/sys/kernel/sched_rt_period_us
-2048 > /proc/sys/fs/mqueue/queues_max
-12860060 > /proc/sys/fs/file-max
-2000000 > /proc/sys/fs/fanotify/max_user_marks
-2048 > /proc/sys/fs/fanotify/max_user_groups
-65536 > /proc/sys/fs/fanotify/max_queued_events
-1024 > /proc/sys/fs/inotify/max_user_instances
-65536 > /proc/sys/fs/inotify/max_queued_events
-524288  > /proc/sys/fs/inotify/max_user_watches
-bash -c "ulimit -n 1028"
-bash -c "ulimit -n 1028"
-bash -c "ulimit -c unlimited"
-bash -c "ulimit -d unlimited"
-bash -c "ulimit -f unlimited"
-bash -c "ulimit -l unlimited"
-bash -c "ulimit -m unlimited"
-bash -c "ulimit -s unlimited"
-bash -c "ulimit -t unlimited"
-bash -c "ulimit -v unlimited"
-bash -c "ulimit -u unlimited"
-EOF
-}
+#Cronjob4all systems
+zfscronjobs=(
+	'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
+	'@hourly zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__HOURLY)'
+	'@daily zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__DAILY)'
+	'@weekly zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__WEEKLY)'
+	'@monthly zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__MONTHLY)'
+	'@daily swapoff -a'
+	'@daily chown usr:usr /home/usr'
+	'@reboot xset s off'
+	'@reboot xset s noblank'
+	'@reboot xset -dpms'
+	'*/5 * * * * rc-service autofs reload'
+	'*/5 * * * * rm /run/user/1000/rofi.pid'
+	'@hourly fish_update_completions'
+	'@hourly DEBIAN_FRONTEND=noninteractive apt-get update'
+	'@reboot udevadm hwdb --update'
+	'@reboot df -a'
+	'@reboot hdparm -S 255 /dev/sd*'
+	'@reboot echo 0 > /proc/sys/vm/swappiness'
+	'@reboot echo 60000000 > /proc/sys/fs/epoll/max_user_watches'
+	'@reboot echo 2000000 > /proc/sys/fs/pipe-max-size'
+	'@reboot echo 2048 > /proc/sys/fs/mqueue/queues_max'
+	'@reboot echo 12860060 > /proc/sys/fs/file-max'
+	'@reboot echo 2000000 > /proc/sys/fs/fanotify/max_user_marks'
+	'@reboot echo 2048 > /proc/sys/fs/fanotify/max_user_groups'
+	'@reboot echo 65536 > /proc/sys/fs/fanotify/max_queued_events'
+	'@reboot echo 1024 > /proc/sys/fs/inotify/max_user_instances'
+	'@reboot echo 65536 > /proc/sys/fs/inotify/max_queued_events'
+	'@reboot echo 524288  > /proc/sys/fs/inotify/max_user_watches'
+	'@reboot echo -j36 > /sys/module/nvme/parameters/poll_queues'
+	'@reboot echo 2048 > /sys/module/nvme/parameters/io_queue_depth'
+	'@reboot echo -1 > /proc/sys/kernel/sched_rt_runtime_us'
+	'@reboot echo -1 > /proc/sys/kernel/sched_rt_period_us'
+	'@reboot echo 20059 > /proc/sys/fs/nfs/nfs_callback_tcpport'
+	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables'
+	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
+	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables'
+	'bash -c "ulimit -n 1028'
+	'bash -c "ulimit -n 1028'
+	'bash -c "ulimit -c unlimited'
+	'bash -c "ulimit -d unlimited'
+	'bash -c "ulimit -f unlimited'
+	'bash -c "ulimit -l unlimited'
+	'bash -c "ulimit -m unlimited'
+	'bash -c "ulimit -s unlimited'
+	'bash -c "ulimit -t unlimited'
+	'bash -c "ulimit -v unlimited'
+	'bash -c "ulimit -u unlimited'
+)
 
-#
-zfscronjobsdaily() {
-	cat <<'EOF'
-#!/bin/bash
-zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__DAILY)
+#Start cronjobs installation
+installzfscronjobs() {
+	for ((cjp = 0; czfs < ${#zfscronjobs[@]}; czfs++)); do
+		if [[ $(cat /var/spool/cron/crontabs/root | grep -o -F "${zfscronjobs[czfs]}") == "${zfscronjobs[czfs]}" ]]; then
+		echo -e "cronjob ${zfscronjobs[czfs]} already installed"
+		else
+cat <<EOF | cat >> "/var/spool/cron/crontabs/root"
+${zfscronjobs[czfs]}
 EOF
-}
-
-#
-zfscronjobsweekly() {
-	cat <<'EOF'
-#!/bin/bash
-zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__DAILY)
-zpool scrub rpool
-EOF
-}
-
-#
-zfscronjobsmonthly() {
-	cat <<'EOF'
-#!/bin/bash
-zfs snap -r rpool@$(date +\%Y-\%m-\%d__\%I-\%M-\%S-\%p__MONTHLY)
-EOF
+		fi
+	done
 }
 
 #
@@ -500,29 +510,12 @@ installzfsulticrons() {
 	echo -e "would you like to install the zfs ultimate cronjobs?"
 	read -r -p "$(echo -e "$green" Y= yes cronjobs "$nocolor" "$red" V= viewcron jobs "$nocolor" "$red" N= no not now "$nocolor")" installcrons
 	if [ "$installcrons" = V ] || [ "$installcrons" = v ]; then
-		echo -e "hourly crons"
-		zfscronjobshourly | bat -l bash --style=plain
-		echo -e "daily crons"
-		zfscronjobsdaily | bat -l bash --style=plain
-		echo -e "monthly crons"
-		zfscronjobsmonthly | bat -l bash --style=plain
-		echo -e "weekly crons"
-		zfscronjobsweekly | bat -l bash --style=plain
+		echo -e "All Cron Jobs"
+		echo -e "${zfscronjobs[*]}" | bat -l bash --style=plain
 	fi
 	if [ "$installcrons" = Y ] || [ "$installcrons" = y ]; then
-		echo -e "installing cron jobs to /etc/cron.hourly"
-		zfscronjobshourly >/etc/cron.hourly/zfsulti
-		chmod +x /etc/cron.hourly/zfsulti
-		echo -e "installing cron jobs to /etc/cron.daily"
-		zfscronjobsdaily >/etc/cron.daily/zfsulti
-		chmod +x /etc/cron.daily/zfsulti
-		echo -e "installing cron jobs to /etc/cron.weekly"
-		zfscronjobsmonthly >/etc/cron.weekly/zfsulti
-		chmod +x /etc/cron.weekly/zfsulti
-		echo -e "installing cron jobs to /etc/cron.monthly"
-		zfscronjobsweekly >/etc/cron.monthly/zfsulti
-		chmod +x /etc/cron.monthly/zfsulti
-		echo -e "finished installing crons"
+		echo -e "installing cron jobs to root crontab"
+		installzfscronjobs
 	else
 		echo -e "not installing crons"
 	fi
