@@ -17,16 +17,16 @@ datemonitor=$(date +%Y-%m-%d__%I-%M-%S-%p)
 #
 IFS=$'\n'
 runkern=$(uname -r)
-userdatadir=$(readlink -e "$basedir/configs/userdata/" 2>/dev/null)
+userdatadir=$(readlink -e "$basedir/configs/userdata/")
 root=$(df -t zfs / 2>/dev/null | awk '{print $1}' | tail -n1)
-bootfs=$(zpool list "$root" -H -o bootfs 2>/dev/null)
-bootmount=$(df /boot 2>/dev/null | awk '/boot/{print $6}')
+bootfs=$(zpool list "$root" -H -o bootfs)
+bootmount=$(df -t zfs -T / | awk '{print $1}')
 bootdrive=$(df /boot 2>/dev/null | awk '/boot/{print $1}')
 totalmem=$(awk '/MemTotal/{print $2/1024"gb"}' /proc/meminfo)
 hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2 }' /proc/meminfo)
 hugepage=$(awk '( $1 == "Hugepagesize:" ) { print $2/1024^2 }' /proc/meminfo)
 hugepageamount=$(awk '( $1 == "Hugetlb:" ) { print $2/1024^2 }' /proc/meminfo)
-pcipassthroughids=$(rg -i -o -e "pci-stub.ids=.*|vfio-pci.ids=.*" </proc/cmdline 2>/dev/null | awk '{print $1}' | sed 's&pci-stub.ids=&&' | sed 's&vfio-pci.ids=&&')
+pcipassthroughids=$(rg -i -o -e "pci-stub.ids=.*|vfio-pci.ids=.*" </proc/cmdline | awk '{print $1}' | sed 's&pci-stub.ids=&&' | sed 's&vfio-pci.ids=&&')
 distro=$(grep -i pretty_name </etc/os-release | sed 's*pretty_name=**' | sed 's&"&&g')
 autoarcminb=$(awk '/MemTotal/{print $2*1024*.50}' /proc/meminfo)
 autoarcmaxb=$(awk '/MemTotal/{print $2*1024*.75}' /proc/meminfo)
@@ -282,17 +282,17 @@ zfscronjobs=(
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables'
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables'
-	'bash -c "ulimit -n 1028'
-	'bash -c "ulimit -n 1028'
-	'bash -c "ulimit -c unlimited'
-	'bash -c "ulimit -d unlimited'
-	'bash -c "ulimit -f unlimited'
-	'bash -c "ulimit -l unlimited'
-	'bash -c "ulimit -m unlimited'
-	'bash -c "ulimit -s unlimited'
-	'bash -c "ulimit -t unlimited'
-	'bash -c "ulimit -v unlimited'
-	'bash -c "ulimit -u unlimited'
+	'@reboot bash -c "ulimit -n 1028'
+	'@reboot bash -c "ulimit -n 1028'
+	'@reboot bash -c "ulimit -c unlimited'
+	'@reboot bash -c "ulimit -d unlimited'
+	'@reboot bash -c "ulimit -f unlimited'
+	'@reboot bash -c "ulimit -l unlimited'
+	'@reboot bash -c "ulimit -m unlimited'
+	'@reboot bash -c "ulimit -s unlimited'
+	'@reboot bash -c "ulimit -t unlimited'
+	'@reboot bash -c "ulimit -v unlimited'
+	'@reboot bash -c "ulimit -u unlimited'
 )
 
 #Start cronjobs installation
