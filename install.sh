@@ -282,17 +282,17 @@ zfscronjobs=(
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables'
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
 	'@reboot echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables'
-	'@reboot bash -c "ulimit -n 1028'
-	'@reboot bash -c "ulimit -n 1028'
-	'@reboot bash -c "ulimit -c unlimited'
-	'@reboot bash -c "ulimit -d unlimited'
-	'@reboot bash -c "ulimit -f unlimited'
-	'@reboot bash -c "ulimit -l unlimited'
-	'@reboot bash -c "ulimit -m unlimited'
-	'@reboot bash -c "ulimit -s unlimited'
-	'@reboot bash -c "ulimit -t unlimited'
-	'@reboot bash -c "ulimit -v unlimited'
-	'@reboot bash -c "ulimit -u unlimited'
+	'@reboot ulimit -n 1028'
+	'@reboot ulimit -n 1028'
+	'@reboot ulimit -c unlimited'
+	'@reboot ulimit -d unlimited'
+	'@reboot ulimit -f unlimited'
+	'@reboot ulimit -l unlimited'
+	'@reboot ulimit -m unlimited'
+	'@reboot ulimit -s unlimited'
+	'@reboot ulimit -t unlimited'
+	'@reboot ulimit -v unlimited'
+	'@reboot ulimit -u unlimited'
 )
 
 #Start cronjobs installation
@@ -306,6 +306,8 @@ ${zfscronjobs[czfs]}
 EOF
 		fi
 	done
+	chown root:crontab /var/spool/cron/crontabs/root
+	chmod 600 /var/spool/cron/crontabs/root
 }
 
 #
