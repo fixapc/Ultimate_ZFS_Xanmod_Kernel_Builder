@@ -737,8 +737,8 @@ checkifbootmounted() {
 #
 kerneltobootmatcheshost() {
 	echo -e "savedhostname matches hostname, copying to $bootmount on $bootdrive for $sethostname - starting"
-	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/$bootmount/vmlinuz-$kver"
-	cp -a -f -v -v "$basedir/linux/System.map" "/$bootmount/System.map-$kver"
+	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/boot/vmlinuz-$kver"
+	cp -a -f -v -v "$basedir/linux/System.map" "/boot/System.map-$kver"
 	echo -e "savedhostname matches hostname, copying to $bootmount on $bootdrive for $sethostname - finished"
 	echo -e "Creating kernel backup for $sethostname - starting"
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/bootback/vmlinuz-$kver"
@@ -774,7 +774,7 @@ installefibootmgr() {
 	if [ "$efibootmgr" = Y ] || [ "$efibootmgr" = y ]; then
 	read -r -p "$(echo -e "Would you like to delete all your efi boot entires first? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgrdel
 	if [ "$efibootmgrdel" = Y ] || [ "$efibootmgrdel" = y ]; then
-	efibootmgr | grep Boot | cut -c 5- | while read entry; do sudo efibootmgr -b $entry -B; done
+	efibootmgr | grep Boot | cut -c 5- | while read entry; do sudo efibootmgr -b "$entry" -B; done
 	fi
 	echo -e "$yellow installing efibootmgr for $sethostname - starting $nocolor"
 	efibootmgr -c -d /dev/sda -p 1 -L "$kver" -l "$bootmount/vmlinuz-$kver" -u 'root=/dev/sda1 ro'
