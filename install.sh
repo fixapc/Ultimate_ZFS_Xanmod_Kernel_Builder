@@ -189,7 +189,6 @@ zfsinstalldeps() {
 		echo -e "installing dependencies - starting"
 		apt-get update
 		echo -e "$zfsultideps" | xargs -n1 apt-get -y install
-		ln -sf /usr/bin/batcat /usr/bin/bat
 	fi
 	if [ "$zfsultidepsinstall" = n ] || [ "$zfsultidepsinstall" = N ]; then
 		echo -e "not installing dependencies - exiting"
