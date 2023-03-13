@@ -183,7 +183,7 @@ ishdsentinelinstalled() {
 #
 zfsinstalldeps() {
 	zfsultideps="rustc rust-all autogen bat python3-full batcat ripgrep libssl-dev libblkid-dev uuid-dev fish tmux grc libvirt-daemon-driver-storage-zfs alien dh-make dh-dist-zilla dh-acc dh-autoreconf intltool intltool-debian libtool gettext autoconf libelf-dev grub2-common grub-efi-amd64-bin libncurses-dev pkg-config rsync flex bison binutils build-essential git figlet ksh bc fio acl sysstat mdadm lsscsi parted attr dbench nfs-kernel-server samba rng-tools pax linux-perf selinux-utils quota build-essential autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging git libcurl4-openssl-dev"
-	echo -e "$zfsultideps" | xargs -n5 | column -t | bash
+	echo -e "$zfsultideps" | xargs -n5 | column -t
 	read -r -p "$(echo -e "would you like to install the required/following dependencies? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" zfsultidepsinstall
 	if [ "$zfsultidepsinstall" = Y ] || [ "$zfsultidepsinstall" = y ]; then
 		echo -e "installing dependencies - starting"
