@@ -81,10 +81,10 @@ kverorg=$(cat "$basedir/linux/include/config/kernel.release" 2>/dev/null)
 kver=$(sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gI' <"$basedir"/linux/include/config/kernel.release)
 
 #
-xanmodstdv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | rg -v "rt" | tail -n1)
-xanmodstddl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | rg -v "rt" | tail -n1)
-xanmodrtv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | rg "rt" | tail -n1)
-xanmodrtdl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | rg "rt" | tail -n1)
+xanmodstdv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | grep -v "rt" | tail -n1)
+xanmodstddl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | grep -v "rt" | tail -n1)
+xanmodrtv=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | awk -F "/" '{print $8}' | grep "rt" | tail -n1)
+xanmodrtdl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_page=100" | grep tarball_url | cut -d '"' -f 4 | sort --version-sort | grep "rt" | tail -n1)
 
 #
 generatedefaultcmdline() {
