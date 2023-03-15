@@ -43,9 +43,11 @@ initfiles=(gpg gpgv perl ssh-keygen wpa_supplicant wget parted wipefs rc-status 
 #
 export basedir
 
+#
 #Create symlink for batcat
 if [[ $(which bat) = "" ]]; then ln -sf /usr/bin/batcat /usr/bin/bat; fi;
 
+#
 #Check and create required directories
 mkdir -p "/bootback"
 mkdir -p "$basedir/configs/userdata"
@@ -519,7 +521,7 @@ starthtopinstall() {
 
 #
 loadhostnameprofile() {
-	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" | xargs -n1 > /tmp/savedvariables.txt && cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" && cat "$basedir/configs/userdata/savedvariables.txt" && unset lastconfigurationlist)
+	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"; cat "$basedir/configs/userdata/savedvariables.txt"; unset lastconfigurationlist)
 	cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "$yellow config files found for $(hostname) skipping first run $nocolor"
@@ -527,7 +529,7 @@ loadhostnameprofile() {
 		echo -e config files not fund for "$(hostname)" generating defaults
 		echo -e "$(hostname)" >> "$basedir/configs/userdata/savedvariables.txt"
 		echo -e "$yellow List Of Hostname Configs $nocolor"
-		lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" | xargs -n1 > /tmp/savedvariables.txt && cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt" && cat "$basedir/configs/userdata/savedvariables.txt")
+		lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"; cat "$basedir/configs/userdata/savedvariables.txt";)
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
@@ -739,8 +741,11 @@ checkifbootmounted() {
 #
 kerneltobootmatcheshost() {
 	echo -e "savedhostname matches hostname, copying to $bootmount on $bootdrive for $sethostname - starting"
+	#copy kernel to boot
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/boot/vmlinuz-$kver"
 	cp -a -f -v -v "$basedir/linux/System.map" "/boot/System.map-$kver"
+	#create symlink for grub
+	ln -sf "/boot/vmlinuz-$kver" "/boot/vmlinuz"
 	echo -e "savedhostname matches hostname, copying to $bootmount on $bootdrive for $sethostname - finished"
 	echo -e "Creating kernel backup for $sethostname - starting"
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "/bootback/vmlinuz-$kver"
@@ -752,6 +757,7 @@ kerneltobootmatcheshost() {
 kerneltobootmissmatch() {
 	echo -e "savedhostname does not match hostname, copying to subdirectory in $bootmount on $bootdrive for $sethostname - starting"
 	mkdir -p "$bootmount/otherhosts"
+	#Shellcheck 
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "$bootmount/otherhosts/vmlinuz-$kver"
 	cp -a -f -v -v "$basedir/linux/System.map" "$bootmount/otherhosts/System.map-$kver"
 	echo -e "savedhostname does not match hostname, copying to subdirectory in $bootmount on $bootdrive for $sethostname - finished"
@@ -771,6 +777,7 @@ updategrub() {
 	echo -e "updating grub for $sethostname - finished"
 }
 
+#
 installefibootmgr() {
 	read -r -p "$(echo -e "would you like to install the required/following dependencies? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgr
 	if [ "$efibootmgr" = Y ] || [ "$efibootmgr" = y ]; then
