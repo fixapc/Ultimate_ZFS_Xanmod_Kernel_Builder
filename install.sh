@@ -282,7 +282,7 @@ zfscronjobs=(
 
 #Start cronjobs installation
 installzfscronjobs() {
-	for ((cjp = 0; czfs < ${#zfscronjobs[@]}; czfs++)); do
+	for ((czfs = 0; czfs < ${#zfscronjobs[@]}; czfs++)); do
 		if [[ $(cat /var/spool/cron/crontabs/root | grep -o -F "${zfscronjobs[czfs]}") == "${zfscronjobs[czfs]}" ]]; then
 		echo -e "cronjob ${zfscronjobs[czfs]} already installed"
 		else
