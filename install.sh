@@ -697,12 +697,16 @@ zfsbuiltininstall() {
 	./autogen.sh
 	echo -e "running autogen for zfs buildin module, pertaining to $sethostname - finished"
 	echo -e "running configure.ac for $sethostname - starting"
-	./configure --with-linux="$basedir/linux" --with-linux-obj="$basedir/linux" --enable-linux-builtin
+	./configure --with-linux="$basedir/linux" --with-linux-obj="$basedir/linux" --enable-static --disable-shared --enable-linux-builtin
 	echo -e "running configure.ac for $sethostname - finished"
 	echo -e "copying builtin zfs module to kernel sources ($kver) for $sethostname - starting"
+	make -j128
+	make install -j128
 	./copy-builtin "$basedir/linux"
 	echo -e "copying builtin zfs module to kernel sources ($kver) for $sethostname - finsihed"
 }
+
+
 
 #
 compilekernel() {
