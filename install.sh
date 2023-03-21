@@ -45,7 +45,7 @@ export basedir
 
 #
 #Create symlink for batcat
-if [[ $(which bat) = "" ]]; then ln -sf /usr/bin/batcat /usr/bin/bat; fi;
+if [[ $(which bat) = "" ]]; then ln -sf /usr/bin/batcat /usr/bin/bat; fi
 
 #
 #Check and create required directories
@@ -54,7 +54,7 @@ mkdir -p "$basedir/configs/userdata"
 mkdir -p "$basedir/configs/userdata/autosaves"
 mkdir -p "$basedir/linux/include"
 mkdir -p "$basedir/linux/include/config"
-touch 	 "$basedir/linux/include/config/kernel.release"
+touch "$basedir/linux/include/config/kernel.release"
 mkdir -p "$basedir/linux"
 mkdir -p "$basedir/configs/auto_backup_configs"
 mkdir -p "$basedir/configs/userdata"
@@ -93,7 +93,7 @@ xanmodrtdl=$(curl -s "https://api.github.com/repos/xanmod/linux/releases?per_pag
 
 #
 generatedefaultcmdline() {
-	cat <<EOF > "$basedir"/configs/cmdline_default.conf
+	cat <<EOF >"$basedir"/configs/cmdline_default.conf
 #CPU,VGA STUB ID AND HUGEPAGE SETTINGS
 pci-stub.ids=
 irqaffinity=
@@ -284,9 +284,9 @@ zfscronjobs=(
 installzfscronjobs() {
 	for ((czfs = 0; czfs < ${#zfscronjobs[@]}; czfs++)); do
 		if [[ $(cat /var/spool/cron/crontabs/root | grep -o -F "${zfscronjobs[czfs]}") == "${zfscronjobs[czfs]}" ]]; then
-		echo -e "cronjob ${zfscronjobs[czfs]} already installed"
+			echo -e "cronjob ${zfscronjobs[czfs]} already installed"
 		else
-cat <<EOF | cat >> "/var/spool/cron/crontabs/root"
+			cat <<EOF | cat >>"/var/spool/cron/crontabs/root"
 ${zfscronjobs[czfs]}
 EOF
 		fi
@@ -414,6 +414,7 @@ copyfilestoinit() (
 	cp -v --force --preserve --remove-destination "/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2" "$basedir/initrd/lib/x86_64-linux-gnu/"
 	#create soft link with force, but according to current directory. Do not use basedir for this or it will failed when in init.
 	ln -sf "initrd/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2" "initrd/lib64/ld-linux-x86-64.so.2"
+	cp -a -r -f -v "$(which zfs | sed 's&[^/]*$&*&')" "$basedir/initrd/sbin/"
 )
 
 #
@@ -521,15 +522,22 @@ starthtopinstall() {
 
 #
 loadhostnameprofile() {
-	lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"; cat "$basedir/configs/userdata/savedvariables.txt"; unset lastconfigurationlist)
+	lastconfigurationlist=$(
+		sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"
+		cat "$basedir/configs/userdata/savedvariables.txt"
+		unset lastconfigurationlist
+	)
 	cp -a -r -f /tmp/savedvariables.txt "$basedir/configs/userdata/savedvariables.txt"
 	if [ -f "$basedir/configs/userdata/cmdline.conf.$(hostname).save" ] && [ -f "$basedir/configs/userdata/kernel.config.$(hostname).save" ]; then
 		echo -e "$yellow config files found for $(hostname) skipping first run $nocolor"
 	else
 		echo -e config files not fund for "$(hostname)" generating defaults
-		echo -e "$(hostname)" >> "$basedir/configs/userdata/savedvariables.txt"
+		echo -e "$(hostname)" >>"$basedir/configs/userdata/savedvariables.txt"
 		echo -e "$yellow List Of Hostname Configs $nocolor"
-		lastconfigurationlist=$(sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"; cat "$basedir/configs/userdata/savedvariables.txt";)
+		lastconfigurationlist=$(
+			sort -u "$basedir/configs/userdata/savedvariables.txt" -o "$basedir/configs/userdata/savedvariables.txt"
+			cat "$basedir/configs/userdata/savedvariables.txt"
+		)
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.$(hostname).save"
 		cp -f "$basedir/configs/kernel_default.config" "$basedir/configs/userdata/kernel.config.$(hostname).save"
 		cp -f "$basedir/configs/cmdline_default.conf" "$basedir/configs/userdata/cmdline.conf.defaults.save"
@@ -699,14 +707,16 @@ zfsbuiltininstall() {
 	echo -e "running configure.ac for $sethostname - starting"
 	./configure --with-linux="$basedir/linux" --with-linux-obj="$basedir/linux" --enable-static --disable-shared --enable-linux-builtin
 	echo -e "running configure.ac for $sethostname - finished"
-	echo -e "copying builtin zfs module to kernel sources ($kver) for $sethostname - starting"
+	echo -e "Starting make for ZFS ($kver) for $sethostname - starting"
 	make -j128
+	echo -e "Starting make for ZFS ($kver) for $sethostname - finsihed"
+	echo -e "Starting make install for ZFS ($kver) for $sethostname - starting"
 	make install -j128
+	echo -e "Starting make install for ZFS ($kver) for $sethostname - finsihed"
+	echo -e "copying and running builtin zfs module to kernel sources ($kver) for $sethostname - starting"
 	./copy-builtin "$basedir/linux"
 	echo -e "copying builtin zfs module to kernel sources ($kver) for $sethostname - finsihed"
 }
-
-
 
 #
 compilekernel() {
@@ -761,7 +771,7 @@ kerneltobootmatcheshost() {
 kerneltobootmissmatch() {
 	echo -e "savedhostname does not match hostname, copying to subdirectory in $bootmount on $bootdrive for $sethostname - starting"
 	mkdir -p "$bootmount/otherhosts"
-	#Shellcheck 
+	#Shellcheck
 	cp -a -r -f -v "$basedir/linux/arch/x86/boot/bzImage" "$bootmount/otherhosts/vmlinuz-$kver"
 	cp -a -f -v -v "$basedir/linux/System.map" "$bootmount/otherhosts/System.map-$kver"
 	echo -e "savedhostname does not match hostname, copying to subdirectory in $bootmount on $bootdrive for $sethostname - finished"
@@ -785,16 +795,16 @@ updategrub() {
 installefibootmgr() {
 	read -r -p "$(echo -e "would you like to install the required/following dependencies? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgr
 	if [ "$efibootmgr" = Y ] || [ "$efibootmgr" = y ]; then
-	read -r -p "$(echo -e "Would you like to delete all your efi boot entires first? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgrdel
-	if [ "$efibootmgrdel" = Y ] || [ "$efibootmgrdel" = y ]; then
-	efibootmgr | grep Boot | cut -c 5- | while read entry; do sudo efibootmgr -b "$entry" -B; done
-	fi
-	echo -e "$yellow installing efibootmgr for $sethostname - starting $nocolor"
-	efibootmgr -c -d /dev/sda -p 1 -L "$kver" -l "$bootmount/vmlinuz-$kver" -u 'root=/dev/sda1 ro'
-	echo -e "$yellow installing efibootmgr for $sethostname - finished $nocolor"
+		read -r -p "$(echo -e "Would you like to delete all your efi boot entires first? \n $green Y/y$nocolor=YES \n $red ENTER$nocolor=NO")" efibootmgrdel
+		if [ "$efibootmgrdel" = Y ] || [ "$efibootmgrdel" = y ]; then
+			efibootmgr | grep Boot | cut -c 5- | while read entry; do sudo efibootmgr -b "$entry" -B; done
+		fi
+		echo -e "$yellow installing efibootmgr for $sethostname - starting $nocolor"
+		efibootmgr -c -d /dev/sda -p 1 -L "$kver" -l "$bootmount/vmlinuz-$kver" -u 'root=/dev/sda1 ro'
+		echo -e "$yellow installing efibootmgr for $sethostname - finished $nocolor"
 	else
-	echo -e "$red skipping efibootmgr install for $sethostname $nocolor"
-fi
+		echo -e "$red skipping efibootmgr install for $sethostname $nocolor"
+	fi
 }
 
 #
@@ -831,7 +841,7 @@ if [[ $(hostname) == "$sethostname" ]]; then
 	saveconfiguredkernelchanges
 	zfsbuiltininstall
 	zfsv=$(grep zfs_meta_version <"$basedir/zfs/zfs_config.h" 2>/dev/null | awk '{print $3}' | grep -v zfs_meta_version | sed 's&"&&g')
-	zfspkginstall
+	#zfspkginstall
 	copyfilestoinit
 	kerneloptionscheck
 	compilekernel
