@@ -70,6 +70,19 @@ touch "/tmp/savedvariables.txt"
 #sed 's&xanmod1&'"$sethostname"'-zfsulti.efi&gi' <"$basedir"/linux/include/config/kernel.release
 cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty8,tty9,sda1} "$basedir/initrd/dev/" 2>/dev/null
 
+
+# Check if there are any pools available
+if ! zpool list >/dev/null 2>&1; then
+  echo "No pools found, skipping snapshot"
+else
+rootrpool=$(df -t zfs / 2>/dev/null | awk '{print $1}' | tail -n1)
+  echo "$yellow Deleting zfs ultimate safety snapshots if any before install $nocolor"
+  echo "$yellow Creating snapshot of root pool before install $nocolor"
+zfs destroy -f -r "$rootrpool"/@prezfsinstall 2>&1
+zfs snap -r "$rootrpool"/@prezfsinstall
+fi
+
+
 #
 #makerust() {
 #make CC=clang -j36
