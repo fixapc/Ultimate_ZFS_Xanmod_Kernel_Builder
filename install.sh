@@ -75,13 +75,24 @@ cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty
 if ! zpool list >/dev/null 2>&1; then
   echo "No pools found, skipping snapshot"
 else
-rootrpool=$(df -t zfs / 2>/dev/null | awk '{print $1}' | tail -n1)
+root=$(df -t zfs / 2>/dev/null | awk '{print $1}' | tail -n1)
   echo "$yellow Deleting zfs ultimate safety snapshots if any before install $nocolor"
   echo "$yellow Creating snapshot of root pool before install $nocolor"
-zfs destroy -f -r "$rootrpool"/@prezfsinstall 2>&1
-zfs snap -r "$rootrpool"/@prezfsinstall
+zfs destroy -f -r "$root"/@prezfsinstall 2>&1
+zfs snap -r "$root"/@prezfsinstall
 fi
 
+if [[ $(echo -e "$SHELL") == $(which fish) ]]; then
+echo -e "$yellow fish shell detected installing zfs root variable $nocolor"
+if [[ $(cat /etc/fish/config.fish | grep -o -i -m1 "$root") != "$root" ]]; then echo -e "set root (df -t zfs / 2>/dev/null | awk '{print \$1}' | tail -n1)" >> /etc/fish/config.fish; fi
+elif [[ $(echo -e "$SHELL") == $(which bash) ]]; then
+echo -e "$yellow bash shell detected installing zfs root variable $nocolor"
+if [[ $(cat /etc/profile | grep -o -i -m1 "$root") != "$root" ]]; then echo -e "root=$(df -t zfs / 2>/dev/null | awk '{print \$1}' | tail -n1)" >> /etc/profile; fi
+fi
+
+#sed -i '&rpool=`${grub_probe} --device ${GRUB_DEVICE} --target=fs_label 2>/dev/null || true`&rpool=$(zdb -l "${GRUB_DEVICE}" | grep " name:" | cut -d"'" -f2)&' /etc/grub.d/10_linux
+
+#do an if shell statement
 
 #
 #makerust() {
