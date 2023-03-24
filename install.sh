@@ -73,10 +73,10 @@ cp --archive /dev/{null,console,mouse,tty,tty1,tty2,tty3,tty4,tty5,tty6,tty7,tty
 
 # Check if there are any pools available
 if [[ $(zpool list >/dev/null 2>&1 | grep -o -i -m1 "no pools available") == "no pools available" ]]; then
-echo "No pools found, skipping snapshot"
+echo -e "$red No pools found, skipping snapshot $nocolor"
 else
-echo "$yellow Deleting zfs ultimate safety snapshots if any before install $nocolor"
-echo "$yellow Creating snapshot of root pool before install $nocolor"
+echo -e "$yellow Deleting zfs ultimate safety snapshots if any before install $nocolor"
+echo -e "$yellow Creating snapshot of root pool before install $nocolor"
 zfs destroy -f -r "$rpool"@prezfsinstall 2>&1
 zfs snap -r "$rpool"@prezfsinstall
 fi
