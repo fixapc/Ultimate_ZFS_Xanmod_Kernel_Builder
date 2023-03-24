@@ -14,14 +14,14 @@ script=$(readlink -f "$0")
 basedir=$(dirname "$script")
 datemonitor=$(date +%Y-%m-%d__%I-%M-%S-%p)
 
-#
+#s
 IFS=$'\n'
 runkern=$(uname -r)
 userdatadir=$(readlink -e "$basedir/configs/userdata/")
-rpool=$(df -t zfs -T / | awk '{print $1}'|tail -n +2)
+rpool=$(df -t zfs -T / 2>&1 | awk '{print $1}'|tail -n +2| xargs)
 bootfs=$(zpool list "$rpool" -H -o bootfs)
-bootmount=$(df -t zfs -T / | awk '{print $1}')
-bootdrive=$(df /boot 2>/dev/null | awk '/boot/{print $1}')
+bootmount="/boot"
+bootdrive=$(df -T /boot 2>&1 | awk '{print $1}'|tail -n +2 | xargs) 
 totalmem=$(awk '/MemTotal/{print $2/1024"gb"}' /proc/meminfo)
 hugepagestotal=$(awk '( $1 == "HugePages_Total:" ) { print $2 }' /proc/meminfo)
 hugepage=$(awk '( $1 == "Hugepagesize:" ) { print $2/1024^2 }' /proc/meminfo)
@@ -84,10 +84,10 @@ fi
 
 if [[ $(echo -e "$SHELL") == $(which fish) ]]; then
 echo -e "$yellow fish shell detected installing zfs root variable $nocolor"
-if [[ $(cat /etc/fish/config.fish | grep -o -i -m1 "set rpool (df -t zfs -T / | awk '{print \$1}'|tail -n +2)") != "set rpool (df -t zfs -T / | awk '{print \$1}'|tail -n +2)" ]]; then echo -e "set root (df -t zfs -T / | awk '{print \$1}'|tail -n +2)" >> /etc/fish/config.fish; fi
+if [[ $(cat /etc/fish/config.fish | grep -o -i -m1 "set rpool (df -t zfs -T / 2>&1 | awk '{print \$1}'|tail -n +2|xargs)") != "set rpool (df -t zfs -T / 2>&1 | awk '{print \$1}'|tail -n +2|xargs)" ]]; then echo -e "set root (df -t zfs -T / | awk '{print \$1}'|tail -n +2)" >> /etc/fish/config.fish; fi
 elif [[ $(echo -e "$SHELL") == $(which bash) ]]; then
 echo -e "$yellow bash shell detected installing zfs root variable $nocolor"
-if [[ $(cat /etc/profile | grep -o -i -m1 "rpool=$(df -t zfs -T / | awk '{print $1}'|tail -n +2)") != "rpool=$(df -t zfs -T / | awk '{print $1}'|tail -n +2)" ]]; then echo -e "rpool=$(df -t zfs -T / | awk '{print $1}'|tail -n +2)" >> /etc/profile; fi
+if [[ $(cat /etc/profile | grep -o -i -m1 "rpool=$(df -t zfs -T / 2>&1 | awk '{print $1}'|tail -n +2|xargs)") != "rpool=$(df -t zfs -T / 2>&1 | awk '{print $1}'|tail -n +2|xargs)" ]]; then echo -e "rpool=$(df -t zfs -T / | awk '{print $1}'|tail -n +2)" >> /etc/profile; fi
 fi
 
 #sed -i '&rpool=`${grub_probe} --device ${GRUB_DEVICE} --target=fs_label 2>/dev/null || true`&rpool=$(zdb -l "${GRUB_DEVICE}" | grep " name:" | cut -d"'" -f2)&' /etc/grub.d/10_linux
@@ -502,7 +502,7 @@ getzfsultisysteminfo() {
 	$green num of allocated hugepages:$nocolor $hugepageamount gb
 	$green auto calculated arc min(tram-hugepagesx.50):$nocolor $autoarcmin gb
 	$green auto calculated arc max(tram-hugepagesx.75):$nocolor $autoarcmax gb
-	$green current os running root pool:$nocolor$root
+	$green current os running root pool:$nocolor$rpool
 	$green current os running root pool bootfs:$nocolor$bootfs
 	$green current boot drive:$nocolor$bootdrive
 	$green current boot drive mount:$nocolor$bootmount
