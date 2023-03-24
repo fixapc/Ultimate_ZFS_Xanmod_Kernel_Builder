@@ -77,8 +77,8 @@ echo "No pools found, skipping snapshot"
 else
 echo "$yellow Deleting zfs ultimate safety snapshots if any before install $nocolor"
 echo "$yellow Creating snapshot of root pool before install $nocolor"
-zfs destroy -f -r "$rpool"/@prezfsinstall 2>&1
-zfs snap -r "$rpool"/@prezfsinstall
+zfs destroy -f -r "$rpool"@prezfsinstall 2>&1
+zfs snap -r "$rpool"@prezfsinstall
 fi
 
 if [[ $(echo -e "$SHELL") == $(which fish) ]]; then
