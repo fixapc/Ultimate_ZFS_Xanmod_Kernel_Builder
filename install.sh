@@ -14,7 +14,7 @@ script=$(readlink -f "$0")
 basedir=$(dirname "$script")
 datemonitor=$(date +%Y-%m-%d__%I-%M-%S-%p)
 
-#s
+#
 IFS=$'\n'
 runkern=$(uname -r)
 userdatadir=$(readlink -e "$basedir/configs/userdata/")
